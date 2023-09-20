@@ -1,5 +1,8 @@
-/3rdParty
+
+
+3rdParty/
 .vs/
+Build/ 
 
 # User-specific files
 *.suo
