@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\9084b655e6e08d70169c87d98a2edcac\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{CC5C7D59-030B-3CDE-B926-ED6D1E5B19DD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

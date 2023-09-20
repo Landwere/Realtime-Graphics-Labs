@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\Build\CMakeFiles\d681855538bc14ffc28b7f03885b4eab\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{FEBEBC96-9675-3B9C-B089-F25E48849FBA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

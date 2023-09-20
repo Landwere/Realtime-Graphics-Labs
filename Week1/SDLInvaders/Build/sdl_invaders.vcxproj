@@ -1,0 +1,325 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{734E4258-E553-3B96-9FC1-5C6FAAF35A8B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>sdl_invaders</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">sdl_invaders.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">sdl_invaders</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <LocalDebuggerEnvironment Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PATH=%PATH%;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/SDL2-2.28.2/lib/x64;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/SDL2_ttf-2.20.2/lib/x64;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/opencv-4.8.0/build/x64/vc16/bin</LocalDebuggerEnvironment>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">sdl_invaders.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">sdl_invaders</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <LocalDebuggerEnvironment Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PATH=%PATH%;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/SDL2-2.28.2/lib/x64;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/SDL2_ttf-2.20.2/lib/x64;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/opencv-4.8.0/build/x64/vc16/bin</LocalDebuggerEnvironment>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">sdl_invaders.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">sdl_invaders</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <LocalDebuggerEnvironment Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">PATH=%PATH%;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/SDL2-2.28.2/lib/x64;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/SDL2_ttf-2.20.2/lib/x64;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/opencv-4.8.0/build/x64/vc16/bin</LocalDebuggerEnvironment>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">sdl_invaders.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">sdl_invaders</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+    <LocalDebuggerEnvironment Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">PATH=%PATH%;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/SDL2-2.28.2/lib/x64;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/SDL2_ttf-2.20.2/lib/x64;C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/3rdParty/opencv-4.8.0/build/x64/vc16/bin</LocalDebuggerEnvironment>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\lib\x64\SDL2.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache\build\Release\FontCache.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\lib\x64\SDL2_ttf.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\x64\vc16\lib\opencv_world480d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/Debug/sdl_invaders.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/Debug/sdl_invaders.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\lib\x64\SDL2.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache\build\Release\FontCache.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\lib\x64\SDL2_ttf.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\x64\vc16\lib\opencv_world480.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/Release/sdl_invaders.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/Release/sdl_invaders.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\lib\x64\SDL2.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache\build\Release\FontCache.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\lib\x64\SDL2_ttf.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\x64\vc16\lib\opencv_world480.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/MinSizeRel/sdl_invaders.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/MinSizeRel/sdl_invaders.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\.;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\include;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\3rdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2-2.28.2\lib\x64\SDL2.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL_FontCache\build\Release\FontCache.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\SDL2_ttf-2.20.2\lib\x64\SDL2_ttf.lib;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\3rdParty\opencv-4.8.0\build\x64\vc16\lib\opencv_world480.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/RelWithDebInfo/sdl_invaders.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/RelWithDebInfo/sdl_invaders.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders -BC:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build --check-stamp-file C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\WindowsPaths.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeCXXCompiler.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeRCCompiler.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeSystem.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindOpenCV.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL_FontCache.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL_ttf.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders -BC:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build --check-stamp-file C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\WindowsPaths.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeCXXCompiler.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeRCCompiler.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeSystem.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindOpenCV.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL_FontCache.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL_ttf.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders -BC:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build --check-stamp-file C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\WindowsPaths.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeCXXCompiler.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeRCCompiler.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeSystem.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindOpenCV.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL_FontCache.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL_ttf.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders -BC:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build --check-stamp-file C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.27\Modules\Platform\WindowsPaths.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeCXXCompiler.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeRCCompiler.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\3.27.5\CMakeSystem.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindOpenCV.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL_FontCache.cmake;C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\cmake\FindSDL_ttf.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\sdl_invaders.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\SDLInvaders\Build\ZERO_CHECK.vcxproj">
+      <Project>{B0595101-CEE9-34F0-8BAD-4F3FAB2E014C}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

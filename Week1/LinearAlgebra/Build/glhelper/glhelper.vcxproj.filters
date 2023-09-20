@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Exception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\GLBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Renderable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\RotateViewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\ShaderProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Constants.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Entity.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Exception.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\GLBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Mesh.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Renderable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\RotateViewer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\ShaderProgram.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{8B5B4FE9-6FBD-3A81-9078-CE495CAFEC9A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{030CB735-0C59-3411-A3E6-D5BBC07BC03C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,3 @@
+C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/CMakeFiles/sdl_invaders.dir
+C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/SDLInvaders/Build/CMakeFiles/ZERO_CHECK.dir
