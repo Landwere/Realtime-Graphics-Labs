@@ -1,63 +1,63 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Entity.cpp">
+    <ClCompile Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Exception.cpp">
+    <ClCompile Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\GLBuffer.cpp">
+    <ClCompile Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\GLBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Mesh.cpp">
+    <ClCompile Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Renderable.cpp">
+    <ClCompile Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Renderable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\RotateViewer.cpp">
+    <ClCompile Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\RotateViewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\ShaderProgram.cpp">
+    <ClCompile Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Constants.hpp">
+    <ClInclude Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Constants.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Entity.hpp">
+    <ClInclude Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Entity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Exception.hpp">
+    <ClInclude Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Exception.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\GLBuffer.hpp">
+    <ClInclude Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\GLBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Mesh.hpp">
+    <ClInclude Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Mesh.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Renderable.hpp">
+    <ClInclude Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\Renderable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\RotateViewer.hpp">
+    <ClInclude Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\RotateViewer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\ShaderProgram.hpp">
+    <ClInclude Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\ShaderProgram.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\glhelper\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{8B5B4FE9-6FBD-3A81-9078-CE495CAFEC9A}</UniqueIdentifier>
+      <UniqueIdentifier>{D6FAC85C-C32B-3BAC-808F-42B72F7415C5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{030CB735-0C59-3411-A3E6-D5BBC07BC03C}</UniqueIdentifier>
+      <UniqueIdentifier>{8721D89E-3B9B-3C4B-B5AB-4E6C091249FF}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

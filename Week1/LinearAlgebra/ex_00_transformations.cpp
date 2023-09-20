@@ -36,7 +36,7 @@ void SheerMatrix(Eigen::Matrix3f& matrix, float sheerAmount)
 		0, sheerAmount, 0,
 		0, 0, sheerAmount;
 
-
+	matrix = sheerMatrix * matrix;
 	
 
 
@@ -131,12 +131,12 @@ int main()
 		// 3. Create a shear matrix
 		// 4. Mirror the cube in the x axis.
 		// 5. Scale the cube along the x and y axes.
-		// 6. Change the matrix to be a singular matrix of rank 2. How has the cube been affected?
+		// 6. Change the matrix to be a singular matrix of rank 2. How has the cube been affected? flat 
 		// 7. Change the matrix to be a singular matrix of rank 1. What has happened to the cube now?
 
-		Eigen::Matrix3f rotationMatrix;
-		rotationMatrix <<
-			0, 0, 0,
+		Eigen::Matrix3f xMirrorMatrix;
+		xMirrorMatrix <<
+			-1, -1, -1,
 			0, 0, 0,
 			0, 0, 0;
 
@@ -147,11 +147,13 @@ int main()
 		//	Eigen::AngleAxisf(0, Eigen::Vector3f::UnitY()) *
 		//	Eigen::AngleAxisf(0, Eigen::Vector3f::UnitZ());
 
-		RotateMatrix(transformationMatrix, 0, 0, 0);
+		RotateMatrix(transformationMatrix, 45, 0, 0);
+
+		//SheerMatrix(transformationMatrix, 0);
+		
+		//transformationMatrix * xMirrorMatrix;
 
 
-		
-		
 
 		std::cout << transformationMatrix << std::endl;
 

@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Student/Documents/GitHub/Realtime-Graphics-Labs/Week1/LinearAlgebra/glhelper
+# Install script for directory: C:/Users/corya/Documents/GitHub/Realtime-Graphics-Labs/Week1/LinearAlgebra/glhelper
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

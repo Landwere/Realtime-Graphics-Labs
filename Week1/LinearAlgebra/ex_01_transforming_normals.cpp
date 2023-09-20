@@ -64,6 +64,17 @@ Eigen::Matrix4f findNormalTransformationMatrix(const Eigen::Matrix4f& modelToWor
 	// Requirements:
 	// Translation doesn't affect the normals.
 	// Normals respond correctly to model scaling.
+
+	Eigen::Matrix4f transformationMatrix;
+		transformationMatrix <<
+		1.f, 0.f, 0.f, 0.f,
+		0.f, 0.f, 0.f, 0.f,
+		0.f, 0.f, 0.f, 0.f,
+		0.f, 0.f, 0.f, 0.f;
+
+	modelToWorldMatrix * transformationMatrix;
+
+
 	return modelToWorldMatrix;
 }
 

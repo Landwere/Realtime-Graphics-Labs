@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\tut_01_multiplication_inverses.cpp">
+    <ClCompile Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\tut_01_multiplication_inverses.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Student\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\corya\Documents\GitHub\Realtime-Graphics-Labs\Week1\LinearAlgebra\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{030CB735-0C59-3411-A3E6-D5BBC07BC03C}</UniqueIdentifier>
+      <UniqueIdentifier>{8721D89E-3B9B-3C4B-B5AB-4E6C091249FF}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
