@@ -4,4 +4,8 @@ modelLoader.hpp
 shader.h
 shader.cpp
 ShaderProgram.cpp
-ShaderProgram.hpp)
+ShaderProgram.hpp
+ShaderUtils.h
+ShaderUtils.cpp
+Camera.h
+Camera.cpp)
