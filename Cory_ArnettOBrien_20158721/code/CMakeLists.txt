@@ -54,10 +54,10 @@ function(add_executable_rtg name)
 
     target_link_libraries(${name} ${LIBRARIES})
 
-    target_compile_features(${name} PRIVATE cxx_std_17)
+    target_compile_features(${name} PRIVATE cxx_std_20)
 
     set_target_properties(${name} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=${SDL_DLL_DIR};${SDL_TTF_DLL_DIR};${OpenCV_DLL_DIR};${GLEW_DLL_DIR};${Assimp_DLL_DIR};%PATH%")
 endfunction()
 # function (name shaders.vert shaders.frag)
-add_executable_rtg(main )
+add_executable_rtg(main lambert.vert lambert.frag)
 
