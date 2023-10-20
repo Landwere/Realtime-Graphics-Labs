@@ -8,4 +8,10 @@ ShaderProgram.hpp
 ShaderUtils.h
 ShaderUtils.cpp
 Camera.h
-Camera.cpp)
+Camera.cpp
+ModelRenderer.cpp
+ModelRenderer.h
+Texture.cpp
+Texture.h)
+
+target_compile_features(RGLib PRIVATE cxx_std_20)

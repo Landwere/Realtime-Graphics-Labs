@@ -1,9 +1,9 @@
 #pragma once
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <SDL_mouse.h>
 
-namespace GE
+namespace RGLib
 {
 	//Source Cory Arnett-O'Brien (Game Engine Architecture)
 	class Camera

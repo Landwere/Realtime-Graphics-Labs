@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(GlobalIllumination LANGUAGES CXX)
+project(RealtimeGraphics LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -21,6 +21,7 @@ include_directories(${SDL_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${Assimp_INCLUDE_DIRS})
 include_directories(${glText_INCLUDE_DIRS})
+include_directories(../../3rdParty/glm)
 
 add_subdirectory(RGLib)
 
