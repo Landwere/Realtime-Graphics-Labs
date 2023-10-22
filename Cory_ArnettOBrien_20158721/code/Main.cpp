@@ -7,7 +7,7 @@
 #include <iostream>
 #include "RGLib/modelLoader.hpp"
 #include "RGLib/ShaderProgram.hpp"
-#include "RGLib/ShaderUtils.h"
+//#include "RGLib/ShaderUtils.h"
 #include <glm/glm.hpp>
 #include "RGLib/Camera.h"
 #include "RGLib/ModelRenderer.h"
@@ -72,12 +72,12 @@ int main()
 
 
 //	RGLib::ShaderProgram lambertShader({ ".\\shaders\\lambert.vert", ".\\shaders\\lambert.frag" });
-	std::string v_shader = RGLib::loadShaderSourceCode("../shaders\\lambert.vert");
-	std::string f_shader = RGLib::loadShaderSourceCode("../shaders\\lambert.frag");
+	//std::string v_shader = RGLib::loadShaderSourceCode("../shaders\\lambert.vert");
+	//std::string f_shader = RGLib::loadShaderSourceCode("../shaders\\lambert.frag");
 
 	GLuint shaderProgram;
 	GLuint testShader = glCreateShader(GL_VERTEX_SHADER);
-	RGLib::compileProgram(v_shader, f_shader, &shaderProgram);
+	//RGLib::compileProgram(v_shader, f_shader, &shaderProgram);
 
 	bool running = true;
 		while (running)

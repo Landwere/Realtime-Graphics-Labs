@@ -1,7 +1,7 @@
 #include "ModelRenderer.h"
 #include <glm/gtc/type_ptr.hpp>
+#include "ShaderProgram.hpp"
 #include "ShaderUtils.h"
-
 	namespace RGLib 
 	{
 
@@ -36,19 +36,34 @@
 			projectionUniformId = 0;
 
 
-			std::string v_shader_source = loadShaderSourceCode("VertexLighting.vert");
-			std::string f_shader_source = loadShaderSourceCode("FragmentLighting.frag");
+			//ShaderProgram model_shader({ "../shaders/VertexLighting.vert", "../shaders/FragmentLighting.frag" });
+			//ShaderProgram f_shader({ "../shaders\\FragmentLighting.frag" });
+
+
+			ShaderUtils modelShader;
+			modelShader.loadShaderSourceCode(".. / shaders\\VertexLighting.vert", "../shaders\\FragmentLighting.frag");
+
+			modelShader.compileProgram(modelShader.v_shader_source, modelShader.v_shader_source, &programId);
+
+			//ShaderUtils v_shader;
+			 //std::string v_shader_source = v_shader.loadShaderSourceCode("../shaders\\VertexLighting.vert");
+
+			//ShaderUtils f_shader;
+			 //std::string f_shader_source = f_shader.loadShaderSourceCode("../shaders\\FragmentLighting.frag");
+
+			//std::string v_shader_source = loadShaderSourceCode("../shaders\\VertexLighting.vert");
+			//std::string f_shader_source = loadShaderSourceCode("../shaders\\FragmentLighting.frag");
 
 			// Due to the unique way OpenGL handles shader source, OpenGL expects
 			// an array of strings.  In this case, create an array of the
 			// loaded source code strings and pass to compileProgram for compilation
-			const GLchar* v_source_array[] = { v_shader_source.c_str() };
-			const GLchar* f_source_array[] = { f_shader_source.c_str() };
+			//const GLchar* v_source_array[] = { v_shader_source.c_str() };
+			//const GLchar* f_source_array[] = { f_shader_source.c_str() };
 
-			// Compile shaders into a program
-			if (!compileProgram(v_shader_source, f_shader_source, &programId)) {
+			 //Compile shaders into a program
+			/*if (!v_shader.compileProgram(v_shader_source, f_shader_source, &programId)) {
 				std::cerr << "Problem building lighting shader program.  Check console log for more information." << std::endl;
-			}
+			}*/
 
 
 
