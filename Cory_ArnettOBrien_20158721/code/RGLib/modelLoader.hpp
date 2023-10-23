@@ -1,5 +1,6 @@
 #pragma once
 #include <GL/glew.h>
+#include "RGLib/Mesh.hpp"
 
 // source from Cory Arnett-O'Brien (Game Engine Architecture)
 
@@ -49,7 +50,7 @@
 		}
 
 		//help method to load vertices from file
-		bool loadFromFile(const char* filename);
+		bool loadFromFile(const char* filename, glhelper::Mesh* mesh);
 
 		//returns the vertices so we can create a vertex buffer
 		//based on the model vertices

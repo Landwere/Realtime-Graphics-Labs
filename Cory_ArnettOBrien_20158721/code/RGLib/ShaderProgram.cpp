@@ -7,7 +7,7 @@
 #include <fstream>
 #include <filesystem>
 
-namespace RGLib {
+namespace glhelper {
 
 	//Source David Walton (Moodle.bcu.ac.uk)
 std::string getFileContents(const std::string& filename)

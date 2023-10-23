@@ -3,7 +3,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <vector>
-
 // source from Cory Arnett-O'Brien (Game Engine Architecture)
 
 
@@ -22,7 +21,7 @@
 	}
 
 
-	bool Model::loadFromFile(const char* filename)
+	bool Model::loadFromFile(const char* filename, glhelper::Mesh* mesh)
 	{
 		//temporary vector	for storing model vertices loaded from file
 		std::vector<Vertex> loadedVertices;
@@ -38,15 +37,15 @@
 		{
 			return false;
 		}
-
+		const aiMesh* _mesh;
 		//get the vertices loaded from the model object and put them in a temporary vector
 		for (int MeshIdx = 0; MeshIdx < pScene->mNumMeshes; MeshIdx++)
 		{
-			const aiMesh* mesh = pScene->mMeshes[MeshIdx];
+			_mesh = pScene->mMeshes[MeshIdx];
 
-			for (int faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)
+			for (int faceIndex = 0; faceIndex < _mesh->mNumFaces; faceIndex++)
 			{
-				const aiFace& face = mesh->mFaces[faceIndex];
+				const aiFace& face = _mesh->mFaces[faceIndex];
 
 
 				//extract a vertex from the meshes main vertex array 
@@ -56,15 +55,15 @@
 				{
 					//extract pos and tex co-ord based on its index number
 					//not directly from mesh arrays
-					const aiVector3D* pos = &mesh->mVertices[face.mIndices[vertInx]];
+					const aiVector3D* pos = &_mesh->mVertices[face.mIndices[vertInx]];
 
 					//get uvs for vertex this code assumes there are uvs
 					//defined in the model or it will crash
-					const aiVector3D uv = mesh->mTextureCoords[0][face.mIndices[vertInx]];
+					const aiVector3D uv = _mesh->mTextureCoords[0][face.mIndices[vertInx]];
 
-					if (mesh->HasNormals())
+					if (_mesh->HasNormals())
 					{
-						const aiVector3D& normal = mesh->mNormals[MeshIdx];
+						const aiVector3D& normal = _mesh->mNormals[MeshIdx];
 
 						//create a new object in the shape array based on the extracted vertex
 						//this shape array will then be used to create the vertex buffer
@@ -72,9 +71,9 @@
 					}
 					else
 					{
-						aiVector3D& A = mesh->mVertices[face.mIndices[0]];
-						aiVector3D& B = mesh->mVertices[face.mIndices[1]];
-						aiVector3D& C = mesh->mVertices[face.mIndices[2]];
+						aiVector3D& A = _mesh->mVertices[face.mIndices[0]];
+						aiVector3D& B = _mesh->mVertices[face.mIndices[1]];
+						aiVector3D& C = _mesh->mVertices[face.mIndices[2]];
 						aiVector3D normals = CalculateSurfaceNormal(A, B, C);
 						//create a new object in the shape array based on the extracted vertex
 						//this shape array will then be used to create the vertex buffer
@@ -85,7 +84,20 @@
 
 				}
 			}
+			std::vector<Eigen::Vector3f> verts(_mesh->mNumVertices);
+			std::vector<Eigen::Vector3f> norms(_mesh->mNumVertices);
+			std::vector<Eigen::Vector2f> uvs(_mesh->mNumVertices);
+			std::vector<GLuint> elems(_mesh->mNumFaces * 3);
+			//Add bi tangents
+			//TODO
+			mesh->vert(verts);
+			mesh->norm(norms);
+			mesh->tex(uvs);
+			mesh->elems(elems);
+
 		}
+
+
 
 		numVertices = loadedVertices.size();
 

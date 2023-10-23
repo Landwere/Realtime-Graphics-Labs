@@ -5,13 +5,28 @@ shader.h
 shader.cpp
 ShaderProgram.cpp
 ShaderProgram.hpp
-ShaderUtils.h
-ShaderUtils.cpp
 Camera.h
 Camera.cpp
 ModelRenderer.cpp
 ModelRenderer.h
 Texture.cpp
-Texture.h)
+Texture.h
+Mesh.hpp
+Mesh.cpp
+Renderable.cpp
+Renderable.hpp
+Entity.cpp
+Entity.hpp
+Exception.cpp
+Exception.hpp
+GLBuffer.cpp
+GLBuffer.hpp
+Constants.hpp
+Viewer.hpp
+Viewer.cpp
+RotateViewer.hpp
+RotateViewer.cpp
+Matrices.hpp
+Matrices.cpp)
 
 target_compile_features(RGLib PRIVATE cxx_std_20)

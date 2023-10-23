@@ -6,7 +6,7 @@
 #include <map>
 #include <set>
 
-namespace RGLib {
+namespace glhelper {
 	//source David Walton (moodle.bcu.ac.uk)
 void checkForGLError(const std::string &exception = "OpenGL error encountered!");
 
