@@ -114,6 +114,36 @@ void Mesh::render()
 	glBindVertexArray(0);
 }
 
+void Mesh::render(RGLib::Texture *texture)
+{
+	if (shaderProgram_ == nullptr) {
+		throw std::runtime_error("Attempted to render mesh without supplying shader program.");
+	}
+	glBindVertexArray(vao_);
+	shaderProgram_->use();
+	glProgramUniformMatrix4fv(shaderProgram_->get(), shaderProgram_->uniformLoc("modelToWorld"), 1, GL_FALSE, modelToWorld().data());
+	glProgramUniformMatrix3fv(shaderProgram_->get(), shaderProgram_->uniformLoc("normToWorld"), 1, GL_FALSE, normToWorld().data());
+	shaderProgram_->setupCameraBlock();
+
+	//select the texture
+	GLuint programId = 0;
+	GLint samplerID = glGetUniformLocation(programId, "albedoTex");
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(samplerID, 0);
+	glBindTexture(GL_TEXTURE_2D, texture->getTextureName());
+
+	if (nElems_ != 0) {
+		glDrawElements(drawMode_, GLsizei(nElems_), GL_UNSIGNED_INT, 0);
+	}
+	else {
+		glDrawArrays(drawMode_, 0, GLsizei(nVerts_));
+	}
+	shaderProgram_->unuse();
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindVertexArray(0);
+}
+
 void Mesh::render(ShaderProgram& program)
 {
 	glBindVertexArray(vao_);

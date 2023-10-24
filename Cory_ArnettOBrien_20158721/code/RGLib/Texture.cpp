@@ -6,7 +6,7 @@ namespace RGLib {
 		//IMG_Init(IMG_INIT_JPG);
 		//load texture from file
 		//surfaceImage = IMG_Load(filename.c_str());
-		int height, width, channels;
+		//int height, width, channels;
 		cv::Mat mat = cv::imread(filename);
 		unsigned char* image = mat.data; //  stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 		if (image == nullptr)

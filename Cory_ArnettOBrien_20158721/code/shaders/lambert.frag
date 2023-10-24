@@ -16,9 +16,13 @@ out vec4 colorOut;
 uniform vec4 color;
 uniform vec3 lightPosWorld;
 
+uniform sampler2D albedoTex;
+
 void main()
 {
-	vec3 albedo = color.xyz;
+	
+	vec3 albedo = texture(albedoTex, texCoord).xyz;
+
 
 	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
 	float dotProd = clamp(dot(lightDir, normalize(worldNorm)), 0, 1);

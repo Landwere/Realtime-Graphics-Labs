@@ -35,8 +35,6 @@ int main()
 	for (const auto& entry : fs::directory_iterator(path))
 		std::cout << entry.path() << std::endl;
 
-	RGLib::Texture* tex = new RGLib::Texture("");
-
 	//Set up SDL window
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -47,7 +45,6 @@ int main()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
-
 
 	SDL_Window* window;
 	window = SDL_CreateWindow("Realtime Graphics", 50, 50, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
@@ -60,6 +57,7 @@ int main()
 	}
 
 
+
 	RGLib::Camera* cam = new RGLib::Camera(
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),//look at
@@ -68,8 +66,13 @@ int main()
 	
 	glhelper::RotateViewer viewer(windowWidth, windowHeight);
 
+	//Shader
+	glhelper::ShaderProgram lambertShader({ "..\\shaders\\Lambert.vert", "..\\shaders\\Lambert.frag" });
+	glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
+
 	Model* modelLoader = new Model();
 
+	//Mesh
 	glhelper::Mesh testMesh;
 	std::vector<glhelper::Renderable*> scene{ &testMesh };
 
@@ -81,19 +84,15 @@ int main()
 
 	modelLoader->loadFromFile("../models/stanford_bunny/scene.gltf", &testMesh);
 
-	glhelper::ShaderProgram lambertShader({ "..\\shaders\\FixedColor.vert", "..\\shaders\\FixedColor.frag" });
-	glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
+	cv::Mat bunnyTextureImage = cv::imread("../models/stanford_bunny/textures/Bunny_baseColor.png");
+	cv::cvtColor(bunnyTextureImage, bunnyTextureImage, cv::COLOR_BGR2RGB);
+	RGLib::Texture* bunnyTex = new RGLib::Texture("../models/stanford_bunny/textures/Bunny_baseColor.png");
+
+
+	//testMesh.tex(bunnyTex);
 
 	testMesh.modelToWorld(bunnyModelToWorld);
 	testMesh.shaderProgram(&lambertShader);
-
-	//std::string v_shader = RGLib::loadShaderSourceCode("../shaders\\lambert.vert");
-	//std::string f_shader = RGLib::loadShaderSourceCode("../shaders\\lambert.frag");
-
-	GLuint shaderProgram;
-	GLuint testShader = glCreateShader(GL_VERTEX_SHADER);
-	//RGLib::compileProgram(v_shader, f_shader, &shaderProgram);
-
 
 
 	bool running = true;
@@ -116,13 +115,17 @@ int main()
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, windowWidth, windowHeight);
 
-			testMesh.render();
+			glActiveTexture(GL_TEXTURE0 + 0);
+			glBindTexture(GL_TEXTURE_2D, bunnyTex->getTextureName());
+			testMesh.render(bunnyTex);
 
+			glActiveTexture(GL_TEXTURE0 + 1);
 
+			GLint samplerID = glGetUniformLocation(0, "albedoTex");
 
+			//glProgramUniform2d(lambertShader.get(), lambertShader.uniformLoc("albedoTex"))
 
 			SDL_GL_SwapWindow(window);
-			//modr->draw(cam, model, tex);
 		};
 
 	return 0;

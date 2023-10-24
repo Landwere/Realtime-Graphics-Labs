@@ -3,7 +3,7 @@
 #include "Renderable.hpp"
 #include "GLBuffer.hpp"
 #include <GL/glew.h>
-
+#include "RGLib/Texture.h"
 namespace glhelper {
 
 //!\brief Class abstracting a renderable 3D triangle mesh.
@@ -23,6 +23,7 @@ public:
 
 
 	virtual void render();
+	void render(RGLib::Texture* texture);
 	virtual void render(ShaderProgram &program);
 
 	virtual bool castsShadow();
