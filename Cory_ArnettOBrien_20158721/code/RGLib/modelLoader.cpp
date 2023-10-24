@@ -23,6 +23,12 @@
 
 	bool Model::loadFromFile(const char* filename, glhelper::Mesh* mesh)
 	{
+
+		std::vector<Eigen::Vector3f> verts;
+		std::vector<Eigen::Vector3f> norms;
+		std::vector<Eigen::Vector2f> uvs;
+
+
 		//temporary vector	for storing model vertices loaded from file
 		std::vector<Vertex> loadedVertices;
 
@@ -68,6 +74,7 @@
 						//create a new object in the shape array based on the extracted vertex
 						//this shape array will then be used to create the vertex buffer
 						loadedVertices.push_back(Vertex(pos->x, pos->y, pos->z, uv.x, uv.y, normal.x, normal.y, normal.z));
+						norms.push_back(Eigen::Vector3f(normal.x, normal.y, normal.z));
 					}
 					else
 					{
@@ -79,21 +86,18 @@
 						//this shape array will then be used to create the vertex buffer
 						loadedVertices.push_back(Vertex(pos->x, pos->y, pos->z, uv.x, uv.y, normals.x, normals.y, normals.z));
 					}
-
-
-
+					verts.push_back(Eigen::Vector3f(pos->x, pos->y, pos->z));
+					uvs.push_back(Eigen::Vector2f(uv.x, uv.y));
 				}
 			}
-			std::vector<Eigen::Vector3f> verts(_mesh->mNumVertices);
-			std::vector<Eigen::Vector3f> norms(_mesh->mNumVertices);
-			std::vector<Eigen::Vector2f> uvs(_mesh->mNumVertices);
+			//std::vector<Eigen::Vector3f> verts(_mesh->mNumVertices);
 			std::vector<GLuint> elems(_mesh->mNumFaces * 3);
 			//Add bi tangents
 			//TODO
 			mesh->vert(verts);
 			mesh->norm(norms);
 			mesh->tex(uvs);
-			mesh->elems(elems);
+			//mesh->elems(elems);
 
 		}
 

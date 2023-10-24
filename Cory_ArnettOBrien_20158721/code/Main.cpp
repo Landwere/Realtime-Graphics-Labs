@@ -84,8 +84,9 @@ int main()
 	glhelper::ShaderProgram lambertShader({ "..\\shaders\\FixedColor.vert", "..\\shaders\\FixedColor.frag" });
 	glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
 
-	testMesh.shaderProgram(&lambertShader);
 	testMesh.modelToWorld(bunnyModelToWorld);
+	testMesh.shaderProgram(&lambertShader);
+
 	//std::string v_shader = RGLib::loadShaderSourceCode("../shaders\\lambert.vert");
 	//std::string f_shader = RGLib::loadShaderSourceCode("../shaders\\lambert.frag");
 
@@ -93,8 +94,7 @@ int main()
 	GLuint testShader = glCreateShader(GL_VERTEX_SHADER);
 	//RGLib::compileProgram(v_shader, f_shader, &shaderProgram);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, windowWidth, windowHeight);
+
 
 	bool running = true;
 		while (running)
@@ -110,7 +110,18 @@ int main()
 					viewer.processEvent(event);
 				}
 			}
+			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, windowWidth, windowHeight);
+
 			testMesh.render();
+
+
+
+
+			SDL_GL_SwapWindow(window);
 			//modr->draw(cam, model, tex);
 		};
 
