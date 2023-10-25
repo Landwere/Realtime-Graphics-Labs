@@ -16,6 +16,7 @@
 #include "RGLib/Renderable.hpp"
 #include "RGLib/RotateViewer.hpp"
 #include <RGLib/Matrices.hpp>
+#include <RGLib/World.hpp>
 namespace fs = std::filesystem;
 
 int windowWidth = 1280;
@@ -68,7 +69,7 @@ int main()
 
 	//Shader
 	glhelper::ShaderProgram lambertShader({ "..\\shaders\\Lambert.vert", "..\\shaders\\Lambert.frag" });
-	glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
+	//glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
 
 	Model* modelLoader = new Model();
 
@@ -94,6 +95,11 @@ int main()
 	testMesh.modelToWorld(bunnyModelToWorld);
 	testMesh.shaderProgram(&lambertShader);
 
+	RGLib::World* Worldscene = new RGLib::World;
+	Worldscene->AddToWorld(testMesh);
+
+	glEnable(GL_BLEND);
+
 
 	bool running = true;
 		while (running)
@@ -117,9 +123,9 @@ int main()
 
 			glActiveTexture(GL_TEXTURE0 + 0);
 			glBindTexture(GL_TEXTURE_2D, bunnyTex->getTextureName());
-			testMesh.render(bunnyTex);
+			Worldscene->RenderWorld();
+			//testMesh.render(lambertShader);
 
-			glActiveTexture(GL_TEXTURE0 + 1);
 
 			GLint samplerID = glGetUniformLocation(0, "albedoTex");
 

@@ -27,6 +27,6 @@ void main()
 	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
 	float dotProd = clamp(dot(lightDir, normalize(worldNorm)), 0, 1);
 
-	colorOut.xyz = albedo * dotProd;
+	colorOut.xyz = albedo ;//* dotProd;
 	colorOut.a = 1.0;
 }
