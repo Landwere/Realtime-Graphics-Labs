@@ -10,13 +10,15 @@
 //#include "RGLib/ShaderUtils.h"
 #include <glm/glm.hpp>
 #include "RGLib/Camera.h"
-#include "RGLib/Texture.h"
+#include "RGLib/Texture.hpp"
 #include "assimp/mesh.h"
 #include "RGLib/Mesh.hpp"
 #include "RGLib/Renderable.hpp"
 #include "RGLib/RotateViewer.hpp"
 #include <RGLib/Matrices.hpp>
 #include <RGLib/World.hpp>
+#include <opencv2/opencv.hpp>
+
 namespace fs = std::filesystem;
 
 int windowWidth = 1280;
@@ -75,7 +77,7 @@ int main()
 
 	//Mesh
 	glhelper::Mesh testMesh;
-	std::vector<glhelper::Renderable*> scene{ &testMesh };
+	testMesh.meshName = "TestMesh";
 
 	Eigen::Matrix4f bunnyModelToWorld = Eigen::Matrix4f::Identity();
 	bunnyModelToWorld(0, 0) = 0.2f;
@@ -87,18 +89,39 @@ int main()
 
 	cv::Mat bunnyTextureImage = cv::imread("../models/stanford_bunny/textures/Bunny_baseColor.png");
 	cv::cvtColor(bunnyTextureImage, bunnyTextureImage, cv::COLOR_BGR2RGB);
-	RGLib::Texture* bunnyTex = new RGLib::Texture("../models/stanford_bunny/textures/Bunny_baseColor.png");
-
+	glhelper::Texture bunnyTex(GL_TEXTURE_2D, GL_RGB8,bunnyTextureImage.cols, bunnyTextureImage.rows,
+		0, GL_RGB, GL_UNSIGNED_BYTE, bunnyTextureImage.data,GL_LINEAR_MIPMAP_LINEAR,GL_LINEAR); //= new RGLib::Texture("../models/stanford_bunny/textures/Bunny_baseColor.png");
+	bunnyTex.genMipmap();
 
 	//testMesh.tex(bunnyTex);
 
 	testMesh.modelToWorld(bunnyModelToWorld);
 	testMesh.shaderProgram(&lambertShader);
 
+	//Lighthouse
+	glhelper::Mesh lightHouse;
+	lightHouse.meshName = "LightHouse";
+
+	Eigen::Matrix4f lighthouseModelToWorld = Eigen::Matrix4f::Identity();
+	lighthouseModelToWorld(0, 0) = 0.2f;
+	lighthouseModelToWorld(1, 1) = 0.2f;
+	lighthouseModelToWorld(2, 2) = 0.2f;
+	lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0.f, -0.5f, 0.f)) * lighthouseModelToWorld;
+
+	modelLoader->loadFromFile("../models/lighthouse/source/lighthouse.fbx", &lightHouse);
+
+
+	std::vector<glhelper::Renderable*> scene{ &testMesh, &lightHouse };
+
 	RGLib::World* Worldscene = new RGLib::World;
 	Worldscene->AddToWorld(testMesh);
+	//Worldscene->AddToWorld(lightHouse);
+	Worldscene->CreateQueries();
 
 	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 
 
 	bool running = true;
@@ -122,17 +145,19 @@ int main()
 			glViewport(0, 0, windowWidth, windowHeight);
 
 			glActiveTexture(GL_TEXTURE0 + 0);
-			glBindTexture(GL_TEXTURE_2D, bunnyTex->getTextureName());
+			bunnyTex.bindToImageUnit(0);
 			Worldscene->RenderWorld();
-			//testMesh.render(lambertShader);
 
-
-			GLint samplerID = glGetUniformLocation(0, "albedoTex");
-
-			//glProgramUniform2d(lambertShader.get(), lambertShader.uniformLoc("albedoTex"))
 
 			SDL_GL_SwapWindow(window);
 		};
 
+		//Clean up
+			
 	return 0;
+}
+
+void Clean()
+{
+
 }

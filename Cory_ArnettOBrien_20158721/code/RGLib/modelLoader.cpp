@@ -41,6 +41,7 @@
 		//check if file was opened ok
 		if (!pScene)
 		{
+			std::cout << "Model Failed to open: " << filename << std::endl;
 			return false;
 		}
 		const aiMesh* _mesh;

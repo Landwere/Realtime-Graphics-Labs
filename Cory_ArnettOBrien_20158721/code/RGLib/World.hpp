@@ -1,6 +1,7 @@
 #pragma once
 #include "RGLib/Mesh.hpp"
-
+#include <iostream>
+#include <fstream>
 namespace RGLib
 {
 	class World
@@ -15,6 +16,8 @@ namespace RGLib
 
 	private:
 		std::vector<glhelper::Mesh*> worldObjects;
-		std::vector<GLuint*> queries;
+		std::vector<GLuint> queries;
+		std::ofstream dataFile; //("renderData.csv");
+
 	};
 }

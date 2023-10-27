@@ -3,7 +3,7 @@
 #include "Renderable.hpp"
 #include "GLBuffer.hpp"
 #include <GL/glew.h>
-#include "RGLib/Texture.h"
+//#include "RGLib/Texture.h"
 namespace glhelper {
 
 //!\brief Class abstracting a renderable 3D triangle mesh.
@@ -23,7 +23,7 @@ public:
 
 
 	virtual void render();
-	void render(RGLib::Texture* texture);
+	//void render(RGLib::Texture* texture);
 	virtual void render(ShaderProgram &program);
 
 	virtual bool castsShadow();
@@ -34,6 +34,8 @@ public:
 	ShaderProgram* shaderProgram() const;
 
 	Mesh& drawMode(GLenum mode);
+
+	std::string meshName;
 
 private:
 	Mesh(const Mesh&);

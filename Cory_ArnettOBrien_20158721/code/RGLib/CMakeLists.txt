@@ -10,7 +10,9 @@ Camera.cpp
 ModelRenderer.cpp
 ModelRenderer.h
 Texture.cpp
-Texture.h
+Texture.hpp
+TextureLegacy.cpp
+TextureLegacy.h
 Mesh.hpp
 Mesh.cpp
 Renderable.cpp

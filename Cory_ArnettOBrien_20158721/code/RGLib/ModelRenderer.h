@@ -6,7 +6,7 @@
 #include <iostream>
 #include "Camera.h"
 #include <opencv2/opencv.hpp>
-#include "Texture.h"
+#include "TextureLegacy.h"
 
 namespace RGLib
 {
