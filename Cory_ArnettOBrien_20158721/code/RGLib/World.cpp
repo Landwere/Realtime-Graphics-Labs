@@ -12,6 +12,10 @@ void RGLib::World::RenderWorld()
 		GLuint currentQuery = queries[i];
 		i++;
 		
+
+		glActiveTexture(GL_TEXTURE0 + 0);
+		mesh->meshTex->bindToImageUnit(0);
+
 		glBeginQuery(GL_TIME_ELAPSED_EXT, currentQuery);
 		mesh->render();
 		glEndQuery(GL_TIME_ELAPSED_EXT);

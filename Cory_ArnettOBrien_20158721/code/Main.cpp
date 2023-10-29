@@ -18,6 +18,7 @@
 #include <RGLib/Matrices.hpp>
 #include <RGLib/World.hpp>
 #include <opencv2/opencv.hpp>
+#include <RGLib/Matrices.cpp>
 
 namespace fs = std::filesystem;
 
@@ -97,25 +98,39 @@ int main()
 
 	testMesh.modelToWorld(bunnyModelToWorld);
 	testMesh.shaderProgram(&lambertShader);
+	testMesh.meshTex = &bunnyTex;
 
 	//Lighthouse
 	glhelper::Mesh lightHouse;
 	lightHouse.meshName = "LightHouse";
 
+
 	Eigen::Matrix4f lighthouseModelToWorld = Eigen::Matrix4f::Identity();
-	lighthouseModelToWorld(0, 0) = 0.2f;
-	lighthouseModelToWorld(1, 1) = 0.2f;
-	lighthouseModelToWorld(2, 2) = 0.2f;
-	lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0.f, -0.5f, 0.f)) * lighthouseModelToWorld;
+	lighthouseModelToWorld(0, 0) = 1.f;
+	lighthouseModelToWorld(1, 1) = 1.f;
+	lighthouseModelToWorld(2, 2) = 1.f;
+
+	lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(5.f, -0.5f, 0.f)) * makeRotationMatrix(-90, 0, 0) * lighthouseModelToWorld;
+
+	
 
 	modelLoader->loadFromFile("../models/lighthouse/source/lighthouse.fbx", &lightHouse);
 
+	cv::Mat lightHouseTextureImage = cv::imread("../models/lighthouse/textures/lighthouse_v1_01_da.tga.png");
+	cv::cvtColor(lightHouseTextureImage, lightHouseTextureImage, cv::COLOR_BGR2RGB);
+	glhelper::Texture lighthouseTex(GL_TEXTURE_2D, GL_RGB8, lightHouseTextureImage.cols, lightHouseTextureImage.rows,
+		0, GL_RGB, GL_UNSIGNED_BYTE, lightHouseTextureImage.data, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR); //= new RGLib::Texture("../models/stanford_bunny/textures/Bunny_baseColor.png");
+	lighthouseTex.genMipmap();
+
+	lightHouse.modelToWorld(lighthouseModelToWorld);
+	lightHouse.shaderProgram(&lambertShader);
+	lightHouse.meshTex = &lighthouseTex;
 
 	std::vector<glhelper::Renderable*> scene{ &testMesh, &lightHouse };
 
 	RGLib::World* Worldscene = new RGLib::World;
 	Worldscene->AddToWorld(testMesh);
-	//Worldscene->AddToWorld(lightHouse);
+	Worldscene->AddToWorld(lightHouse);
 	Worldscene->CreateQueries();
 
 	glEnable(GL_BLEND);
@@ -144,8 +159,6 @@ int main()
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, windowWidth, windowHeight);
 
-			glActiveTexture(GL_TEXTURE0 + 0);
-			bunnyTex.bindToImageUnit(0);
 			Worldscene->RenderWorld();
 
 
