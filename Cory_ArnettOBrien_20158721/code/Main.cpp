@@ -93,7 +93,7 @@ int main()
 	glhelper::Texture bunnyTex(GL_TEXTURE_2D, GL_RGB8,bunnyTextureImage.cols, bunnyTextureImage.rows,
 		0, GL_RGB, GL_UNSIGNED_BYTE, bunnyTextureImage.data,GL_LINEAR_MIPMAP_LINEAR,GL_LINEAR); //= new RGLib::Texture("../models/stanford_bunny/textures/Bunny_baseColor.png");
 	bunnyTex.genMipmap();
-
+	bunnyTextureImage.release();
 	//testMesh.tex(bunnyTex);
 
 	testMesh.modelToWorld(bunnyModelToWorld);
@@ -106,31 +106,42 @@ int main()
 
 
 	Eigen::Matrix4f lighthouseModelToWorld = Eigen::Matrix4f::Identity();
-	lighthouseModelToWorld(0, 0) = 1.f;
-	lighthouseModelToWorld(1, 1) = 1.f;
-	lighthouseModelToWorld(2, 2) = 1.f;
+	lighthouseModelToWorld = makeIdentityMatrix(5);
+	//lighthouseModelToWorld(0, 0) = 1.f;
+	//lighthouseModelToWorld(1, 1) = 1.f;
+	//lighthouseModelToWorld(2, 2) = 1.f;
 
-	lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(5.f, -0.5f, 0.f)) * makeRotationMatrix(-90, 0, 0) * lighthouseModelToWorld;
+	lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(10.f, -0.5f, 0.f)) * makeRotationMatrix(-90, 0, 0) * lighthouseModelToWorld;
 
+	modelLoader->loadFromFile("../models/lighthouse2/source/Lighthouse.fbx", &lightHouse);
 	
-
-	modelLoader->loadFromFile("../models/lighthouse/source/lighthouse.fbx", &lightHouse);
-
-	cv::Mat lightHouseTextureImage = cv::imread("../models/lighthouse/textures/lighthouse_v1_01_da.tga.png");
+	cv::Mat lightHouseTextureImage = cv::imread("../models/lighthouse2/textures/Base_color.png");
 	cv::cvtColor(lightHouseTextureImage, lightHouseTextureImage, cv::COLOR_BGR2RGB);
 	glhelper::Texture lighthouseTex(GL_TEXTURE_2D, GL_RGB8, lightHouseTextureImage.cols, lightHouseTextureImage.rows,
 		0, GL_RGB, GL_UNSIGNED_BYTE, lightHouseTextureImage.data, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR); //= new RGLib::Texture("../models/stanford_bunny/textures/Bunny_baseColor.png");
 	lighthouseTex.genMipmap();
+	lightHouseTextureImage.release();
 
 	lightHouse.modelToWorld(lighthouseModelToWorld);
 	lightHouse.shaderProgram(&lambertShader);
 	lightHouse.meshTex = &lighthouseTex;
+
+	glhelper::Mesh rock;
+	rock.meshName = "Rock";
+
+	Eigen::Matrix4f rockModelToWorld = Eigen::Matrix4f::Identity();
+	rockModelToWorld = makeIdentityMatrix(0.5f);
+	rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0, -0.5f, 0)) * makeRotationMatrix(0, 0, 0) * makeScaleMatrix(0.000001f) * rockModelToWorld;
+	modelLoader->loadFromFile("../models/river-rock/source/River_Rock.fbx", &rock);
+	rock.loadTexture("../models/river-rock/textures/RiverRock_BaseColor.png");
+	rock.shaderProgram(&lambertShader);
 
 	std::vector<glhelper::Renderable*> scene{ &testMesh, &lightHouse };
 
 	RGLib::World* Worldscene = new RGLib::World;
 	Worldscene->AddToWorld(testMesh);
 	Worldscene->AddToWorld(lightHouse);
+	Worldscene->AddToWorld(rock);
 	Worldscene->CreateQueries();
 
 	glEnable(GL_BLEND);
@@ -147,6 +158,9 @@ int main()
 				if (event.type == SDL_QUIT)
 				{
 					running = false;
+					delete Worldscene;
+
+					
 				}
 				else
 				{

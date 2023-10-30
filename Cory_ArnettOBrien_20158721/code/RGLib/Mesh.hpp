@@ -4,6 +4,7 @@
 #include "GLBuffer.hpp"
 #include <GL/glew.h>
 #include "RGLib/Texture.hpp"
+#include <opencv2/opencv.hpp>
 namespace glhelper {
 
 //!\brief Class abstracting a renderable 3D triangle mesh.
@@ -34,6 +35,8 @@ public:
 	ShaderProgram* shaderProgram() const;
 
 	Mesh& drawMode(GLenum mode);
+
+	void loadTexture(cv::String filename);
 
 	std::string meshName;
 

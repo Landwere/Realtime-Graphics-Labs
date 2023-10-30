@@ -45,3 +45,13 @@ Eigen::Matrix4f makeRotationMatrix(float x, float y, float z)
 	
 	return outMat;
 }
+
+Eigen::Matrix4f makeIdentityMatrix(float scale)
+{
+	Eigen::Matrix4f identityMatrix = Eigen::Matrix4f::Identity();
+	identityMatrix(0, 0) = scale;
+	identityMatrix(1, 1) = scale;
+	identityMatrix(2, 2) = scale;
+
+	return identityMatrix;
+}

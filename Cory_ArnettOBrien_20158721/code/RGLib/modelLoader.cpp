@@ -99,7 +99,6 @@
 			mesh->norm(norms);
 			mesh->tex(uvs);
 			//mesh->elems(elems);
-
 		}
 
 
@@ -117,6 +116,8 @@
 
 		//remove the buffer from the pipeline 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		imp.FreeScene();
 
 		return true;
 
