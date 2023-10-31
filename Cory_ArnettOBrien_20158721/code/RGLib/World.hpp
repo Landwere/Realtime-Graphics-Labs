@@ -4,6 +4,7 @@
 #include <fstream>
 #define GLT_IMPLEMENTATION
 #include <gltext.h>
+#include <chrono>
 namespace RGLib
 {
 	class World
@@ -17,11 +18,14 @@ namespace RGLib
 
 		void CreateQueries();
 
+		void Clean();
 	private:
 		std::vector<glhelper::Mesh*> worldObjects;
 		std::vector<GLuint> queries;
 		std::ofstream dataFile; //("renderData.csv");
 		GLTtext* fpsText;
 		int frameCount;
+		std::chrono::time_point<std::chrono::steady_clock> lastFrameTime;
+		float frameDuration;
 	};
 }

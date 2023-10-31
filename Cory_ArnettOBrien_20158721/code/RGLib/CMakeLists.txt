@@ -31,6 +31,8 @@ RotateViewer.cpp
 Matrices.hpp
 Matrices.cpp
 World.hpp
-World.cpp)
+World.cpp
+FlyViewer.hpp
+FlyViewer.cpp)
 
 target_compile_features(RGLib PRIVATE cxx_std_20)

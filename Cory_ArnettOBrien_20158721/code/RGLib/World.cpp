@@ -22,13 +22,14 @@ void RGLib::World::RenderWorld()
 		
 
 		glActiveTexture(GL_TEXTURE0 + 0);
-		mesh->meshTex->bindToImageUnit(0);
+		if(mesh->meshTex != nullptr)
+			mesh->meshTex->bindToImageUnit(0);
 
 		glBeginQuery(GL_TIME_ELAPSED_EXT, currentQuery);
 		mesh->render();
 		glEndQuery(GL_TIME_ELAPSED_EXT);
 	}
-	if (frameCount >= 900)
+	if (frameCount >= 30)
 	{
 		i = 0;
 		GLuint64 totalTime = 0;
@@ -42,24 +43,35 @@ void RGLib::World::RenderWorld()
 			GLuint64 timeElapsed;
 			glGetQueryObjectui64v(query, GL_QUERY_RESULT, &timeElapsed);
 			totalTime += timeElapsed;
-			std::cout << "Mesh: " << worldObjects[i]->meshName << " " << timeElapsed / 10000 << "\n";
-			dataFile << worldObjects[i]->meshName << timeElapsed << " ";
+			std::cout << "Mesh: " << worldObjects[i]->meshName << " " << timeElapsed / 1e6f << "\n";
+			dataFile << worldObjects[i]->meshName << timeElapsed << ", ";
 			i++;
 		}
+
 		//to fps
-		std::cout << "Total Render Time: " << totalTime / 10000 << "ms" << "\n";
+		std::cout << "Total Render Time: " << totalTime / 1e6f << "ms" << "\n";
 		GLuint64 fps;
-		fps = 1 / ((totalTime / 10000.f) / 1000.f);
-		std::cout << "Total FPS: " << fps << "fps" << "\n";
+		fps = 1 / ((totalTime / 1e6f) / 1000.f);
+		std::cout << "Total FPS: " << std::to_string(1 / frameDuration) << "fps" << "\n";
+		dataFile << "Total render time: " << totalTime << " FPS: " << std::to_string(1 / frameDuration) << "\n";
+
+		gltSetText(fpsText, (std::string("FPS: ") + std::to_string(1 / frameDuration)).c_str());
+
 		//dataFile.flush();
-		gltSetText(fpsText, (std::string("FPS: ") + std::to_string(fps)).c_str());
 		frameCount = 0;
 	}
+
+	frameCount++;
+
+	frameDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastFrameTime).count() * 1e-9f;
+	lastFrameTime = std::chrono::steady_clock::now();
+
+
+
 	gltBeginDraw();
 	gltColor(1.f, 1.f, 1.f, 1.f);
 	gltDrawText2D(fpsText, 10.f, 10.f, 1.f);
 	gltEndDraw();
-	frameCount++;
 }
 
 void RGLib::World::AddToWorld(glhelper::Mesh &mesh)
@@ -79,4 +91,9 @@ void RGLib::World::CreateQueries()
 	}
 	dataFile.clear();
 
+}
+
+void RGLib::World::Clean()
+{
+	dataFile.close();
 }

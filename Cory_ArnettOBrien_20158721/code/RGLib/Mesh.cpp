@@ -193,10 +193,13 @@ void Mesh::loadTexture(cv::String filename)
 {
 	cv::Mat textureImage = cv::imread(filename);
 	cv::cvtColor(textureImage, textureImage, cv::COLOR_BGR2RGB);
-	glhelper::Texture Tex(GL_TEXTURE_2D, GL_RGB8, textureImage.cols, textureImage.rows,
+
+
+	 meshTex = std::make_unique< glhelper::Texture>(GL_TEXTURE_2D, GL_RGB8, textureImage.cols, textureImage.rows,
 		0, GL_RGB, GL_UNSIGNED_BYTE, textureImage.data, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-	Tex.genMipmap();
-	meshTex = &Tex;
+
+	meshTex->genMipmap();
+
 }
 
 

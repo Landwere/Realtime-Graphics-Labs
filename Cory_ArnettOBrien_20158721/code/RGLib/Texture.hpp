@@ -42,10 +42,11 @@ public:
 
 	void genMipmap();
 
+
 private:
 	Texture(const Texture&);
 	Texture& operator=(const Texture&);
-	
+
 	void init(const void *data, GLenum minFilter, GLenum magFilter);
 
 	size_t width_, height_;

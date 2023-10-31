@@ -40,7 +40,7 @@ public:
 
 	std::string meshName;
 
-	glhelper::Texture* meshTex;
+	std::unique_ptr< glhelper::Texture> meshTex;
 
 private:
 	Mesh(const Mesh&);
