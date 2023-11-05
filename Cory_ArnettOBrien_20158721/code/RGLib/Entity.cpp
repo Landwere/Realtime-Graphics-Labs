@@ -2,6 +2,7 @@
 #include <Eigen/Dense>
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 Entity::Entity(const Eigen::Matrix4f &modelToWorld)
 :modelToWorld_(modelToWorld)
@@ -24,5 +25,5 @@ Eigen::Matrix3f Entity::normToWorld() const
 {
 	return modelToWorld_.block<3,3>(0,0).inverse().transpose();
 }
-
+//end source
 }

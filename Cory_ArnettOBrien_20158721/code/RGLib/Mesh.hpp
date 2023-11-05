@@ -6,6 +6,7 @@
 #include "RGLib/Texture.hpp"
 #include <opencv2/opencv.hpp>
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 //!\brief Class abstracting a renderable 3D triangle mesh.
 class Mesh : public Renderable
@@ -53,6 +54,6 @@ private:
 	GLenum drawMode_;
 	bool castsShadow_;
 };
-
+//end source
 }
 

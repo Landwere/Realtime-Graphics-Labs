@@ -1,6 +1,7 @@
 #include "GLBuffer.hpp"
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 BufferObject::BufferObject(size_t sizeBytes, GLenum usage, const void * data)
 	:sizeBytes_(sizeBytes)
@@ -216,5 +217,5 @@ void AtomicCounterBuffer::bindBase(GLuint index)
 	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, index, get());
 	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
 }
-
+//end source
 }

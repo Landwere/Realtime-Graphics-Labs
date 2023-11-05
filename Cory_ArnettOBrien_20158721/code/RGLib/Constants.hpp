@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 enum UniformLocation : GLint {
 	VERT      = 0,
@@ -25,6 +26,6 @@ enum UniformBlock : GLuint {
 #ifndef M_PI_2
 #define M_PI_2 1.57079632679489661923132169163975144
 #endif
-
+//end source
 }
 

@@ -4,6 +4,7 @@
 #include "ShaderProgram.hpp"
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 //!\brief Abstract class encapsulating an Entity capable of being rendered.
 class Renderable : public Entity
@@ -16,6 +17,6 @@ public:
 
 	virtual bool castsShadow() = 0;
 };
-
+//end source
 }
 

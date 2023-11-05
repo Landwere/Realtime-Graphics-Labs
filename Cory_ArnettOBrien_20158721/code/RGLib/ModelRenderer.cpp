@@ -4,7 +4,7 @@
 #include "ShaderUtils.h"
 	namespace RGLib 
 	{
-
+		//Source Cory Arnett-O'Brien (Game engine architecture)
 
 		//GLfloat vertexData[] =
 		//{
@@ -333,4 +333,5 @@
 				delete[] Msg;
 			}
 		}
+		//end source
 }

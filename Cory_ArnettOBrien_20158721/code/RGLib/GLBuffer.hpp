@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 class BufferObject {
 public:
@@ -157,6 +158,6 @@ private:
 	AtomicCounterBuffer(const AtomicCounterBuffer&);
 	AtomicCounterBuffer &operator=(const AtomicCounterBuffer&);
 };
-
+//end source
 }
 

@@ -10,7 +10,7 @@
 
 namespace RGLib
 {
-
+	//source Cory Arnett-O'Brien (Game Engine Architecture)
 	class Model
 	{
 	public:
@@ -219,6 +219,6 @@ struct Vertex
 	}
 };
 
-
+//end source
 }
 

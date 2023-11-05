@@ -3,7 +3,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <vector>
-// source from Cory Arnett-O'Brien (Game Engine Architecture)
+// source from Cory Arnett-O'Brien (Game Engine Architecture) modifications noted
 
 
 	aiVector3D CalculateSurfaceNormal(aiVector3D a, aiVector3D b, aiVector3D c)
@@ -20,7 +20,7 @@
 
 	}
 
-
+	//function modified to use glhelper::mesh instead of model
 	bool Model::loadFromFile(const char* filename, glhelper::Mesh* mesh)
 	{
 

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <GL/glew.h>
+//Source David Walton (Moodle.bcu.ac.uk)
 
 std::string glErrToString(GLenum err);
 
@@ -13,3 +14,4 @@ std::string glErrToString(GLenum err);
 #endif //_DEBUG
 void throwOnGlError_(const std::string &info);
 
+//end source

@@ -2,6 +2,7 @@
 #include <iostream>
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 #ifndef M_PI_4
 #define M_PI_4 0.78539816339f
@@ -25,5 +26,5 @@ void Viewer::updateBuffer()
 {
 	buffer_.update(&block_);
 }
-
+//end source
 }

@@ -4,6 +4,7 @@
 #include <string>
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 //!\brief Class encapsulating a (2D) OpenGL texture.
 class Texture final
@@ -55,6 +56,6 @@ private:
 	
 	friend class CubemapTexture;
 };
-
+//end source
 }
 

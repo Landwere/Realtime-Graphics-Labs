@@ -5,6 +5,7 @@
 #include <iostream>
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 #ifndef M_PI_4
 #define M_PI_4 0.78539816339f
@@ -130,5 +131,5 @@ Eigen::Matrix4f RotateViewer::worldToCam() const
 {
 	return translate_ * rotate_;
 }
-
+//end source
 }

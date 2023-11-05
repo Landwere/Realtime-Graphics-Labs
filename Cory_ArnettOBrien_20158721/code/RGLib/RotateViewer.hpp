@@ -6,6 +6,7 @@
 #include "Viewer.hpp"
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 //!\brief A Viewer which rotates about the origin.
 class RotateViewer : public Viewer
@@ -28,6 +29,6 @@ private:
 	void updateTranslation();
 	void updateBlock();
 };
-
+//end source
 }
 

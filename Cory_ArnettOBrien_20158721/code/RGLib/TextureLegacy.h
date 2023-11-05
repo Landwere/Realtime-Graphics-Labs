@@ -7,7 +7,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 namespace RGLib {
-
+	//source Cory Arnett-O'Brien (Game engine architecture)
 	class Texture
 	{
 	public:
@@ -71,6 +71,7 @@ namespace RGLib {
 		SDL_Surface* surfaceImage;
 		GLuint textureName;
 	};
+	//end source
 }
 
 

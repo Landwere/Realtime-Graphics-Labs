@@ -5,6 +5,7 @@
 #include "Exception.hpp"
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 Mesh::Mesh(const Eigen::Matrix4f &modelToWorld)
     :Renderable(modelToWorld),
@@ -203,5 +204,5 @@ void Mesh::loadTexture(cv::String filename)
 }
 
 
-
+//end source
 }

@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 //!\brief Class representing an object in a 3D world. Has a transform indicating
 //!       its location in the world.
@@ -20,6 +21,6 @@ public:
 private:
 	Eigen::Matrix4f modelToWorld_;
 };
-
+//end source
 }
 

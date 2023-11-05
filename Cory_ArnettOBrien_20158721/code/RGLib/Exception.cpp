@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <stdexcept>
+//Source David Walton (Moodle.bcu.ac.uk)
 
 void throwOnGlError_(const std::string &info)
 {
@@ -30,4 +31,4 @@ std::string glErrToString(GLenum err)
 	}
 	return "UNKNOWN_GL_ERROR_ENUM";
 }
-
+//end source

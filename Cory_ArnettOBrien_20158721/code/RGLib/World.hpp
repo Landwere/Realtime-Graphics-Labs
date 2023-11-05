@@ -16,6 +16,7 @@ namespace RGLib
 
 		void AddToWorld(glhelper::Mesh& mesh);
 
+		//create GL queries for each mesh in world
 		void CreateQueries();
 
 		void Clean();

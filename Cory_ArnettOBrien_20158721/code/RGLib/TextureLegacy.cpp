@@ -1,6 +1,7 @@
 #include "TextureLegacy.h"
 
 namespace RGLib {
+	//source Cory Arnett-O'Brien (Game engine architecture) 
 	void Texture::loadTexture(std::string filename)
 	{
 		//IMG_Init(IMG_INIT_JPG);
@@ -49,4 +50,5 @@ namespace RGLib {
 	Texture::~Texture() {
 		glDeleteTextures(1, &textureName);
 	}
+	//end sources
 }

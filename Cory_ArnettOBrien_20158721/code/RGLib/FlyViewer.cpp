@@ -4,6 +4,7 @@
 #include <iostream>
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 #ifndef M_PI_4
 #define M_PI_4 0.78539816339f
@@ -161,5 +162,5 @@ void FlyViewer::updateBlock()
 	block_.cameraPos = (rotate_ * translate_).inverse() * Eigen::Vector4f(0.f, 0.f, 0.f, 1.f);
 	block_.cameraDir = rotate_.inverse() * Eigen::Vector4f(0.f, 0.f, -1.f, 1.f);
 }
-
+//end source
 }

@@ -6,6 +6,7 @@
 #include "GLBuffer.hpp"
 
 namespace glhelper {
+	//Source David Walton (Moodle.bcu.ac.uk)
 
 	//!\brief Abstract class encapsulating a 3D viewer, which interprets user input
 	//!       (as supplied by SDL) and uses this to move an OpenGL camera.
@@ -29,5 +30,5 @@ namespace glhelper {
 		UniformBuffer buffer_;
 		CameraBlock block_;
 	};
-
+	//end source
 }

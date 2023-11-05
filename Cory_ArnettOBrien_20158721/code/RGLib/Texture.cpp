@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <string>
 #include <opencv2/opencv.hpp>
+//Source David Walton (Moodle.bcu.ac.uk)
 
 bool validFormat(GLenum format)
 {
@@ -382,5 +383,5 @@ size_t Texture::numChannels() const
 		throw std::runtime_error("NOT IMPLEMENTED");
 	}
 }
-
+//end source
 }
