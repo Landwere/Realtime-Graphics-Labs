@@ -90,6 +90,7 @@ void FlyViewer::update()
 		if(keystate[SDL_SCANCODE_E]) {
 			translate.y() += moveAmt;
 		}
+		//TODO stop from flying using theta and phi to tell if the player is moving 
 		translate = rotate_.inverse() * translate;
 		translation_ += Eigen::Vector3f(translate.x()/translate.w(),
 							 translate.y()/translate.w(), translate.z()/translate.w());

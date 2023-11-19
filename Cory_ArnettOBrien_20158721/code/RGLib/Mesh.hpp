@@ -49,6 +49,9 @@ private:
 	std::unique_ptr<VertexBuffer> vert_, norm_, tex_, color_, tangent_, bitangent_;
 	std::unique_ptr<ElementBuffer> elem_;
 	ShaderProgram *shaderProgram_;
+	//vertex array stores information about how objects are bound in the buffer
+	//is used to set up vertex attributes 
+	//sort of a vertex layout object
 	GLuint vao_;
 	size_t nElems_, nVerts_;
 	GLenum drawMode_;

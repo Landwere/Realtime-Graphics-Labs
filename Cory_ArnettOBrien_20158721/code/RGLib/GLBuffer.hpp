@@ -107,6 +107,7 @@ private:
 
 //!\brief Class describing structure of a uniform block containing useful
 //!       information about the current OpenGL camera.
+//! //used to pass data into all shaders efficiently 
 struct CameraBlock {
 	Eigen::Matrix4f worldToClip;
 	Eigen::Vector4f cameraPos;

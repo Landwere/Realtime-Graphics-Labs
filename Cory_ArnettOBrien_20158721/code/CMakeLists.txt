@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(RealtimeGraphics LANGUAGES CXX)
+project(UsingDoxygen LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+find_package(Doxygen REQUIRED)
 find_package(Eigen REQUIRED)
 find_package(SDL REQUIRED)
 find_package(glText REQUIRED)
@@ -60,5 +62,7 @@ function(add_executable_rtg name)
     set_target_properties(${name} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=${SDL_DLL_DIR};${SDL_TTF_DLL_DIR};${OpenCV_DLL_DIR};${GLEW_DLL_DIR};${Assimp_DLL_DIR};%PATH%")
 endfunction()
 # function (name shaders.vert shaders.frag)
-add_executable_rtg(main lambert.vert lambert.frag VertexLighting.vert FragmentLighting.frag FixedColor.frag FixedColor.vert)
+add_executable_rtg(main lambert.vert lambert.frag VertexLighting.vert FragmentLighting.frag FixedColor.frag FixedColor.vert BlinnPhong.vert BlinnPhong.frag )
+set(SOURCES test.cpp test.hpp main.cpp)
+doxygen_add_docs(doxygen ${SOURCES} ALL)
 

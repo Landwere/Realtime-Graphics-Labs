@@ -33,8 +33,11 @@ Model* model;
 
 
 SDL_Event event;
-
-
+float theta = 0.0f;
+Eigen::Vector3f lightPos(5.f * sinf(theta), 5.f, 5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
+Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
+float specularExponent = 60.f, specularIntensity = 1.0f;
+float lightIntensity = 60.f;
 
 int main()
 {
@@ -77,6 +80,12 @@ int main()
 
 	//Shader
 	glhelper::ShaderProgram lambertShader({ "..\\shaders\\Lambert.vert", "..\\shaders\\Lambert.frag" });
+	glhelper::ShaderProgram blinnPhongShader({ "..\\shaders\\BlinnPhong.vert", "..\\shaders\\BlinnPhong.frag" });
+
+	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularExponent"), specularExponent);
+	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
+	glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
+	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
 	//glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
 
 	//Model class repurposed to be a model loader 
@@ -98,8 +107,14 @@ int main()
 	testMesh.loadTexture("../models/stanford_bunny/textures/Bunny_baseColor.png");
 
 	testMesh.modelToWorld(bunnyModelToWorld);
-	testMesh.shaderProgram(&lambertShader);
+	testMesh.shaderProgram(&blinnPhongShader);
 
+	//Sphere mesh
+	glhelper::Mesh sphereMesh;
+	sphereMesh.meshName = "Sphere";
+	sphereMesh.modelToWorld(makeTranslationMatrix(lightPos));
+	modelLoader->loadFromFile("../models/sphere.obj", &sphereMesh);
+	sphereMesh.shaderProgram(&lambertShader);
 
 	//Lighthouse Mesh
 	glhelper::Mesh lightHouse;
@@ -107,7 +122,7 @@ int main()
 
 	Eigen::Matrix4f lighthouseModelToWorld = Eigen::Matrix4f::Identity();
 	lighthouseModelToWorld = makeIdentityMatrix(5);
-	lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(10.f, -0.5f, 0.f)) * makeRotationMatrix(-90, 0, 180) * lighthouseModelToWorld;
+	lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.1f, -0.5f, 0.f)) * makeRotationMatrix(-90, 0, -16) * lighthouseModelToWorld;
 
 	modelLoader->loadFromFile("../models/lighthouse2/source/Lighthouse.fbx", &lightHouse);
 	lightHouse.loadTexture("../models/lighthouse2/textures/Base_color.png");
@@ -121,8 +136,8 @@ int main()
 	rock.meshName = "Rock";
 
 	Eigen::Matrix4f rockModelToWorld = Eigen::Matrix4f::Identity();
-	rockModelToWorld = makeIdentityMatrix(0.05f);
-	rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0, -0.5f, 0)) * makeScaleMatrix(1) * rockModelToWorld;
+	rockModelToWorld = makeIdentityMatrix(1);
+	rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-3, 5.f, 0.7)) *  makeRotationMatrix(-90, 0, -18) * makeScaleMatrix(0.09f) * rockModelToWorld;
 	modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock.obj", &rock);
 	rock.loadTexture("../models/obj-nat-rock/textures/nat-rock-diff.jpeg");
 	rock.shaderProgram(&lambertShader);
@@ -147,6 +162,7 @@ int main()
 	//set up world scene
 	RGLib::World* Worldscene = new RGLib::World;
 	Worldscene->AddToWorld(testMesh);
+	Worldscene->AddToWorld(sphereMesh);
 	Worldscene->AddToWorld(lightHouse);
 	Worldscene->AddToWorld(rock);
 	Worldscene->AddToWorld(rock2);
@@ -155,6 +171,7 @@ int main()
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 
 
 
