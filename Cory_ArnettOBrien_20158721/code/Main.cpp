@@ -36,9 +36,9 @@ SDL_Event event;
 float theta = 0.0f;
 Eigen::Vector3f lightPos(5.f * sinf(theta), 5.f, 5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
 Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
-float specularExponent = 60.f, specularIntensity = 1.0f;
-float lightIntensity = 60.f;
-
+float specularExponent = 60.f, specularIntensity = 0.05f;
+float lightIntensity = 50.f;
+float fallOffExponent = 2.0f;
 int main()
 {
 	//print out all shaders in path (used for debugging)
@@ -86,6 +86,8 @@ int main()
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
 	glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+
 	//glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
 
 	//Model class repurposed to be a model loader 
@@ -137,10 +139,10 @@ int main()
 
 	Eigen::Matrix4f rockModelToWorld = Eigen::Matrix4f::Identity();
 	rockModelToWorld = makeIdentityMatrix(1);
-	rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-3, 5.f, 0.7)) *  makeRotationMatrix(-90, 0, -18) * makeScaleMatrix(0.09f) * rockModelToWorld;
-	modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock.obj", &rock);
+	rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-3, 5.f, 0.7)) *  makeRotationMatrix(-0, -90, -18) * rockModelToWorld;
+	modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-scaled.obj", &rock);
 	rock.loadTexture("../models/obj-nat-rock/textures/nat-rock-diff.jpeg");
-	rock.shaderProgram(&lambertShader);
+	rock.shaderProgram(&blinnPhongShader);
 	rock.modelToWorld(rockModelToWorld);
 
 	//Second Rock Mesh
@@ -163,18 +165,18 @@ int main()
 	RGLib::World* Worldscene = new RGLib::World;
 	Worldscene->AddToWorld(testMesh);
 	Worldscene->AddToWorld(sphereMesh);
-	Worldscene->AddToWorld(lightHouse);
+	//Worldscene->AddToWorld(lightHouse);
 	Worldscene->AddToWorld(rock);
-	Worldscene->AddToWorld(rock2);
+	//Worldscene->AddToWorld(rock2);
 	Worldscene->CreateQueries();
 
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_CULL_FACE);
 
 
-
-
+	bool lightRotating = true;
 	bool running = true;
 		while (running)
 		{
@@ -197,7 +199,67 @@ int main()
 					viewer.processEvent(event);
 					viewer.update();
 				}
+				if (event.type == SDL_KEYDOWN)
+				{
+					if (event.key.keysym.sym == SDLK_DOWN) {
+						if (event.key.keysym.mod & KMOD_SHIFT) {
+							lightIntensity -= 0.1f;
+							if (lightIntensity < 0.f) lightIntensity = 0.f;
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+						}
+						else {
+							lightIntensity -= 10.0f;
+							if (lightIntensity < 0.f) lightIntensity = 0.f;
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+						}
+					}
+					if (event.key.keysym.sym == SDLK_UP) {
+						if (event.key.keysym.mod & KMOD_SHIFT) {
+							lightIntensity += 0.1f;
+							if (lightIntensity < 0.f) lightIntensity = 0.f;
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+						}
+						else {
+							lightIntensity += 10.0f;
+							if (lightIntensity < 0.f) lightIntensity = 0.f;
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+						}
+					}
+					if (event.key.keysym.sym == SDLK_RIGHT) {
+						if (event.key.keysym.mod & KMOD_SHIFT) {
+							fallOffExponent += 0.01f;
+							if (fallOffExponent < 0.f) fallOffExponent = 0.f;
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+						}
+						else {
+							fallOffExponent += 10.0f;
+							if (fallOffExponent < 0.f) fallOffExponent = 0.f;
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+						}
+					}
+					if (event.key.keysym.sym == SDLK_LEFT) {
+						if (event.key.keysym.mod & KMOD_SHIFT) {
+							fallOffExponent -= 0.01f;
+							if (fallOffExponent < 0.f) fallOffExponent = 0.f;
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+						}
+						else {
+							fallOffExponent -= 10.0f;
+							if (fallOffExponent < 0.f) fallOffExponent = 0.f;
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+						}
+					}
+				}
 			}
+
+			if (lightRotating) {
+				theta += 0.01f;
+				if (theta > 2 * 3.14159f) theta = 0.f;
+				lightPos << 5.f * sinf(theta), 5.f, 5.f * cosf(theta);
+				sphereMesh.modelToWorld(makeTranslationMatrix(lightPos));
+				glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
+			}
+
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

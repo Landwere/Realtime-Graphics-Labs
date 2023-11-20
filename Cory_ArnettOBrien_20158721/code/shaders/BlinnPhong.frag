@@ -23,6 +23,8 @@ uniform float lightIntensity;
 
 uniform sampler2D albedoTex;
 
+uniform float falloffExponent;
+
 void main()
 {
 	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
@@ -38,6 +40,6 @@ void main()
 	float spec = ((pow( clamp( dot(normalize(lightDir + viewDir), worldNorm), 0, 1), specHighExponent ) * specNorm) * specularIntensity);
 	
 
-	colorOut.rgb = ((diffuse + spec) * lightIntensity / (lightDistance * lightDistance)) * clamp( dot(lightDir, worldNorm), 0, 1);
+	colorOut.rgb = ((diffuse + spec) * lightIntensity / pow(lightDistance, falloffExponent)) * clamp( dot(lightDir, worldNorm), 0, 1);
 	colorOut.a = 1;
 }

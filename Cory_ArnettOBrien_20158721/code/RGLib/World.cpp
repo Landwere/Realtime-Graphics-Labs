@@ -53,6 +53,7 @@ void RGLib::World::RenderWorld()
 			totalTime += timeElapsed;
 			//convert time to milliseconds for console output
 			std::cout << "Mesh: " << worldObjects[i]->meshName << " " << timeElapsed / 1e6f << "\n";
+			//TODO change to show names on colums and data on rows for easy chart creation
 			dataFile << worldObjects[i]->meshName << timeElapsed << ", ";
 			i++;
 		}

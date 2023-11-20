@@ -41,9 +41,9 @@ Eigen::Matrix4f makeRotationMatrix(float x, float y, float z)
 	//	Eigen::AngleAxisf((z / 180) * M_PI, Eigen::Vector3f::UnitZ()));
 
 	//rotation matrix q
-	Eigen::Quaternion q = Eigen::AngleAxisf((x / 180) * M_PI, Eigen::Vector3f::UnitX()) *
+	Eigen::Quaternion q = Eigen::AngleAxisf((z / 180) * M_PI, Eigen::Vector3f::UnitX()) *
 		Eigen::AngleAxisf((y / 180) * M_PI, Eigen::Vector3f::UnitY()) *
-		Eigen::AngleAxisf((z / 180) * M_PI, Eigen::Vector3f::UnitZ());
+		Eigen::AngleAxisf((x / 180) * M_PI, Eigen::Vector3f::UnitZ());
 	
 	outMat.block(0,0,3,3) = q.matrix();
 	
