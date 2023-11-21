@@ -48,7 +48,7 @@ void main()
 	
 	float falloff = pow(lightDistance, 2);
 
-
+	//dot product betwwen lighthouse light direction and object light direction
 
 	colorOut.rgb = vec3(0);
 	colorOut.a = 1;
