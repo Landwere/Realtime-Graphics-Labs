@@ -70,7 +70,7 @@
 
 					if (_mesh->HasNormals())
 					{
-						const aiVector3D& normal = _mesh->mNormals[MeshIdx];
+						const aiVector3D& normal = _mesh->mNormals[face.mIndices[vertInx]];
 
 						//create a new object in the shape array based on the extracted vertex
 						//this shape array will then be used to create the vertex buffer

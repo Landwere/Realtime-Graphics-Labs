@@ -25,21 +25,36 @@ uniform sampler2D albedoTex;
 
 uniform float falloffExponent;
 
+uniform vec3 worldLightDir;
+uniform float worldLightInt;
+
+vec3 lightModel(float lIntensity, vec3 lDirection, vec3 viewDir, vec3 albedo)
+{
+	float specHighExponent = specularExponent * 2;
+	vec3 diffuse = albedo.rgb;
+	float specNorm = (specularIntensity + 8) / 8;
+	float spec = ((pow( clamp( dot(normalize(lDirection + viewDir), worldNorm), 0, 1), specHighExponent ) * specNorm) * specularIntensity);
+	
+	return (diffuse + spec) * lIntensity * clamp( dot(lDirection, worldNorm), 0, 1);
+}
+
 void main()
 {
 	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
 	vec3 viewDir = normalize(cameraPos.xyz - fragPosWorld);
-	float lightDistance = length(lightPosWorld - fragPosWorld);
+	float lightDistance =  length(lightPosWorld - fragPosWorld) ;
 
 	vec3 albedo = texture(albedoTex, texCoord).xyz;
-
 	
-	float specHighExponent = specularExponent * 2;
-	vec3 diffuse = albedo.rgb;
-	float specNorm = (specularIntensity + 8) / 8;
-	float spec = ((pow( clamp( dot(normalize(lightDir + viewDir), worldNorm), 0, 1), specHighExponent ) * specNorm) * specularIntensity);
-	
+	float falloff = pow(lightDistance, 2);
 
-	colorOut.rgb = ((diffuse + spec) * lightIntensity / pow(lightDistance, falloffExponent)) * clamp( dot(lightDir, worldNorm), 0, 1);
+
+
+	colorOut.rgb = vec3(0);
 	colorOut.a = 1;
+	//Point light
+	colorOut.rgb += lightModel(lightIntensity, lightDir, viewDir, albedo) / falloff;
+	//global light
+	colorOut.rgb += lightModel(worldLightInt, worldLightDir, viewDir, albedo);
 }
+

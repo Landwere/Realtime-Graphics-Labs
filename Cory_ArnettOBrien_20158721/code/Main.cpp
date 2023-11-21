@@ -39,8 +39,12 @@ Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
 float specularExponent = 60.f, specularIntensity = 0.05f;
 float lightIntensity = 50.f;
 float fallOffExponent = 2.0f;
+Eigen::Vector3f worldLightDir(0,90, 0);
+float worldLightIntensity = 0.5f;
 int main()
 {
+	worldLightDir.normalize();
+
 	//print out all shaders in path (used for debugging)
 	std::string path = "../shaders";
 	for (const auto& entry : fs::directory_iterator(path))
@@ -87,6 +91,8 @@ int main()
 	glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+	glProgramUniform3fv(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
+	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightInt"), worldLightIntensity);
 
 	//glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
 
@@ -123,14 +129,14 @@ int main()
 	lightHouse.meshName = "LightHouse";
 
 	Eigen::Matrix4f lighthouseModelToWorld = Eigen::Matrix4f::Identity();
-	lighthouseModelToWorld = makeIdentityMatrix(5);
-	lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.1f, -0.5f, 0.f)) * makeRotationMatrix(-90, 0, -16) * lighthouseModelToWorld;
+	lighthouseModelToWorld = makeIdentityMatrix(1);
+	lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.1f, 0.f, 0.f)) * makeRotationMatrix(16, 0, -90) * lighthouseModelToWorld;
 
 	modelLoader->loadFromFile("../models/lighthouse2/source/Lighthouse.fbx", &lightHouse);
 	lightHouse.loadTexture("../models/lighthouse2/textures/Base_color.png");
 
 	lightHouse.modelToWorld(lighthouseModelToWorld);
-	lightHouse.shaderProgram(&lambertShader);
+	lightHouse.shaderProgram(&blinnPhongShader);
 
 	
 	//Rock Mesh
@@ -139,7 +145,7 @@ int main()
 
 	Eigen::Matrix4f rockModelToWorld = Eigen::Matrix4f::Identity();
 	rockModelToWorld = makeIdentityMatrix(1);
-	rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-3, 5.f, 0.7)) *  makeRotationMatrix(-0, -90, -18) * rockModelToWorld;
+	rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-3, 0.7f, 5)) *  makeRotationMatrix(0, 0, -0) * rockModelToWorld;
 	modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-scaled.obj", &rock);
 	rock.loadTexture("../models/obj-nat-rock/textures/nat-rock-diff.jpeg");
 	rock.shaderProgram(&blinnPhongShader);
@@ -165,7 +171,7 @@ int main()
 	RGLib::World* Worldscene = new RGLib::World;
 	Worldscene->AddToWorld(testMesh);
 	Worldscene->AddToWorld(sphereMesh);
-	//Worldscene->AddToWorld(lightHouse);
+	Worldscene->AddToWorld(lightHouse);
 	Worldscene->AddToWorld(rock);
 	//Worldscene->AddToWorld(rock2);
 	Worldscene->CreateQueries();
