@@ -28,6 +28,8 @@ uniform float falloffExponent;
 uniform vec3 worldLightDir;
 uniform float worldLightInt;
 
+uniform vec3 spotLightDir;
+
 vec3 lightModel(float lIntensity, vec3 lDirection, vec3 viewDir, vec3 albedo)
 {
 	float specHighExponent = specularExponent * 2;
@@ -49,11 +51,19 @@ void main()
 	float falloff = pow(lightDistance, 2);
 
 	//dot product betwwen lighthouse light direction and object light direction
-
+	float shape = dot(spotLightDir ,lightDir);
+	float add;
+	add = 0;
+//	if (shape > 0.5)
+//		add = 1;
+	add = mix(0,1,shape);
+	if (add < 0.5 || add > 2)
+		add = 0;
+	
 	colorOut.rgb = vec3(0);
 	colorOut.a = 1;
 	//Point light
-	colorOut.rgb += lightModel(lightIntensity, lightDir, viewDir, albedo) / falloff;
+	colorOut.rgb += lightModel(lightIntensity, lightDir, viewDir, albedo) * add / falloff;
 	//global light
 	colorOut.rgb += lightModel(worldLightInt, worldLightDir, viewDir, albedo);
 }

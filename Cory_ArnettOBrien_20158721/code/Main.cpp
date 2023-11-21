@@ -109,7 +109,7 @@ int main()
 	bunnyModelToWorld(0, 0) = 0.2f;
 	bunnyModelToWorld(1, 1) = 0.2f;
 	bunnyModelToWorld(2, 2) = 0.2f;
-	bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0.f, 0.5f, 0.f)) * bunnyModelToWorld;
+	bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0.f, 0.5f, 0.f)) * makeRotationMatrix(90,0,0) * bunnyModelToWorld;
 
 	modelLoader->loadFromFile("../models/stanford_bunny/scene.gltf", &testMesh);
 	testMesh.loadTexture("../models/stanford_bunny/textures/Bunny_baseColor.png");
@@ -182,8 +182,9 @@ int main()
 	//glEnable(GL_CULL_FACE);
 
 
-	bool lightRotating = true;
+	bool lightRotating = false;
 	bool running = true;
+	float lightDir = 0;
 		while (running)
 		{
 			Uint64 frameStartTime = SDL_GetTicks64();
@@ -265,6 +266,11 @@ int main()
 				sphereMesh.modelToWorld(makeTranslationMatrix(lightPos));
 				glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
 			}
+			if (lightDir < 6)
+				lightDir += 0.1f;
+			else
+				lightDir = 0;
+			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), lightDir, 0, 0);
 
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -276,6 +282,7 @@ int main()
 
 			SDL_GL_SwapWindow(window);
 
+			//TODO replace with v-sync code with option to turn off
 			//Used to limit framerate
 			Uint64 elapsedFrameTime = SDL_GetTicks64() - frameStartTime;
 			if (elapsedFrameTime < desiredFrametime) {
