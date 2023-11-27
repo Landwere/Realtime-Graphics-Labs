@@ -50,20 +50,22 @@ void main()
 	
 	float falloff = pow(lightDistance, 2);
 
-	//dot product betwwen lighthouse light direction and object light direction
-	float shape = dot(spotLightDir ,lightDir);
-	float add;
-	add = 0;
-//	if (shape > 0.5)
-//		add = 1;
-	add = mix(0,1,shape);
-	if (add < 0.5 || add > 2)
-		add = 0;
+//	//dot product betwwen lighthouse light direction and object light direction
+//	float shape = dot(spotLightDir ,lightDir);
+//	float add;
+//	add = 0;
+////	if (shape > 0.5)
+////		add = 1;
+//	add = mix(0,1,shape);
+//	if (add < 0.5 || add > 2)
+//		add = 0;
 	
+	//float spot = pow(max(dot(-lightDir, spotLightDir), 0.0f), 1);
+
 	colorOut.rgb = vec3(0);
 	colorOut.a = 1;
 	//Point light
-	colorOut.rgb += lightModel(lightIntensity, lightDir, viewDir, albedo) * add / falloff;
+	colorOut.rgb += (lightModel(lightIntensity, lightDir, viewDir, albedo) ) / falloff;
 	//global light
 	colorOut.rgb += lightModel(worldLightInt, worldLightDir, viewDir, albedo);
 }

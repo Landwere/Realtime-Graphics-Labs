@@ -44,6 +44,8 @@ float worldLightIntensity = 0.5f;
 int main()
 {
 	worldLightDir.normalize();
+	lightPos = Eigen::Vector3f(-0.1, 6, 0);
+
 
 	//print out all shaders in path (used for debugging)
 	std::string path = "../shaders";
@@ -109,7 +111,7 @@ int main()
 	bunnyModelToWorld(0, 0) = 0.2f;
 	bunnyModelToWorld(1, 1) = 0.2f;
 	bunnyModelToWorld(2, 2) = 0.2f;
-	bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0.f, 0.5f, 0.f)) * makeRotationMatrix(90,0,0) * bunnyModelToWorld;
+	bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(5.f, 0.5f, 6)) * makeRotationMatrix(90,0,0) * bunnyModelToWorld;
 
 	modelLoader->loadFromFile("../models/stanford_bunny/scene.gltf", &testMesh);
 	testMesh.loadTexture("../models/stanford_bunny/textures/Bunny_baseColor.png");
@@ -151,17 +153,33 @@ int main()
 	rock.shaderProgram(&blinnPhongShader);
 	rock.modelToWorld(rockModelToWorld);
 
-	//Second Rock Mesh
 	glhelper::Mesh rock2;
-	rock2.meshName = "rock 2";
-	Eigen::Matrix4f rock2ModelToWorld = Eigen::Matrix4f::Identity();
-	rock2ModelToWorld = makeIdentityMatrix(0.01f);
-	rock2ModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-5, -0.5f, 0)) * rock2ModelToWorld;
-
-	rock2.loadTexture("../models/river-rock/textures/RiverRock_BaseColor.png");
-	modelLoader->loadFromFile("../models/river-rock/source/River_Rock.fbx", &rock2);
-	rock2.shaderProgram(&lambertShader);
+	Eigen::Matrix4f rock2ModelToWorld = makeTranslationMatrix(Eigen::Vector3f(4.32f, 0.3f, -7.75f));
+	modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-scaled.obj", &rock2);
+	rock2.loadTexture("../models/obj-nat-rock/textures/nat-rock-diff.jpeg");
+	rock2.shaderProgram(&blinnPhongShader);
 	rock2.modelToWorld(rock2ModelToWorld);
+
+	//Second Rock Mesh
+	glhelper::Mesh riverRock;
+	riverRock.meshName = "rock 2";
+	Eigen::Matrix4f riverRockModelToWorld = Eigen::Matrix4f::Identity();
+	riverRockModelToWorld = makeIdentityMatrix(0.01f);
+	riverRockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-5, -0.5f, 0)) * riverRockModelToWorld;
+
+	riverRock.loadTexture("../models/river-rock/textures/RiverRock_BaseColor.png");
+	modelLoader->loadFromFile("../models/river-rock/source/River_Rock.fbx", &riverRock);
+	riverRock.shaderProgram(&lambertShader);
+	riverRock.modelToWorld(riverRockModelToWorld);
+
+	glhelper::Mesh groundPlane;
+	groundPlane.meshName = "Ground";
+	Eigen::Matrix4f groundModelToWorld = Eigen::Matrix4f::Identity();
+	groundModelToWorld = makeTranslationMatrix(Eigen::Vector3f( 0, 0, 6.5f)) * groundModelToWorld;
+	modelLoader->loadFromFile("../models/groundPlane.obj", &groundPlane);
+	groundPlane.shaderProgram(&blinnPhongShader);
+	groundPlane.modelToWorld(groundModelToWorld);
+
 #pragma endregion
 
 
@@ -173,7 +191,8 @@ int main()
 	Worldscene->AddToWorld(sphereMesh);
 	Worldscene->AddToWorld(lightHouse);
 	Worldscene->AddToWorld(rock);
-	//Worldscene->AddToWorld(rock2);
+	Worldscene->AddToWorld(rock2);
+	Worldscene->AddToWorld(groundPlane);
 	Worldscene->CreateQueries();
 
 	glEnable(GL_BLEND);
@@ -185,92 +204,104 @@ int main()
 	bool lightRotating = false;
 	bool running = true;
 	float lightDir = 0;
-		while (running)
+	float lightDir2 = 0;
+	Eigen::Matrix4f lightMat = Eigen::Matrix4f::Identity();
+	lightMat = makeRotationMatrix(0, 0, 0);
+	glm::vec3 glmLight;
+	glmLight = glm::vec3(90, 0, 0);
+	while (running)
+	{
+		Uint64 frameStartTime = SDL_GetTicks64();
+
+
+
+		while (SDL_PollEvent(&event))
 		{
-			Uint64 frameStartTime = SDL_GetTicks64();
-
-
-
-			while (SDL_PollEvent(&event))
+			if (event.type == SDL_QUIT)
 			{
-				if (event.type == SDL_QUIT)
-				{
-					running = false;
-					//Worldscene->Clean();
-					delete Worldscene;
+				running = false;
+				//Worldscene->Clean();
+				delete Worldscene;
 
-					return 0;
-				}
-				else
-				{
-					viewer.processEvent(event);
-					viewer.update();
-				}
-				if (event.type == SDL_KEYDOWN)
-				{
-					if (event.key.keysym.sym == SDLK_DOWN) {
-						if (event.key.keysym.mod & KMOD_SHIFT) {
-							lightIntensity -= 0.1f;
-							if (lightIntensity < 0.f) lightIntensity = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
-						}
-						else {
-							lightIntensity -= 10.0f;
-							if (lightIntensity < 0.f) lightIntensity = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
-						}
-					}
-					if (event.key.keysym.sym == SDLK_UP) {
-						if (event.key.keysym.mod & KMOD_SHIFT) {
-							lightIntensity += 0.1f;
-							if (lightIntensity < 0.f) lightIntensity = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
-						}
-						else {
-							lightIntensity += 10.0f;
-							if (lightIntensity < 0.f) lightIntensity = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
-						}
-					}
-					if (event.key.keysym.sym == SDLK_RIGHT) {
-						if (event.key.keysym.mod & KMOD_SHIFT) {
-							fallOffExponent += 0.01f;
-							if (fallOffExponent < 0.f) fallOffExponent = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
-						}
-						else {
-							fallOffExponent += 10.0f;
-							if (fallOffExponent < 0.f) fallOffExponent = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
-						}
-					}
-					if (event.key.keysym.sym == SDLK_LEFT) {
-						if (event.key.keysym.mod & KMOD_SHIFT) {
-							fallOffExponent -= 0.01f;
-							if (fallOffExponent < 0.f) fallOffExponent = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
-						}
-						else {
-							fallOffExponent -= 10.0f;
-							if (fallOffExponent < 0.f) fallOffExponent = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
-						}
-					}
-				}
+				return 0;
 			}
-
-			if (lightRotating) {
-				theta += 0.01f;
-				if (theta > 2 * 3.14159f) theta = 0.f;
-				lightPos << 5.f * sinf(theta), 5.f, 5.f * cosf(theta);
-				sphereMesh.modelToWorld(makeTranslationMatrix(lightPos));
-				glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
-			}
-			if (lightDir < 6)
-				lightDir += 0.1f;
 			else
-				lightDir = 0;
-			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), lightDir, 0, 0);
+			{
+				viewer.processEvent(event);
+				viewer.update();
+			}
+			if (event.type == SDL_KEYDOWN)
+			{
+				if (event.key.keysym.sym == SDLK_DOWN) {
+					if (event.key.keysym.mod & KMOD_SHIFT) {
+						lightIntensity -= 0.1f;
+						if (lightIntensity < 0.f) lightIntensity = 0.f;
+						glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+					}
+					else {
+						lightIntensity -= 10.0f;
+						if (lightIntensity < 0.f) lightIntensity = 0.f;
+						glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+					}
+				}
+				if (event.key.keysym.sym == SDLK_UP) {
+					if (event.key.keysym.mod & KMOD_SHIFT) {
+						lightIntensity += 0.1f;
+						if (lightIntensity < 0.f) lightIntensity = 0.f;
+						glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+					}
+					else {
+						lightIntensity += 10.0f;
+						if (lightIntensity < 0.f) lightIntensity = 0.f;
+						glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+					}
+				}
+				if (event.key.keysym.sym == SDLK_RIGHT) {
+					if (event.key.keysym.mod & KMOD_SHIFT) {
+						fallOffExponent += 0.01f;
+						if (fallOffExponent < 0.f) fallOffExponent = 0.f;
+						glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+					}
+					else {
+						fallOffExponent += 10.0f;
+						if (fallOffExponent < 0.f) fallOffExponent = 0.f;
+						glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+					}
+				}
+				if (event.key.keysym.sym == SDLK_LEFT) {
+					if (event.key.keysym.mod & KMOD_SHIFT) {
+						fallOffExponent -= 0.01f;
+						if (fallOffExponent < 0.f) fallOffExponent = 0.f;
+						glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+					}
+					else {
+						fallOffExponent -= 10.0f;
+						if (fallOffExponent < 0.f) fallOffExponent = 0.f;
+						glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+					}
+				}
+			}
+		}
+
+		if (lightRotating) {
+			theta += 0.01f;
+			if (theta > 2 * 3.14159f) theta = 0.f;
+			lightPos << 5.f * sinf(theta), 5.f, 5.f * cosf(theta);
+			sphereMesh.modelToWorld(makeTranslationMatrix(lightPos));
+			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
+		}
+		if (lightDir < 2 * M_PI)
+		{
+			lightDir += 0.1f;
+			lightDir2 -= 0.1f;
+		}
+		else
+		{
+			lightDir = -6.f;
+		lightDir2 = -6.f;
+	}
+		lightMat = makeRotationMatrix(90, 0, 0);
+		glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), 0, -1, 0);
 
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -281,7 +312,7 @@ int main()
 			Worldscene->RenderWorld();
 
 			SDL_GL_SwapWindow(window);
-
+			
 			//TODO replace with v-sync code with option to turn off
 			//Used to limit framerate
 			Uint64 elapsedFrameTime = SDL_GetTicks64() - frameStartTime;
