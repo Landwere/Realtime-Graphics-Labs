@@ -20,6 +20,8 @@
 #include <opencv2/opencv.hpp>
 #include <RGLib/Matrices.cpp>
 #include "RGLib/FlyViewer.hpp"
+#include "RGLib/json.hpp"
+
 namespace fs = std::filesystem;
 
 int windowWidth = 1280;
@@ -100,6 +102,53 @@ int main()
 
 	//Model class repurposed to be a model loader 
 	Model* modelLoader = new Model();
+
+	//Code from config lab David Walton
+	{
+		nlohmann::json data;
+		try {
+			std::ifstream jsonFile("../config/config.json");
+			data = nlohmann::json::parse(jsonFile);
+		}
+		catch (std::exception& e) {
+			std::cout << e.what() << std::endl;
+			exit(1);
+		}
+
+		// Load all the meshes
+		std::map<std::string, glhelper::Mesh> meshes;
+		for (auto& mesh : data["meshes"]) {
+			std::cout << mesh["name"] << " " << mesh["filename"] << std::endl;
+			std::string meshName = mesh["name"];
+			meshes.emplace(std::piecewise_construct, std::forward_as_tuple(meshName), std::forward_as_tuple());
+			//modelLoader->loadFromFile(mesh["filename"], &(meshes[mesh["name"]])); //loadMesh(&(meshes[mesh["name"]]), mesh["filename"]);
+		}
+
+		// Load all the shaders
+		std::map<std::string, glhelper::ShaderProgram> shaders;
+		for (auto& shader : data["shaders"]) {
+			std::vector<std::string> sourceFilenames;
+			for (auto& filename : shader["filenames"]) {
+				sourceFilenames.push_back(filename);
+			}
+
+			std::string shaderName = shader["name"];
+			shaders.emplace(shaderName, sourceFilenames);
+
+		}
+
+		// Load all the textures
+		std::map<std::string, glhelper::Texture> textures;
+		for (auto& texture : data["textures"]) {
+			std::string textureName = texture["name"];
+			cv::Mat image = cv::imread(texture["filename"]);
+			textures.emplace(textureName, glhelper::Texture{ GL_TEXTURE_2D, GL_RGB8, (size_t)image.cols, (size_t)image.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data });
+		}
+
+		nlohmann::json models = data["models"];
+		//end refference 
+
+
 
 #pragma region Meshes
 

@@ -33,6 +33,7 @@ Matrices.cpp
 World.hpp
 World.cpp
 FlyViewer.hpp
-FlyViewer.cpp)
+FlyViewer.cpp
+json.hpp)
 
 target_compile_features(RGLib PRIVATE cxx_std_20)
