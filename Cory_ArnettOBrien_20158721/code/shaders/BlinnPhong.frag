@@ -60,7 +60,7 @@ void main()
 //	if (add < 0.5 || add > 2)
 //		add = 0;
 	
-	//float spot = pow(max(dot(-lightDir, spotLightDir), 0.0f), 1);
+	float spot = pow(max(dot(-lightDir, spotLightDir), 0.0f), 1);
 
 	colorOut.rgb = vec3(0);
 	colorOut.a = 1;
