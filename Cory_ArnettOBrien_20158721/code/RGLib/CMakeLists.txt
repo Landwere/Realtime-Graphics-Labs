@@ -34,6 +34,7 @@ World.hpp
 World.cpp
 FlyViewer.hpp
 FlyViewer.cpp
-json.hpp)
+json.hpp
+)
 
 target_compile_features(RGLib PRIVATE cxx_std_20)

@@ -21,7 +21,7 @@
 	}
 
 	//function modified to use glhelper::mesh instead of model
-	bool Model::loadFromFile(const char* filename, glhelper::Mesh* mesh)
+	bool Model::loadFromFile(const std::string& filename, glhelper::Mesh* mesh)
 	{
 
 		std::vector<Eigen::Vector3f> verts;

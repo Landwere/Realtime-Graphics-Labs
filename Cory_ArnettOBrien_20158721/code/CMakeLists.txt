@@ -62,7 +62,8 @@ function(add_executable_rtg name)
     set_target_properties(${name} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=${SDL_DLL_DIR};${SDL_TTF_DLL_DIR};${OpenCV_DLL_DIR};${GLEW_DLL_DIR};${Assimp_DLL_DIR};%PATH%")
 endfunction()
 # function (name shaders.vert shaders.frag)
-add_executable_rtg(main lambert.vert lambert.frag VertexLighting.vert FragmentLighting.frag FixedColor.frag FixedColor.vert BlinnPhong.vert BlinnPhong.frag )
+add_executable_rtg(main lambert.vert lambert.frag VertexLighting.vert FragmentLighting.frag FixedColor.frag FixedColor.vert BlinnPhong.vert BlinnPhong.frag ShadowCubeMap.frag
+ ShadowCubeMap.vert ShadowMapped.frag ShadowMapped.vert)
 set(SOURCES test.cpp test.hpp main.cpp)
 doxygen_add_docs(doxygen ${SOURCES} ALL)
 

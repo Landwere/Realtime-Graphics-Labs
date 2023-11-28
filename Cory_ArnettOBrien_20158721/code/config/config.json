@@ -1,0 +1,36 @@
+{
+    "meshes": 
+    [
+        {
+            "name": "frog",
+            "filename": "../models/Ceramic-frog/Ceramic-frog_low-poly.obj"
+        }
+    ],
+ "shaders":
+    [
+        {
+            "name": "blinnPhong",
+            "filenames": ["..\\shaders\\BlinnPhong.vert", "..\\shaders\\BlinnPhong.frag"]
+        }
+    ],
+ "textures":
+    [
+        {
+            "name": "frogTex",
+            "filename": "../models/Ceramic-frog/albedo_Ceramic-frog_low-poly.png"
+        }
+
+    ],
+"models":
+    [
+        {
+            "name": "frog1",
+            "mesh": "frog",
+            "position": [0, 0, 0],
+            "shader": "blinnPhong",
+            "texture": "frogTex"
+        }
+
+    ]
+
+}
