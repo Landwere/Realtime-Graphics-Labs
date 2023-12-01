@@ -36,20 +36,20 @@ Model* model;
 
 SDL_Event event;
 float theta = 0.0f;
-Eigen::Vector3f lightPos(5.f * sinf(theta), 5.f, 5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
+Eigen::Vector3f lightPos(5.f * sinf(theta), 5.f, -5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
 Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
 float specularExponent = 60.f, specularIntensity = 0.05f;
 float lightIntensity = 50.f;
 float fallOffExponent = 2.0f;
-Eigen::Vector3f worldLightDir(0,90, 0);
+Eigen::Vector3f worldLightDir(40,90, 0);
 float worldLightIntensity = 0.5f;
-float lightWidth = 10.f;
+float lightWidth = 0.01f;
 int sampleRadius = 1;
 
 //shadow
-const float shadowMapNear = 0.1f, shadowMapFar = 100000000000.f;
+const float shadowMapNear = 1.f, shadowMapFar = 1000.f;
 float shadowMapBias = 1.0f;
-const int shadowMapSize = 512;
+const int shadowMapSize = 1024;
 
 
 Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
@@ -61,6 +61,8 @@ Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
 
 int main()
 {
+	lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
+
 	worldLightDir.normalize();
 	//lightPos = Eigen::Vector3f(-0.1, 6, 0);
 
@@ -80,7 +82,6 @@ int main()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	SDL_Window* window;
 	window = SDL_CreateWindow("Realtime Graphics", 50, 50, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
@@ -112,7 +113,7 @@ int main()
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
 	glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
-	//glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
+	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
 	glProgramUniform3fv(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightInt"), worldLightIntensity);
 
@@ -120,6 +121,7 @@ int main()
 
 	glProgramUniform1f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("nearPlane"), shadowMapNear);
 	glProgramUniform1f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("farPlane"), shadowMapFar);
+	glProgramUniform3f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
 
 	glProgramUniform4f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("color"), 0.1f, 0.8f, 0.8f, 1.f);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("nearPlane"), shadowMapNear);
@@ -128,6 +130,7 @@ int main()
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightRadius"), lightWidth);
 	glProgramUniform1i(shadowMappedShader.get(), shadowMappedShader.uniformLoc("sampleRadius"), sampleRadius);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("bias"), shadowMapBias);
+	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
 
 
 
@@ -182,7 +185,6 @@ int main()
 
 
 #pragma region Meshes
-
 	//Test Mesh (stanford bunny)
 		glhelper::Mesh testMesh;
 		testMesh.meshName = "TestMesh";
@@ -191,7 +193,7 @@ int main()
 		bunnyModelToWorld(0, 0) = 0.2f;
 		bunnyModelToWorld(1, 1) = 0.2f;
 		bunnyModelToWorld(2, 2) = 0.2f;
-		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(5.f, 0.5f, 6)) * makeRotationMatrix(90, 0, 0) * bunnyModelToWorld;
+		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(5.f, 0.5f, 6)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
 
 		modelLoader->loadFromFile("../models/stanford_bunny/scene.gltf", &testMesh);
 		testMesh.loadTexture("../models/stanford_bunny/textures/Bunny_baseColor.png");
@@ -220,7 +222,7 @@ int main()
 
 		lightHouse.modelToWorld(lighthouseModelToWorld);
 		lightHouse.shaderProgram(&blinnPhongShader);
-
+		lightHouse.setCastsShadow(false);
 
 		//Rock Mesh
 		glhelper::Mesh rock;
@@ -263,6 +265,7 @@ int main()
 
 #pragma endregion
 
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 		//Create cubemap for shadows
 		GLuint cubeMapTexture;
@@ -287,12 +290,6 @@ int main()
 			Eigen::Matrix4f::Identity()                           //NEGATIVE_Z
 		};
 
-		Eigen::Matrix4f flipMatrix;
-		flipMatrix <<
-			-1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, -1.0f, 0.0f, 0.0f,
-			0, 0, 1, 0,
-			0, 0, 0, 1;
 
 
 		std::vector<glhelper::Renderable*> scene{ &testMesh, &lightHouse, &rock, &rock2, &groundPlane};
@@ -300,7 +297,7 @@ int main()
 		//set up world scene
 		RGLib::World* Worldscene = new RGLib::World;
 		Worldscene->AddToWorld(testMesh);
-		//Worldscene->AddToWorld(sphereMesh);
+		Worldscene->AddToWorld(sphereMesh);
 		Worldscene->AddToWorld(lightHouse);
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
@@ -318,7 +315,7 @@ int main()
 
 			Eigen::Vector3f position(model["position"][0], model["position"][1], model["position"][2]);
 			mesh.modelToWorld(makeTranslationMatrix(position));
-			Worldscene->AddToWorld(mesh);
+			//Worldscene->AddToWorld(mesh);
 		}
 
 		Worldscene->CreateQueries();
@@ -326,8 +323,8 @@ int main()
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glEnable(GL_CULL_FACE);
-
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
 		bool lightRotating = false;
 		bool running = true;
@@ -448,9 +445,17 @@ int main()
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			Eigen::Matrix4f flipMatrix;
+			flipMatrix <<
+				-1.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, -1.0f, 0.0f, 0.0f,
+				0, 0, 1, 0,
+				0, 0, 0, 1;
+
+
 			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-			glDisable(GL_CULL_FACE);
-			glViewport(0, 0, windowWidth, windowHeight);
+			//glDisable(GL_CULL_FACE);
+			glViewport(0, 0, shadowMapSize, shadowMapSize);
 
 
 			for (int i = 0; i < 6; ++i) {
@@ -478,6 +483,10 @@ int main()
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
 			
+			//for (glhelper::Renderable* mesh : scene) {
+			//	mesh->render();
+
+			//}
 			//for (glhelper::Renderable* mesh : scene) {
 
 			//	mesh->render();

@@ -22,6 +22,7 @@ void main()
 
 	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
 	float lightDot = clamp(dot(lightDir, normalize(worldNorm)), 0, 1);
+	//lightDot = 1;
 	vec3 colorRgb = color.rgb * lightDot;
 	
 	float realDist = distance(lightPosWorld, fragPosWorld);

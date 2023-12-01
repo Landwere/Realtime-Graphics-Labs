@@ -48,7 +48,7 @@ void main()
 
 	vec3 albedo = texture(albedoTex, texCoord).xyz;
 	
-	float falloff = pow(lightDistance, 2);
+	float falloff = pow(lightDistance, 6);
 
 //	//dot product betwwen lighthouse light direction and object light direction
 //	float shape = dot(spotLightDir ,lightDir);
