@@ -35,6 +35,8 @@ World.cpp
 FlyViewer.hpp
 FlyViewer.cpp
 json.hpp
+FrameBuffer.h
+FrameBuffer.cpp
 )
 
 target_compile_features(RGLib PRIVATE cxx_std_20)

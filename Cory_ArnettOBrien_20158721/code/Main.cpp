@@ -21,6 +21,7 @@
 #include <RGLib/Matrices.cpp>
 #include "RGLib/FlyViewer.hpp"
 #include "RGLib/json.hpp"
+#include <RGLib/FrameBuffer.h>
 
 namespace fs = std::filesystem;
 
@@ -341,6 +342,10 @@ int main()
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		RGLib::FrameBuffer* frameBuffer2 = new RGLib::FrameBuffer(1280, 720);
+		frameBuffer2->init();
+		//unsigned int textureframe = frameBuffer2->getTextureLocation();
 
 		while (running)
 		{
