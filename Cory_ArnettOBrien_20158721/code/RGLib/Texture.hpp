@@ -30,6 +30,7 @@ public:
 
 	void getData(void *data, size_t buffSize);
 	void getData(void *data, size_t mipmapLevel, size_t buffSize);
+	unsigned char* getDataP();
 	void saveToFile(const std::string &filepath);
 
 	size_t width() const;
@@ -49,7 +50,7 @@ private:
 	Texture& operator=(const Texture&);
 
 	void init(const void *data, GLenum minFilter, GLenum magFilter);
-
+	unsigned char* pixelData;
 	size_t width_, height_;
 	GLenum target_, internalFormat_, format_, type_, border_;
 	GLuint tex_;

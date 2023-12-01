@@ -32,9 +32,9 @@ namespace RGLib {
 		glBindFramebuffer(GL_FRAMEBUFFER, location);
 		glViewport(0, 0, width, height);
 
-		glBindRenderbuffer(GL_RENDERBUFFER, null);
+		/*glBindRenderbuffer(GL_RENDERBUFFER, null);
 		glBindTexture(GL_TEXTURE_2D, null);
-		glBindFramebuffer(GL_FRAMEBUFFER, null);
+		glBindFramebuffer(GL_FRAMEBUFFER, null);*/
 		
 		return 0;
 	}

@@ -39,6 +39,8 @@ public:
 
 	void loadTexture(cv::String filename);
 
+	void setTexture(glhelper::Texture &texture);
+
 	std::string meshName;
 
 	std::unique_ptr< glhelper::Texture> meshTex;

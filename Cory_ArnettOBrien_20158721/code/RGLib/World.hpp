@@ -20,6 +20,8 @@ namespace RGLib
 		void CreateQueries();
 
 		void Clean();
+
+		void ClearWorld();
 	private:
 		std::vector<glhelper::Mesh*> worldObjects;
 		std::vector<GLuint> queries;

@@ -287,6 +287,8 @@ void Texture::getData(void * data, size_t mipmapLevel, size_t buffSize)
 	#endif
 }
 
+
+
 void Texture::saveToFile(const std::string & filepath)
 {
 	int type;

@@ -33,6 +33,9 @@ void RGLib::World::RenderWorld()
 		mesh->render();
 		glEndQuery(GL_TIME_ELAPSED_EXT);
 	}
+
+
+
 	//only print every 30 frames to make console readable in realtime
 	if (frameCount >= 30)
 	{
@@ -107,8 +110,16 @@ void RGLib::World::CreateQueries()
 
 }
 
+
+
 void RGLib::World::Clean()
 {
 	//save data to file
 	dataFile.close();
+}
+
+void RGLib::World::ClearWorld()
+{
+	worldObjects.clear();
+	queries.clear();
 }

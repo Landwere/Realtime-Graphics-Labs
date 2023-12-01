@@ -52,12 +52,83 @@ const float shadowMapNear = 1.f, shadowMapFar = 1000.f;
 float shadowMapBias = 1.0f;
 const int shadowMapSize = 1024;
 
+nlohmann::json models;
+std::map<std::string, glhelper::Mesh> meshes;
+std::map<std::string, glhelper::ShaderProgram> shaders;
+std::map<std::string, glhelper::Texture> textures;
+
+RGLib::World* Worldscene;
 
 Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
 {
 	Eigen::Matrix4f output = Eigen::Matrix4f::Identity();
 	output.block<3, 3>(0, 0) = Eigen::AngleAxisf(angle, axis).matrix();
 	return output;
+}
+
+void ReloadConfig()
+{
+	Model* modelLoader = new Model();
+
+	//Code from config lab David Walton
+
+	nlohmann::json data;
+	try {
+		std::ifstream jsonFile("../config/config.json");
+		data = nlohmann::json::parse(jsonFile);
+	}
+	catch (std::exception& e) {
+		std::cout << e.what() << std::endl;
+		exit(1);
+	}
+
+	// Load all the meshes
+	for (auto& mesh : data["meshes"]) {
+		std::cout << mesh["name"] << " " << mesh["filename"] << std::endl;
+		std::string meshName = mesh["name"];
+		meshes.emplace(std::piecewise_construct, std::forward_as_tuple(meshName), std::forward_as_tuple());
+		modelLoader->loadFromFile(mesh["filename"], &(meshes[mesh["name"]])); //loadMesh(&(meshes[mesh["name"]]), mesh["filename"]);
+	}
+
+	// Load all the shaders
+	for (auto& shader : data["shaders"]) {
+		std::vector<std::string> sourceFilenames;
+		for (auto& filename : shader["filenames"]) {
+			sourceFilenames.push_back(filename);
+		}
+
+		std::string shaderName = shader["name"];
+		shaders.emplace(shaderName, sourceFilenames);
+
+	}
+
+	// Load all the textures
+	for (auto& texture : data["textures"]) {
+		std::string textureName = texture["name"];
+		cv::Mat image = cv::imread(texture["filename"]);
+		textures.emplace(textureName, glhelper::Texture{ GL_TEXTURE_2D, GL_RGB8, (size_t)image.cols, (size_t)image.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data });
+	}
+
+	models = data["models"];
+
+	//end refference 
+	//Worldscene->ClearWorld();
+
+	//for (auto& model : models) {
+	//	glhelper::Mesh& mesh = meshes.at(model["mesh"]);
+	//	glhelper::ShaderProgram& shader = shaders.at(model["shader"]);
+	//	glhelper::Texture& texture = textures.at(model["texture"]);
+	//	texture.bindToImageUnit(0);
+	//	glProgramUniform1i(shader.get(), shader.uniformLoc("tex"), 0);
+	//	mesh.shaderProgram(&shader);
+	//	//mesh.meshTex = std::make_unique< glhelper::Texture>(GL_TEXTURE_2D, GL_RGB8, texture.height(), texture.width(),
+	//	//	0, GL_RGB, GL_UNSIGNED_BYTE, texture.getData(), GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+
+	//	Eigen::Vector3f position(model["position"][0], model["position"][1], model["position"][2]);
+	//	mesh.modelToWorld(makeTranslationMatrix(position));
+	//	//mesh.setTexture(texture);
+	//	Worldscene->AddToWorld(mesh);
+	//}
 }
 
 int main()
@@ -75,7 +146,7 @@ int main()
 
 	//Set up SDL window
 	SDL_Init(SDL_INIT_VIDEO);
-	//Set GL attributes 
+	//Set Open-GL attributes 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -83,6 +154,9 @@ int main()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
+	// Turns on 4x MSAA
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
 	SDL_Window* window;
 	window = SDL_CreateWindow("Realtime Graphics", 50, 50, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
@@ -138,50 +212,7 @@ int main()
 	//Model class repurposed to be a model loader 
 	Model* modelLoader = new Model();
 
-	//Code from config lab David Walton
-	
-		nlohmann::json data;
-		try {
-			std::ifstream jsonFile("../config/config.json");
-			data = nlohmann::json::parse(jsonFile);
-		}
-		catch (std::exception& e) {
-			std::cout << e.what() << std::endl;
-			exit(1);
-		}
-
-		// Load all the meshes
-		std::map<std::string, glhelper::Mesh> meshes;
-		for (auto& mesh : data["meshes"]) {
-			std::cout << mesh["name"] << " " << mesh["filename"] << std::endl;
-			std::string meshName = mesh["name"];
-			meshes.emplace(std::piecewise_construct, std::forward_as_tuple(meshName), std::forward_as_tuple());
-			modelLoader->loadFromFile(mesh["filename"], &(meshes[mesh["name"]])); //loadMesh(&(meshes[mesh["name"]]), mesh["filename"]);
-		}
-
-		// Load all the shaders
-		std::map<std::string, glhelper::ShaderProgram> shaders;
-		for (auto& shader : data["shaders"]) {
-			std::vector<std::string> sourceFilenames;
-			for (auto& filename : shader["filenames"]) {
-				sourceFilenames.push_back(filename);
-			}
-
-			std::string shaderName = shader["name"];
-			shaders.emplace(shaderName, sourceFilenames);
-
-		}
-
-		// Load all the textures
-		std::map<std::string, glhelper::Texture> textures;
-		for (auto& texture : data["textures"]) {
-			std::string textureName = texture["name"];
-			cv::Mat image = cv::imread(texture["filename"]);
-			textures.emplace(textureName, glhelper::Texture{ GL_TEXTURE_2D, GL_RGB8, (size_t)image.cols, (size_t)image.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, image.data });
-		}
-
-		nlohmann::json models = data["models"];
-		//end refference 
+	ReloadConfig();
 	
 
 
@@ -296,9 +327,9 @@ int main()
 		std::vector<glhelper::Renderable*> scene{ &testMesh, &lightHouse, &rock, &rock2, &groundPlane};
 
 		//set up world scene
-		RGLib::World* Worldscene = new RGLib::World;
+		Worldscene = new RGLib::World;
 		Worldscene->AddToWorld(testMesh);
-		Worldscene->AddToWorld(sphereMesh);
+		//Worldscene->AddToWorld(sphereMesh);
 		Worldscene->AddToWorld(lightHouse);
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
@@ -316,7 +347,8 @@ int main()
 
 			Eigen::Vector3f position(model["position"][0], model["position"][1], model["position"][2]);
 			mesh.modelToWorld(makeTranslationMatrix(position));
-			//Worldscene->AddToWorld(mesh);
+			//mesh.setTexture(texture);
+			Worldscene->AddToWorld(mesh);
 		}
 
 		Worldscene->CreateQueries();
@@ -418,6 +450,10 @@ int main()
 							if (fallOffExponent < 0.f) fallOffExponent = 0.f;
 							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
 						}
+					}
+					if (event.key.keysym.sym == SDLK_p)
+					{
+						ReloadConfig();
 					}
 				}
 #pragma endregion
