@@ -7,6 +7,30 @@
 #include <chrono>
 namespace RGLib
 {
+	class WorldObject
+	{
+	public:
+		WorldObject(glhelper::Mesh& mesh)
+		{
+			objMesh = &mesh;
+			//world->AddWorldObject(*this);
+		};
+		WorldObject();
+		std::string getName()
+		{
+			return objMesh->meshName;
+		};
+
+		glhelper::Mesh* getMesh()
+		{
+			return objMesh;
+		}
+
+	private:
+		glhelper::Mesh* objMesh;
+		GLuint query;
+	};
+
 	class World
 	{
 
@@ -32,29 +56,8 @@ namespace RGLib
 		int frameCount;
 		std::chrono::time_point<std::chrono::steady_clock> lastFrameTime;
 		float frameDuration;
+		//WorldObject wo;
 	};
 
-	class WorldObject
-	{
-	public:
-		WorldObject(glhelper::Mesh &mesh)
-		{
-			objMesh = &mesh;
-			//world->AddWorldObject(*this);
-		};
-
-		std::string getName()
-		{
-			return objMesh->meshName;
-		};
-
-		glhelper::Mesh* getMesh()
-		{
-			return objMesh;
-		}
-		
-	private:
-		glhelper::Mesh* objMesh;
-		GLuint query;
-	};
+	
 }
