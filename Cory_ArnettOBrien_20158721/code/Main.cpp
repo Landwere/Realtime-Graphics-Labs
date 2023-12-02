@@ -22,6 +22,7 @@
 #include "RGLib/FlyViewer.hpp"
 #include "RGLib/json.hpp"
 #include <RGLib/FrameBuffer.h>
+#include <random>
 
 namespace fs = std::filesystem;
 
@@ -58,6 +59,15 @@ std::map<std::string, glhelper::ShaderProgram> shaders;
 std::map<std::string, glhelper::Texture> textures;
 
 RGLib::World* Worldscene;
+
+const int nRParticles = 1000;
+float ringMinRadius = 5.f;
+float ringMaxRadius = 6.f;
+float particleInitialVelocity = 0.5f;
+float particleMass = 0.1f;
+float gravitationalConstant = 1e-2f;
+float ringParticleSize = 0.03f;
+const int MAX_N_MASSES = 10;
 
 Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
 {
@@ -183,6 +193,8 @@ int main()
 	glhelper::ShaderProgram blinnPhongShader({ "..\\shaders\\BlinnPhong.vert", "..\\shaders\\BlinnPhong.frag" });
 	glhelper::ShaderProgram shadowCubeMapShader({ "..\\shaders\\ShadowCubeMap.vert", "..\\shaders\\ShadowCubeMap.frag" });
 	glhelper::ShaderProgram shadowMappedShader({ "..\\shaders\\ShadowMapped.vert", "..\\shaders\\ShadowMapped.frag" });
+	glhelper::ShaderProgram billboardParticleShader({ "../shaders/BillboardParticle.vert", "../shaders/BillboardParticle.geom", "../shaders/BillboardParticle.frag" });
+	glhelper::ShaderProgram RainPhysicsShader({ "../shaders/RainParticle.comp" });
 
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularExponent"), specularExponent);
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
@@ -198,7 +210,7 @@ int main()
 	glProgramUniform1f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("farPlane"), shadowMapFar);
 	glProgramUniform3f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
 
-	glProgramUniform4f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("color"), 0.1f, 0.8f, 0.8f, 1.f);
+	glProgramUniform4f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("color"), 0.27f, 0.33f, 0.34f, 1.f);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("nearPlane"), shadowMapNear);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("farPlane"), shadowMapFar);
 	glProgramUniform1i(shadowMappedShader.get(), shadowMappedShader.uniformLoc("shadowMap"), 1);
@@ -207,6 +219,50 @@ int main()
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("bias"), shadowMapBias);
 	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
 
+	GLuint ringVao;
+	glGenVertexArrays(1, &ringVao);
+	glhelper::ShaderStorageBuffer particleBuffer(nRParticles * 4 * sizeof(float)),
+		velocityBuffer(nRParticles * 4 * sizeof(float));
+
+	// Initialise ring particle positions and velocities		
+	{
+		std::vector<Eigen::Vector4f> particlePositions(nRParticles), particleVelocities(nRParticles);
+		std::default_random_engine eng;
+		std::uniform_real_distribution<> radDist(ringMinRadius, ringMaxRadius), angleDist(0.0f, 2.0f * (float)M_PI);
+
+		for (size_t i = 0; i < nRParticles; ++i) {
+			float angle = angleDist(eng);
+			float radius = radDist(eng);
+
+			particlePositions[i] = radius * Eigen::Vector4f(sinf(angle), 0.f, cosf(angle), 1.0f);
+			particleVelocities[i] = particleInitialVelocity * Eigen::Vector4f(1.f, 0.f, 0.f, 0.f);
+			Eigen::Vector3f vel = -particlePositions[i].block<3, 1>(0, 0).normalized().cross(Eigen::Vector3f(0.f, 1.f, 0.f)) * particleInitialVelocity;
+			particleVelocities[i].block<3, 1>(0, 0) = vel;
+		}
+
+		particleBuffer.update(particlePositions);
+		velocityBuffer.update(particleVelocities);
+	}
+	std::array<Eigen::Vector3f, MAX_N_MASSES> massLocations;
+	std::array<float, MAX_N_MASSES> masses;
+	int nMasses = 1;
+
+	glBindVertexArray(ringVao);
+	glBindBuffer(GL_ARRAY_BUFFER, particleBuffer.get());
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), ringParticleSize);
+	glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.6f, 0.2f, 0.1f);
+
+	glProgramUniform3fv(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("massPositions"), MAX_N_MASSES, massLocations[0].data());
+	glProgramUniform1fv(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("masses"), MAX_N_MASSES, &(masses[0]));
+	glProgramUniform1i(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("nMasses"), nMasses);
+	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("gravitationalConstant"), gravitationalConstant);
+	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("timeStep"), 1.f / 33.3f);
+	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("particleMass"), particleMass);
 
 
 	//Model class repurposed to be a model loader 
@@ -329,11 +385,13 @@ int main()
 		//set up world scene
 		Worldscene = new RGLib::World;
 		Worldscene->AddToWorld(testMesh);
-		//Worldscene->AddToWorld(sphereMesh);
+		Worldscene->AddToWorld(sphereMesh);
 		Worldscene->AddToWorld(lightHouse);
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
 		Worldscene->AddToWorld(groundPlane);
+
+		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
 
 		for (auto& model : models) {
 			glhelper::Mesh& mesh = meshes.at(model["mesh"]);
@@ -356,8 +414,8 @@ int main()
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
+		//glEnable(GL_CULL_FACE);
+		//glCullFace(GL_BACK);
 
 		bool lightRotating = false;
 		bool running = true;
@@ -486,6 +544,24 @@ int main()
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
+
+			//glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
+			glUseProgram(RainPhysicsShader.get());
+			glDispatchCompute(nRParticles, 1, 1);
+
+			glEnable(GL_BLEND);
+			glDepthMask(GL_FALSE);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+			glBindVertexArray(ringVao);
+			billboardParticleShader.use();
+			glDrawArrays(GL_POINTS, 0, nRParticles);
+			billboardParticleShader.unuse();
+			glDepthMask(GL_TRUE);
+
 			Eigen::Matrix4f flipMatrix;
 			flipMatrix <<
 				-1.0f, 0.0f, 0.0f, 0.0f,
@@ -534,6 +610,9 @@ int main()
 
 			//}
 			Worldscene->RenderWorld();
+
+
+			
 
 			SDL_GL_SwapWindow(window);
 
