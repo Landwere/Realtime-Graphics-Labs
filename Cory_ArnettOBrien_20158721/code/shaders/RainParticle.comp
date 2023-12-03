@@ -15,6 +15,17 @@ uniform int nMasses;
 uniform float particleMass;
 uniform float gravitationalConstant;
 uniform float timeStep;
+uniform vec3 windHorizontal;
+
+highp float rand(vec2 co)
+{
+    highp float a = 12.9898;
+    highp float b = 78.233;
+    highp float c = 43758.5453;
+    highp float dt= dot(co.xy ,vec2(a,b));
+    highp float sn= mod(dt,3.14);
+    return fract(sin(sn) * c);
+}
 
 void main() {
     // Update your position and velocity for each particle, according to the gravitational forces 
@@ -27,21 +38,23 @@ void main() {
     // Remember to use gl_GlobalInvocationID to find which particle to modify!
     vec3 force;
     vec4 _pos = pos[ gl_GlobalInvocationID.x];
-    for (int i = 0; i < nMasses; ++i)
-    {
-        vec3 distance = massPositions[i] - _pos.xyz;
-        vec3 displacement = normalize( distance);
-        float distScale = length(distance);
-        float gravity = ((gravitationalConstant * masses[i]) * particleMass) / (distScale * distScale);
 
-        force += (gravity * displacement);
-    }
+        vec3 displacement = windHorizontal;
+        float gravity = (gravitationalConstant * particleMass);
+
+        force.y += (gravity );
     
     vec3 velocity = vel[gl_GlobalInvocationID.x].xyz;
     vec3 acceleration = force / particleMass;
-    velocity += (acceleration * timeStep);
+    velocity.y += (acceleration.y * timeStep);
 
     vel[gl_GlobalInvocationID.x].xyz = velocity;
     pos[gl_GlobalInvocationID.x].xyz += velocity * timeStep;
+    if (pos[gl_GlobalInvocationID.x].y < 0)
+    {
+        pos[gl_GlobalInvocationID.x].y = 5;
+        velocity = vec3(0,0,0);
+        vel[gl_GlobalInvocationID.x].xyz = velocity;
+    }
 }
 

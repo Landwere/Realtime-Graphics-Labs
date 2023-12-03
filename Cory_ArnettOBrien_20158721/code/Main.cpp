@@ -60,12 +60,13 @@ std::map<std::string, glhelper::Texture> textures;
 
 RGLib::World* Worldscene;
 
-const int nRParticles = 1000;
+const int nRParticles = 20000;
 float ringMinRadius = 5.f;
 float ringMaxRadius = 6.f;
-float particleInitialVelocity = 0.5f;
+float gridWidth = 6;
+float particleInitialVelocity = 0.0f;
 float particleMass = 0.1f;
-float gravitationalConstant = 1e-2f;
+float gravitationalConstant = -0.1f;
 float ringParticleSize = 0.03f;
 const int MAX_N_MASSES = 10;
 
@@ -234,9 +235,9 @@ int main()
 			float angle = angleDist(eng);
 			float radius = radDist(eng);
 
-			particlePositions[i] = radius * Eigen::Vector4f(sinf(angle), 0.f, cosf(angle), 1.0f);
-			particleVelocities[i] = particleInitialVelocity * Eigen::Vector4f(1.f, 0.f, 0.f, 0.f);
-			Eigen::Vector3f vel = -particlePositions[i].block<3, 1>(0, 0).normalized().cross(Eigen::Vector3f(0.f, 1.f, 0.f)) * particleInitialVelocity;
+			particlePositions[i] = radius * Eigen::Vector4f(sinf(angle), 1.f, cosf(angle), 1.0f);
+			particleVelocities[i] = particleInitialVelocity * Eigen::Vector4f(0.f, 0.f, 0.f, 0.f);
+			Eigen::Vector3f vel = -particlePositions[i].block<3, 1>(0, 0).normalized().cross(Eigen::Vector3f(0.f, 0.f, 0.f)) * particleInitialVelocity;
 			particleVelocities[i].block<3, 1>(0, 0) = vel;
 		}
 
@@ -258,8 +259,8 @@ int main()
 	glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.6f, 0.2f, 0.1f);
 
 	glProgramUniform3fv(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("massPositions"), MAX_N_MASSES, massLocations[0].data());
-	glProgramUniform1fv(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("masses"), MAX_N_MASSES, &(masses[0]));
-	glProgramUniform1i(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("nMasses"), nMasses);
+	//glProgramUniform1fv(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("masses"), MAX_N_MASSES, &(masses[0]));
+	//glProgramUniform1i(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("nMasses"), nMasses);
 	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("gravitationalConstant"), gravitationalConstant);
 	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("timeStep"), 1.f / 33.3f);
 	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("particleMass"), particleMass);
@@ -544,23 +545,7 @@ int main()
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
 
-			//glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
-			glUseProgram(RainPhysicsShader.get());
-			glDispatchCompute(nRParticles, 1, 1);
-
-			glEnable(GL_BLEND);
-			glDepthMask(GL_FALSE);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
-			glBindVertexArray(ringVao);
-			billboardParticleShader.use();
-			glDrawArrays(GL_POINTS, 0, nRParticles);
-			billboardParticleShader.unuse();
-			glDepthMask(GL_TRUE);
 
 			Eigen::Matrix4f flipMatrix;
 			flipMatrix <<
@@ -611,7 +596,23 @@ int main()
 			//}
 			Worldscene->RenderWorld();
 
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
 
+			//glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
+			glUseProgram(RainPhysicsShader.get());
+			glDispatchCompute(nRParticles, 1, 1);
+
+			glEnable(GL_BLEND);
+			glDepthMask(GL_FALSE);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+			glBindVertexArray(ringVao);
+			billboardParticleShader.use();
+			glDrawArrays(GL_POINTS, 0, nRParticles);
+			billboardParticleShader.unuse();
+			glDepthMask(GL_TRUE);
 			
 
 			SDL_GL_SwapWindow(window);
