@@ -41,10 +41,10 @@ float theta = 0.0f;
 Eigen::Vector3f lightPos(5.f * sinf(theta), 5.f, -5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
 Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
 float specularExponent = 60.f, specularIntensity = 0.05f;
-float lightIntensity = 50.f;
+float lightIntensity = 5000.f;
 float fallOffExponent = 2.0f;
 Eigen::Vector3f worldLightDir(40,90, 0);
-float worldLightIntensity = 0.5f;
+float worldLightIntensity = 0.0f;
 float lightWidth = 0.01f;
 int sampleRadius = 1;
 
@@ -144,7 +144,7 @@ void ReloadConfig()
 
 int main()
 {
-	lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
+	//lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
 
 	worldLightDir.normalize();
 	//lightPos = Eigen::Vector3f(-0.1, 6, 0);
@@ -350,7 +350,7 @@ int main()
 		groundModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0, 0, 6.5f)) * groundModelToWorld;
 		modelLoader->loadFromFile("../models/groundPlane.obj", &groundPlane);
 		groundPlane.shaderProgram(&shadowMappedShader);
-		groundPlane.modelToWorld(groundModelToWorld);
+		groundPlane.modelToWorld(makeScaleMatrix(4) * groundModelToWorld);
 
 #pragma endregion
 
@@ -438,6 +438,9 @@ int main()
 		frameBuffer2->init();
 		//unsigned int textureframe = frameBuffer2->getTextureLocation();
 
+		Eigen::Vector3f spotLightDir(-1.0f, 0.f, 0.f);
+		Eigen::AngleAxisf rotation;
+		Eigen::Vector3f rotDir;
 		while (running)
 		{
 			Uint64 frameStartTime = SDL_GetTicks64();
@@ -527,18 +530,27 @@ int main()
 			}
 
 			//Rotate light code (does not work properly with the shader)
-			if (lightDir < 2 * M_PI)
+			//if (lightDir < 2 * M_PI)
+			//{
+			//	lightDir += 0.1f;
+			//	lightDir2 -= 0.1f;
+			//}
+			//else
+			//{
+			//	lightDir = -6.f;
+			//	lightDir2 = -6.f;
+			//}
+			lightDir += 0.1f;
+			if (lightDir > 2.0f * M_PI)
 			{
-				lightDir += 0.1f;
-				lightDir2 -= 0.1f;
+				lightDir = 0;
 			}
-			else
-			{
-				lightDir = -6.f;
-				lightDir2 = -6.f;
-			}
+
+			rotation = Eigen::AngleAxisf(-lightDir, Eigen::Vector3f::UnitY());
+			rotDir = rotation * spotLightDir;
+
 			lightMat = makeRotationMatrix(90, 0, 0);
-			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), 0, -1, 0);
+			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
 
 
