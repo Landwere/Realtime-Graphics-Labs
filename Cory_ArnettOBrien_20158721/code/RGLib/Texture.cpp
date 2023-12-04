@@ -218,6 +218,20 @@ tex_(other.tex_)
 	//Make sure tex_ isn't deleted.
 	other.tex_ = 0;
 }
+//new copy construcor unfinshed
+Texture::Texture(Texture& other)
+
+	:width_(other.width_),
+		height_(other.height_),
+		target_(other.target_),
+		internalFormat_(other.internalFormat_),
+		format_(other.format_),
+		type_(other.type_),
+		border_(other.border_),
+		tex_(other.tex_)
+{
+
+}
 
 Texture &Texture::operator=(Texture && other)
 {
@@ -231,6 +245,22 @@ Texture &Texture::operator=(Texture && other)
 	tex_ = other.tex_;
 	//Make sure tex_ isn't deleted.
 	other.tex_ = 0;
+	return *this;
+}
+
+Texture& Texture::operator=(Texture& other)
+{
+	// TODO: insert return statement here
+	width_ = other.width_;
+	height_ = other.height_;
+	target_ = other.target_;
+	internalFormat_ = other.internalFormat_;
+	format_ = other.format_;
+	type_ = other.type_;
+	border_ = other.border_;
+	tex_ = other.tex_;
+	pixelData = other.pixelData;
+	//Make sure tex_ isn't deleted.
 	return *this;
 }
 

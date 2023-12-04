@@ -38,13 +38,13 @@ Model* model;
 
 SDL_Event event;
 float theta = 0.0f;
-Eigen::Vector3f lightPos(5.f * sinf(theta), 5.f, -5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
+Eigen::Vector3f lightPos(5.f * sinf(theta), 2.f, -5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
 Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
 float specularExponent = 60.f, specularIntensity = 0.05f;
-float lightIntensity = 5000.f;
+float lightIntensity = 500.f;
 float fallOffExponent = 2.0f;
 Eigen::Vector3f worldLightDir(40,90, 0);
-float worldLightIntensity = 0.0f;
+float worldLightIntensity = 0.5f;
 float lightWidth = 0.01f;
 int sampleRadius = 1;
 
@@ -144,7 +144,7 @@ void ReloadConfig()
 
 int main()
 {
-	//lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
+	lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
 
 	worldLightDir.normalize();
 	//lightPos = Eigen::Vector3f(-0.1, 6, 0);
@@ -169,6 +169,7 @@ int main()
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
+
 	SDL_Window* window;
 	window = SDL_CreateWindow("Realtime Graphics", 50, 50, windowWidth, windowHeight, SDL_WINDOW_OPENGL);
 	SDL_GLContext context = SDL_GL_CreateContext(window);
@@ -178,6 +179,8 @@ int main()
 	{
 		std::cerr << "Problem starting glew " << glewGetErrorString(gStatus) << std::endl;
 	}
+	//Enable Vsync
+	SDL_GL_SetSwapInterval(1);
 
 
 	RGLib::Camera* cam = new RGLib::Camera(
@@ -319,7 +322,7 @@ int main()
 
 		Eigen::Matrix4f rockModelToWorld = Eigen::Matrix4f::Identity();
 		rockModelToWorld = makeIdentityMatrix(1);
-		rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-3, 0.7f, 5)) * makeRotationMatrix(0, 0, -0) * rockModelToWorld;
+		rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.7, 0.7f, 2.1)) * makeRotationMatrix(0, 0, -0) * rockModelToWorld;
 		modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-scaled.obj", &rock);
 		rock.loadTexture("../models/obj-nat-rock/textures/nat-rock-diff.jpeg");
 		rock.shaderProgram(&blinnPhongShader);
@@ -406,9 +409,13 @@ int main()
 
 			Eigen::Vector3f position(model["position"][0], model["position"][1], model["position"][2]);
 			mesh.modelToWorld(makeTranslationMatrix(position));
-			//mesh.setTexture(texture);
-			Worldscene->AddToWorld(mesh);
+			mesh.setTexture(texture);
+			//Worldscene->AddToWorld(mesh);
 		}
+
+		Worldscene->models = &models;
+		//Worldscene->meshes = &meshes;
+		//Worldscene->shaders = &shaders;
 
 		Worldscene->CreateQueries();
 
@@ -530,17 +537,17 @@ int main()
 			}
 
 			//Rotate light code (does not work properly with the shader)
-			//if (lightDir < 2 * M_PI)
-			//{
-			//	lightDir += 0.1f;
-			//	lightDir2 -= 0.1f;
-			//}
-			//else
-			//{
-			//	lightDir = -6.f;
-			//	lightDir2 = -6.f;
-			//}
-			lightDir += 0.1f;
+	/*		if (lightDir < 2 * M_PI)
+			{
+				lightDir += 0.1f;
+				lightDir2 -= 0.1f;
+			}
+			else
+			{
+				lightDir = -6.f;
+				lightDir2 = -6.f;
+			}*/
+			lightDir += 0.01f;
 			if (lightDir > 2.0f * M_PI)
 			{
 				lightDir = 0;
@@ -631,10 +638,10 @@ int main()
 
 			//TODO replace with v-sync code with option to turn off
 			//Used to limit framerate
-			Uint64 elapsedFrameTime = SDL_GetTicks64() - frameStartTime;
+			/*Uint64 elapsedFrameTime = SDL_GetTicks64() - frameStartTime;
 			if (elapsedFrameTime < desiredFrametime) {
 				SDL_Delay(desiredFrametime - elapsedFrameTime);
-			}
+			}*/
 		};
 
 		//Clean up

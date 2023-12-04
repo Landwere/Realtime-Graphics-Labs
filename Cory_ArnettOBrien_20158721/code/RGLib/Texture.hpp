@@ -18,7 +18,10 @@ public:
 		GLenum magFilter = GL_NEAREST);
 	~Texture() throw();
 	Texture(Texture &&);
+	Texture(Texture&);
+	Texture() {};
 	Texture &operator=(Texture&&);
+	Texture &operator=(Texture&);
 
 	void update(const void *data);
 	void update(const void *data, size_t mipmapLevel);

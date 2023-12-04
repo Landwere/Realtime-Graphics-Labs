@@ -207,8 +207,10 @@ void Mesh::setTexture(glhelper::Texture &texture)
 {
 	//meshTex = std::make_unique<glhelper::Texture>(GL_TEXTURE_2D, GL_RGB8, texture.width(), texture.height(),
 	//	0, GL_RGB, GL_UNSIGNED_BYTE, texture.tex(), GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-
-	//meshTex->genMipmap();
+	//meshTex = std::make_unique<Texture>(&texture);
+	meshTex = std::make_unique<glhelper::Texture>();
+	*meshTex = texture;
+	meshTex->genMipmap();
 }
 
 

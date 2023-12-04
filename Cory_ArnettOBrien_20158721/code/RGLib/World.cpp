@@ -34,6 +34,19 @@ void RGLib::World::RenderWorld()
 		glEndQuery(GL_TIME_ELAPSED_EXT);
 	}
 
+	//for (auto& model : *models) {
+	//	glhelper::Mesh& mesh = meshes.at(model["mesh"]);
+	//	glhelper::ShaderProgram& shader = shaders.at(model["shader"]);
+	//	glhelper::Texture& texture = textures.at(model["texture"]);
+	//	texture.bindToImageUnit(0);
+	//	glProgramUniform1i(shader.get(), shader.uniformLoc("tex"), 0);
+	//	mesh.shaderProgram(&shader);
+
+	//	Eigen::Vector3f position(model["position"][0], model["position"][1], model["position"][2]);
+	//	mesh.modelToWorld(makeTranslationMatrix(position));
+	//	mesh.render();
+	//}
+
 
 
 	//only print every 30 frames to make console readable in realtime
