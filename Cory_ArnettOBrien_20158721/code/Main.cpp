@@ -235,10 +235,14 @@ int main()
 		std::uniform_real_distribution<> radDist(ringMinRadius, ringMaxRadius), angleDist(0.0f, 2.0f * (float)M_PI);
 
 		for (size_t i = 0; i < nRParticles; ++i) {
-			float angle = angleDist(eng);
+			//float angle = angleDist(eng);
 			float radius = radDist(eng);
 
-			particlePositions[i] = radius * Eigen::Vector4f(sinf(angle), 1.f, cosf(angle), 1.0f);
+			//particlePositions[i] = radius * Eigen::Vector4f(sinf(angle), 1.f, cosf(angle), 1.0f);
+			particlePositions[i].x() = radDist(eng);
+			particlePositions[i].y() = radDist(eng);
+			particlePositions[i].z() = radDist(eng);
+
 			particleVelocities[i] = particleInitialVelocity * Eigen::Vector4f(0.f, 0.f, 0.f, 0.f);
 			Eigen::Vector3f vel = -particlePositions[i].block<3, 1>(0, 0).normalized().cross(Eigen::Vector3f(0.f, 0.f, 0.f)) * particleInitialVelocity;
 			particleVelocities[i].block<3, 1>(0, 0) = vel;
