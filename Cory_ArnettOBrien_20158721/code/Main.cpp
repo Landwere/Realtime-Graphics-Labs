@@ -62,7 +62,7 @@ RGLib::World* Worldscene;
 
 const int nRParticles = 20000;
 float ringMinRadius = 5.f;
-float ringMaxRadius = 6.f;
+float ringMaxRadius = 100.f;
 float gridWidth = 6;
 float particleInitialVelocity = 0.0f;
 float particleMass = 0.1f;
@@ -141,7 +141,26 @@ void ReloadConfig()
 	//	Worldscene->AddToWorld(mesh);
 	//}
 }
+//create texture function from Texture lab by David Walton 
+GLuint createTexture(const cv::Mat& image)
+{
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, image.cols, image.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data);
 
+	glGenerateTextureMipmap(texture);
+
+	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// This isn't strictly necessary as GL_REPEAT is the default mode.
+	glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	return texture;
+}
+//end source
 int main()
 {
 	lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
@@ -199,6 +218,7 @@ int main()
 	glhelper::ShaderProgram shadowMappedShader({ "..\\shaders\\ShadowMapped.vert", "..\\shaders\\ShadowMapped.frag" });
 	glhelper::ShaderProgram billboardParticleShader({ "../shaders/BillboardParticle.vert", "../shaders/BillboardParticle.geom", "../shaders/BillboardParticle.frag" });
 	glhelper::ShaderProgram RainPhysicsShader({ "../shaders/RainParticle.comp" });
+	glhelper::ShaderProgram NormalShader({ "..\\shaders\\NormalShader.vert", "..\\shaders\\NormalShader.frag" });
 
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularExponent"), specularExponent);
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
@@ -207,6 +227,16 @@ int main()
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
 	glProgramUniform3fv(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightInt"), worldLightIntensity);
+
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("specularExponent"), specularExponent);
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("specularIntensity"), specularIntensity);
+	glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("lightIntensity"), lightIntensity);
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("falloffExponent"), fallOffExponent);
+	glProgramUniform3fv(NormalShader.get(), NormalShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("worldLightInt"), worldLightIntensity);
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 1);
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
 
 	//glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
 
@@ -239,9 +269,9 @@ int main()
 			float radius = radDist(eng);
 
 			//particlePositions[i] = radius * Eigen::Vector4f(sinf(angle), 1.f, cosf(angle), 1.0f);
-			particlePositions[i].x() = radDist(eng);
+			particlePositions[i].x() = radDist(eng) - 50;
 			particlePositions[i].y() = radDist(eng);
-			particlePositions[i].z() = radDist(eng);
+			particlePositions[i].z() = radDist(eng) - 50;
 
 			particleVelocities[i] = particleInitialVelocity * Eigen::Vector4f(0.f, 0.f, 0.f, 0.f);
 			Eigen::Vector3f vel = -particlePositions[i].block<3, 1>(0, 0).normalized().cross(Eigen::Vector3f(0.f, 0.f, 0.f)) * particleInitialVelocity;
@@ -263,7 +293,7 @@ int main()
 	glBindVertexArray(0);
 
 	glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), ringParticleSize);
-	glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.6f, 0.2f, 0.1f);
+	glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.4f, 0.48f, 0.59f);
 
 	glProgramUniform3fv(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("massPositions"), MAX_N_MASSES, massLocations[0].data());
 	//glProgramUniform1fv(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("masses"), MAX_N_MASSES, &(masses[0]));
@@ -291,11 +321,18 @@ int main()
 		bunnyModelToWorld(2, 2) = 0.2f;
 		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(5.f, 0.5f, 6)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
 
-		modelLoader->loadFromFile("../models/stanford_bunny/scene.gltf", &testMesh);
-		testMesh.loadTexture("../models/stanford_bunny/textures/Bunny_baseColor.png");
+		modelLoader->loadFromFile(/*"../models/stanford_bunny/scene.gltf"*/"../models/spot/spot_triangulated.obj", &testMesh);
+		testMesh.loadTexture(/*"../models/stanford_bunny/textures/Bunny_baseColor.png"*/"../models/spot/spot_texture.png");
 
 		testMesh.modelToWorld(bunnyModelToWorld);
-		testMesh.shaderProgram(&blinnPhongShader);
+		testMesh.shaderProgram(&NormalShader);
+
+		GLuint spotNormalMap;
+		{
+			cv::Mat image = cv::imread("../models/spot/normalmap.png");
+			cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
+			spotNormalMap = createTexture(image);
+		}
 
 		//Sphere mesh
 		glhelper::Mesh sphereMesh;
@@ -394,11 +431,13 @@ int main()
 		Worldscene = new RGLib::World;
 		Worldscene->AddToWorld(testMesh);
 		Worldscene->AddToWorld(sphereMesh);
-		Worldscene->AddToWorld(lightHouse);
+		//Worldscene->AddToWorld(lightHouse);
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
 		Worldscene->AddToWorld(groundPlane);
 
+		Worldscene->AddWorldObject(lightHouse);
+		Worldscene->AddWorldObject(testMesh, spotNormalMap);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
 
 		for (auto& model : models) {
@@ -562,6 +601,7 @@ int main()
 
 			lightMat = makeRotationMatrix(90, 0, 0);
 			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
+			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
 
 
@@ -580,33 +620,33 @@ int main()
 
 			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 			//glDisable(GL_CULL_FACE);
-			glViewport(0, 0, shadowMapSize, shadowMapSize);
+			//glViewport(0, 0, shadowMapSize, shadowMapSize);
 
 
-			for (int i = 0; i < 6; ++i) {
+			//for (int i = 0; i < 6; ++i) {
 
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMapTexture, 0);
-				glClear(GL_DEPTH_BUFFER_BIT);
+			//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMapTexture, 0);
+			//	glClear(GL_DEPTH_BUFFER_BIT);
 
-				Eigen::Matrix4f clipMatrix;
+			//	Eigen::Matrix4f clipMatrix;
 
-				clipMatrix = flipMatrix * cubemapPerspective * cubemapRotations[i] * makeTranslationMatrix(-lightPos);
+			//	clipMatrix = flipMatrix * cubemapPerspective * cubemapRotations[i] * makeTranslationMatrix(-lightPos);
 
 
-				glProgramUniformMatrix4fv(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
+			//	glProgramUniformMatrix4fv(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
 
-				for (glhelper::Renderable* mesh : scene)
-				{
-					if (mesh->castsShadow())
-						mesh->render(shadowCubeMapShader);
+			//	for (glhelper::Renderable* mesh : scene)
+			//	{
+			//		if (mesh->castsShadow())
+			//			mesh->render(shadowCubeMapShader);
 
-				}
+			//	}
 
-			}
+			//}
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, windowWidth, windowHeight);
-			glActiveTexture(GL_TEXTURE0 + 1);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+			//glActiveTexture(GL_TEXTURE0 + 1);
+			//glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
 			
 			//for (glhelper::Renderable* mesh : scene) {
 			//	mesh->render();
@@ -617,7 +657,19 @@ int main()
 			//	mesh->render();
 
 			//}
-			Worldscene->RenderWorld();
+			//Worldscene->RenderWorld();
+			glhelper::Mesh* tM = &testMesh;
+			glActiveTexture(GL_TEXTURE0 + 0);
+			//tM->meshTex->bindToImageUnit(0);
+			testMesh.meshTex->bindToImageUnit(0);
+			//glBindTexture(GL_TEXTURE_2D, );
+			// --- Your code here ---
+			// We've only bound the albedo texture so far - bind the 
+			// normal texture too!
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_2D, spotNormalMap);
+
+			testMesh.render();
 
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
 

@@ -1,4 +1,6 @@
 #include "World.hpp"
+#include "World.hpp"
+#include "World.hpp"
 
 
 
@@ -17,7 +19,7 @@ void RGLib::World::RenderWorld()
 	//int i is used to link world objects to their queries
 	//TODO make world objects into their own mini class with queries attached or attach queries to meshes
 	int i = 0;
-	for (glhelper::Mesh* mesh : worldObjects)
+	for (glhelper::Mesh* mesh : worldMeshes)
 	{
 		GLuint currentQuery = queries[i];
 		i++;
@@ -33,6 +35,22 @@ void RGLib::World::RenderWorld()
 		mesh->render();
 		glEndQuery(GL_TIME_ELAPSED_EXT);
 	}
+
+	//for (WorldObject* object : worldObjects)
+	//{
+	//	//check mesh has texture and bind it
+	//	glActiveTexture(GL_TEXTURE0 + 0);
+	//	if (object->getMesh()->meshTex != nullptr)
+	//		object->getMesh()->meshTex->bindToImageUnit(0);
+	//	//TODO else bind empty tex
+
+	//	//bind normal map
+	//	glActiveTexture(GL_TEXTURE0 + 2);
+	//	glBindTexture(GL_TEXTURE_2D,object->GetNormal());
+
+	//	//store query data for each mesh rendered 
+	//	object->getMesh()->render();
+	//}
 
 	//for (auto& model : *models) {
 	//	glhelper::Mesh& mesh = meshes.at(model["mesh"]);
@@ -68,9 +86,9 @@ void RGLib::World::RenderWorld()
 			glGetQueryObjectui64v(query, GL_QUERY_RESULT, &timeElapsed);
 			totalTime += timeElapsed;
 			//convert time to milliseconds for console output
-			std::cout << "Mesh: " << worldObjects[i]->meshName << " " << timeElapsed / 1e6f << "\n";
+			std::cout << "Mesh: " << worldMeshes[i]->meshName << " " << timeElapsed / 1e6f << "\n";
 			//TODO change to show names on colums and data on rows for easy chart creation
-			dataFile << worldObjects[i]->meshName << timeElapsed << ", ";
+			dataFile << worldMeshes[i]->meshName << timeElapsed << ", ";
 			i++;
 		}
 
@@ -105,15 +123,28 @@ void RGLib::World::RenderWorld()
 
 void RGLib::World::AddToWorld(glhelper::Mesh &mesh)
 {
-	worldObjects.push_back(&mesh);
+	worldMeshes.push_back(&mesh);
 
+}
+
+void RGLib::World::AddWorldObject(glhelper::Mesh& mesh)
+{
+	WorldObject* wO = new WorldObject(mesh);
+	worldObjects.push_back(wO);
+}
+
+void RGLib::World::AddWorldObject(glhelper::Mesh& mesh, GLuint normalMap)
+{
+	WorldObject* wO = new WorldObject(mesh);
+	wO->SetNormal(normalMap);
+	worldObjects.push_back(wO);
 }
 
 void RGLib::World::CreateQueries()
 {
 	//create a query for each world object 
 	//needs to be called after all world objects have been added
-	for (glhelper::Mesh* mesh : worldObjects)
+	for (glhelper::Mesh* mesh : worldMeshes)
 	{
 		GLuint query;
 		glGenQueries(1, &query);
@@ -133,6 +164,6 @@ void RGLib::World::Clean()
 
 void RGLib::World::ClearWorld()
 {
-	worldObjects.clear();
+	worldMeshes.clear();
 	queries.clear();
 }

@@ -49,10 +49,10 @@ void main() {
     velocity.y += (acceleration.y * timeStep);
 
     vel[gl_GlobalInvocationID.x].xyz = velocity;
-    //pos[gl_GlobalInvocationID.x].xyz += velocity * timeStep;
+    pos[gl_GlobalInvocationID.x].xyz += velocity * timeStep;
     if (pos[gl_GlobalInvocationID.x].y < 0)
     {
-        pos[gl_GlobalInvocationID.x].y = 5;
+        pos[gl_GlobalInvocationID.x].y = 20;
         velocity = vec3(0,0,0);
         vel[gl_GlobalInvocationID.x].xyz = velocity;
     }

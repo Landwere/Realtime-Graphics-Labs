@@ -6,7 +6,7 @@
 #include <gltext.h>
 #include <chrono>
 #include "RGLib/json.hpp"
-
+#include "RGLib/Texture.hpp"
 namespace RGLib
 {
 	class WorldObject
@@ -29,8 +29,19 @@ namespace RGLib
 			return objMesh;
 		}
 
+		void SetNormal(GLuint nMap)
+		{
+			normalMap = nMap;
+		}
+
+		GLuint GetNormal()
+		{
+			return normalMap;
+		}
+
 	private:
 		glhelper::Mesh* objMesh;
+		GLuint normalMap;
 		GLuint query;
 	};
 
@@ -43,7 +54,8 @@ namespace RGLib
 
 		void AddToWorld(glhelper::Mesh& mesh);
 
-		//void AddWorldObject(glhelper::Mesh& mesh);
+		void AddWorldObject(glhelper::Mesh& mesh);
+		void AddWorldObject(glhelper::Mesh& mesh, GLuint normalMap);
 
 		//create GL queries for each mesh in world
 		void CreateQueries();
@@ -58,14 +70,14 @@ namespace RGLib
 		std::map<std::string, glhelper::Texture>* textures;*/
 
 	private:
-		std::vector<glhelper::Mesh*> /*std::vector<WorldObject*>**/ worldObjects;
+		std::vector<glhelper::Mesh*> /*std::vector<WorldObject*>**/ worldMeshes;
 		std::vector<GLuint> queries;
 		std::ofstream dataFile; //("renderData.csv");
 		GLTtext* fpsText;
 		int frameCount;
 		std::chrono::time_point<std::chrono::steady_clock> lastFrameTime;
 		float frameDuration;
-		WorldObject wo;
+		std::vector< WorldObject*> worldObjects;
 	};
 
 	
