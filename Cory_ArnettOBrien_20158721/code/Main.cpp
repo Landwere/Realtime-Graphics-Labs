@@ -235,8 +235,8 @@ int main()
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("falloffExponent"), fallOffExponent);
 	glProgramUniform3fv(NormalShader.get(), NormalShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("worldLightInt"), worldLightIntensity);
-	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 1);
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 1);
 
 	//glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
 
@@ -319,7 +319,7 @@ int main()
 		bunnyModelToWorld(0, 0) = 0.2f;
 		bunnyModelToWorld(1, 1) = 0.2f;
 		bunnyModelToWorld(2, 2) = 0.2f;
-		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(5.f, 0.5f, 6)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
+		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0.f, 0.5f, 0)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
 
 		modelLoader->loadFromFile(/*"../models/stanford_bunny/scene.gltf"*/"../models/spot/spot_triangulated.obj", &testMesh);
 		testMesh.loadTexture(/*"../models/stanford_bunny/textures/Bunny_baseColor.png"*/"../models/spot/spot_texture.png");
@@ -462,9 +462,9 @@ int main()
 
 		Worldscene->CreateQueries();
 
-		glEnable(GL_BLEND);
+		//glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
 
@@ -477,12 +477,12 @@ int main()
 		glm::vec3 glmLight;
 		glmLight = glm::vec3(90, 0, 0);
 
-		GLuint frameBuffer;
-		glGenFramebuffers(1, &frameBuffer);
+		//GLuint frameBuffer;
+		//glGenFramebuffers(1, &frameBuffer);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+		//glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		RGLib::FrameBuffer* frameBuffer2 = new RGLib::FrameBuffer(1280, 720);
 		frameBuffer2->init();
@@ -618,7 +618,7 @@ int main()
 				0, 0, 0, 1;
 
 
-			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+			//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 			//glDisable(GL_CULL_FACE);
 			//glViewport(0, 0, shadowMapSize, shadowMapSize);
 
@@ -658,10 +658,13 @@ int main()
 
 			//}
 			//Worldscene->RenderWorld();
-			glhelper::Mesh* tM = &testMesh;
+			//glhelper::Mesh* tM = &testMesh;
+			//glDisable(GL_CULL_FACE);
 			glActiveTexture(GL_TEXTURE0 + 0);
 			//tM->meshTex->bindToImageUnit(0);
 			testMesh.meshTex->bindToImageUnit(0);
+			//glBindTexture(GL_TEXTURE_2D, spotNormalMap);
+
 			//glBindTexture(GL_TEXTURE_2D, );
 			// --- Your code here ---
 			// We've only bound the albedo texture so far - bind the 
