@@ -36,7 +36,7 @@
 		Assimp::Importer imp;
 
 		//load model into scene object
-		const aiScene* pScene = imp.ReadFile(filename, aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
+		const aiScene* pScene = imp.ReadFile(filename, aiProcessPreset_TargetRealtime_Quality  | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 
 		//check if file was opened ok
 		if (!pScene)

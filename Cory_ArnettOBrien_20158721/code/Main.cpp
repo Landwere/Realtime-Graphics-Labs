@@ -23,6 +23,9 @@
 #include "RGLib/json.hpp"
 #include <RGLib/FrameBuffer.h>
 #include <random>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace fs = std::filesystem;
 
@@ -41,7 +44,7 @@ float theta = 0.0f;
 Eigen::Vector3f lightPos(5.f * sinf(theta), 2.f, -5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
 Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
 float specularExponent = 60.f, specularIntensity = 0.05f;
-float lightIntensity = 20.0f;//500.f;
+float lightIntensity =  30.f;
 float fallOffExponent = 2.0f;
 Eigen::Vector3f worldLightDir(40,90, 0);
 float worldLightIntensity = 0.5f;
@@ -75,6 +78,51 @@ Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
 	Eigen::Matrix4f output = Eigen::Matrix4f::Identity();
 	output.block<3, 3>(0, 0) = Eigen::AngleAxisf(angle, axis).matrix();
 	return output;
+}
+
+void loadSpotMesh(glhelper::Mesh* mesh)
+{
+	// ----- Your code here -----
+	// Change the code here to generate tangents and bitangents when loading the mesh, and add
+	// them to the glhelper::Mesh instance.
+	// You can use the Mesh::tangent() and Mesh::bitangent() methods to do this, they work
+	// the same way as the Mesh::norm() method.
+
+	Assimp::Importer importer;
+	importer.ReadFile("../models/spot/spot_triangulated.obj", aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
+	const aiScene* aiscene = importer.GetScene();
+	const aiMesh* aimesh = aiscene->mMeshes[0];
+
+	std::vector<Eigen::Vector3f> verts(aimesh->mNumVertices);
+	std::vector<Eigen::Vector3f> norms(aimesh->mNumVertices);
+	std::vector<Eigen::Vector2f> uvs(aimesh->mNumVertices);
+	std::vector<Eigen::Vector3f> tangents(aimesh->mNumVertices);
+	std::vector<Eigen::Vector3f> biTangents(aimesh->mNumVertices);
+
+
+	std::vector<GLuint> elems(aimesh->mNumFaces * 3);
+
+	memcpy(biTangents.data(), aimesh->mBitangents, aimesh->mNumVertices * sizeof(aiVector3D));
+	memcpy(tangents.data(), aimesh->mTangents, aimesh->mNumVertices * sizeof(aiVector3D));
+	memcpy(verts.data(), aimesh->mVertices, aimesh->mNumVertices * sizeof(aiVector3D));
+	memcpy(norms.data(), aimesh->mNormals, aimesh->mNumVertices * sizeof(aiVector3D));
+	for (size_t v = 0; v < aimesh->mNumVertices; ++v) {
+		uvs[v][0] = aimesh->mTextureCoords[0][v].x;
+		uvs[v][1] = 1.f - aimesh->mTextureCoords[0][v].y;
+	}
+	for (size_t f = 0; f < aimesh->mNumFaces; ++f) {
+		for (size_t i = 0; i < 3; ++i) {
+			elems[f * 3 + i] = aimesh->mFaces[f].mIndices[i];
+		}
+	}
+
+	mesh->tangent(tangents);
+	mesh->bitangent(biTangents);
+
+	mesh->vert(verts);
+	mesh->norm(norms);
+	//mesh->elems(elems);
+	mesh->tex(uvs);
 }
 
 void ReloadConfig()
@@ -163,9 +211,8 @@ GLuint createTexture(const cv::Mat& image)
 //end source
 int main()
 {
-	//lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
+	lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
 	//lightPos = Eigen::Vector3f(0, 6, -5);
-	lightPos = Eigen::Vector3f(5.f * sinf(theta), 5.f, 5.f * cosf(theta));
 	worldLightDir.normalize();
 
 
@@ -236,7 +283,7 @@ int main()
 	glProgramUniform3fv(NormalShader.get(), NormalShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("worldLightInt"), worldLightIntensity);
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
-	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 1);
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
 
 	//glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
 
@@ -319,9 +366,9 @@ int main()
 		bunnyModelToWorld(0, 0) = 0.2f;
 		bunnyModelToWorld(1, 1) = 0.2f;
 		bunnyModelToWorld(2, 2) = 0.2f;
-		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0.f, 0.0f, 0)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
-
-		modelLoader->loadFromFile(/*"../models/stanford_bunny/scene.gltf"*/"../models/spot/spot_triangulated.obj", &testMesh);
+		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(6.f, 0.5f, 0)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
+		loadSpotMesh(&testMesh);
+		//modelLoader->loadFromFile(/*"../models/stanford_bunny/scene.gltf"*/"../models/spot/spot_triangulated.obj", &testMesh);
 		testMesh.loadTexture(/*"../models/stanford_bunny/textures/Bunny_baseColor.png"*/"../models/spot/spot_texture.png");
 
 		testMesh.modelToWorld(bunnyModelToWorld);
@@ -430,20 +477,20 @@ int main()
 		};
 
 
-
-		std::vector<glhelper::Renderable*> scene{ /*&testMesh, &lightHouse, &rock, &rock2, &groundPlane*/ &sphereMesh};
+		//TODO remove scene and replace with World class, currently only used for shadows
+		std::vector<glhelper::Renderable*> scene{ &testMesh, &lightHouse, &rock, &rock2, &groundPlane};
 
 		//set up world scene
 		Worldscene = new RGLib::World;
-		Worldscene->AddToWorld(testMesh);
+		//Worldscene->AddToWorld(testMesh);
 		Worldscene->AddToWorld(sphereMesh);
-		//Worldscene->AddToWorld(lightHouse);
+		Worldscene->AddToWorld(lightHouse);
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
 		Worldscene->AddToWorld(groundPlane);
 
 		Worldscene->AddWorldObject(lightHouse);
-		Worldscene->AddWorldObject(testMesh, spotNormalMap);
+		//Worldscene->AddWorldObject(testMesh, spotNormalMap);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
 
 		for (auto& model : models) {
@@ -468,13 +515,13 @@ int main()
 
 		Worldscene->CreateQueries();
 
-		//glEnable(GL_BLEND);
+		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
-		bool lightRotating = true;
+		bool lightRotating = false;
 		bool running = true;
 		float lightDir = 0;
 		float lightDir2 = 0;
@@ -483,12 +530,12 @@ int main()
 		glm::vec3 glmLight;
 		glmLight = glm::vec3(90, 0, 0);
 
-		//GLuint frameBuffer;
-		//glGenFramebuffers(1, &frameBuffer);
+		GLuint frameBuffer;
+		glGenFramebuffers(1, &frameBuffer);
 
-		//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		//glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		RGLib::FrameBuffer* frameBuffer2 = new RGLib::FrameBuffer(1280, 720);
 		frameBuffer2->init();
@@ -626,64 +673,55 @@ int main()
 				0, 0, 0, 1;
 
 
-			//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-			//glDisable(GL_CULL_FACE);
-			//glViewport(0, 0, shadowMapSize, shadowMapSize);
+			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+			glDisable(GL_CULL_FACE);
+			glViewport(0, 0, shadowMapSize, shadowMapSize);
 
 
-			//for (int i = 0; i < 6; ++i) {
+			for (int i = 0; i < 6; ++i) {
 
-			//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMapTexture, 0);
-			//	glClear(GL_DEPTH_BUFFER_BIT);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMapTexture, 0);
+				glClear(GL_DEPTH_BUFFER_BIT);
 
-			//	Eigen::Matrix4f clipMatrix;
+				Eigen::Matrix4f clipMatrix;
 
-			//	clipMatrix = flipMatrix * cubemapPerspective * cubemapRotations[i] * makeTranslationMatrix(-lightPos);
+				clipMatrix = flipMatrix * cubemapPerspective * cubemapRotations[i] * makeTranslationMatrix(-lightPos);
 
 
-			//	glProgramUniformMatrix4fv(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
+				glProgramUniformMatrix4fv(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
 
-			//	for (glhelper::Renderable* mesh : scene)
-			//	{
-			//		if (mesh->castsShadow())
-			//			mesh->render(shadowCubeMapShader);
+				for (glhelper::Renderable* mesh : scene)
+				{
+					if (mesh->castsShadow())
+						mesh->render(shadowCubeMapShader);
 
-			//	}
-
-			//}
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(0, 0, windowWidth, windowHeight);
-			//glActiveTexture(GL_TEXTURE0 + 1);
-			//glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-			
-			for (glhelper::Renderable* mesh : scene) {
-				mesh->render();
+				}
 
 			}
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, windowWidth, windowHeight);
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+			
+	
 			//for (glhelper::Renderable* mesh : scene) {
 
 			//	mesh->render();
 
 			//}
-			//Worldscene->RenderWorld();
+			//glDisable(GL_CULL_FACE);
+
+
+			Worldscene->RenderWorld();
 			//glhelper::Mesh* tM = &testMesh;
-			glDisable(GL_CULL_FACE);
+
 			glDisable(GL_BLEND);
 			glActiveTexture(GL_TEXTURE0 + 0);
-			//glBindTexture(GL_TEXTURE_2D, spotNormalMap);
-
-			//tM->meshTex->bindToImageUnit(0);
-			//testMesh.meshTex->bindToImageUnit(0);
 			glBindTexture(GL_TEXTURE_2D, spotTexture);
-
-			//glBindTexture(GL_TEXTURE_2D, );
-			// --- Your code here ---
-			// We've only bound the albedo texture so far - bind the 
-			// normal texture too!
-			glActiveTexture(GL_TEXTURE0 + 1);
+			glActiveTexture(GL_TEXTURE0 + 2);
 			glBindTexture(GL_TEXTURE_2D, spotNormalMap);
-			
 			testMesh.render();
+			
 
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
 

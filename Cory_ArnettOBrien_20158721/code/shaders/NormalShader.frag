@@ -7,7 +7,7 @@ layout(std140) uniform cameraBlock
 	vec4 cameraPos;
 	vec4 cameraDir;
 };
-in vec3 normWorld;
+in vec3 worldNorm;
 in vec3 fragPosWorld;
 in vec2 texCoord;
 in vec3 biTan;
@@ -36,11 +36,11 @@ uniform vec3 spotLightDir;
 vec4 lightModel(float lIntensity, vec3 lDirection, vec3 viewDir, vec3 albedo, vec3 normWorld)
 {
 	//float specHighExponent = specularExponent * 2;
-	vec4 diffuse = vec4(albedo.xyz * dot(normWorld, lDirection), 1.0f);
+	vec4 diffuse = vec4(albedo.xyz * dot(worldNorm, lDirection), 1.0f);
 	//float specNorm = (specularIntensity + 8) / 8;
 	//float spec = ((pow( clamp( dot(normalize(lDirection + viewDir), normWorld), 0, 1), specHighExponent ) * specNorm) * specularIntensity);
 	
-	float specularPower = pow(clamp(dot(reflect(lDirection, normWorld), -viewDir), 0, 1), 10);
+	float specularPower = pow(clamp(dot(reflect(lDirection, normWorld), -viewDir), 0, 1), 10.0f);
 	vec4 specularColor = vec4(specularPower * vec3(1,1,1), 1.0);
 
 	return (diffuse + specularColor) * lIntensity;
@@ -52,7 +52,7 @@ void main()
 	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
 	vec3 viewDir = normalize(cameraPos.xyz - fragPosWorld);
 	float lightDistance = length(lightPosWorld - fragPosWorld);
-	vec4 albedo = texture(albedoTex, texCoord);
+	vec3 albedo = texture(albedoTex, texCoord).xyz;
 	vec4 normal = texture(normalTex, texCoord);
 
 	// --- Your Code Here
@@ -62,13 +62,13 @@ void main()
 
 	//vec4 normalColor = vec4((normal.xyz * 2) - 1);
 	vec3 normScaled = vec3((normal.xyz * 2 ) -1);
-	vec3 mapNormal = (normScaled.x * _tan, normScaled.y * biTan, normScaled.z * normWorld);
+	vec3 mapNormal = (normScaled.x * _tan, normScaled.y * biTan, normScaled.z * worldNorm);
 
-	vec4 diffuseColor = vec4(albedo.xyz * dot(normWorld, lightDir), 1.0f);
-	float specularPower = pow(clamp(dot(reflect(lightDir, mapNormal), -viewDir), 0, 1), 10);
-	vec4 specularColor = vec4(specularPower * vec3(1,1,1), 1.0);
+//	vec4 diffuseColor = vec4(albedo.xyz * dot(worldNorm, lightDir), 1.0f);
+//	float specularPower = pow(clamp(dot(reflect(lightDir, mapNormal), -viewDir), 0, 1), 10);
+//	vec4 specularColor = vec4(specularPower * vec3(1,1,1), 1.0);
+			//colorOut = (lightIntensity / 10) * (diffuseColor + specularColor) / (pow(lightDistance, 2));
 
-	colorOut = lightIntensity * (diffuseColor + specularColor) / (lightDistance*lightDistance);
 
 
 
@@ -80,7 +80,8 @@ void main()
 //	vec3 albedo = texture(albedoTex, texCoord).xyz;
 //	vec4 normal = texture(normalTex, texCoord);
 //
-//	float falloff = pow(lightDistance, 2);
+	float falloff = pow(lightDistance, 2);
+
 //
 //
 ////	//dot product betwwen lighthouse light direction and object light direction
@@ -93,7 +94,7 @@ void main()
 ////	if (add < 0.5 || add > 2)
 ////		add = 0;
 //	
-//	float spot = pow(max(dot(-lightDir, spotLightDir), 0.0f), 1);
+	float spot = pow(max(dot(-lightDir, spotLightDir), 0.0f), 1);
 //
 //	vec3 mappedWorldNorm = vec3((normal.xyz * 2 ) -1);
 //
@@ -102,10 +103,10 @@ void main()
 //	//colorOut.rgb = vec3(0);
 //	//colorOut.a = 1;
 //	//Point  
-//
-//	colorOut = (lightModel(lightIntensity, lightDir, viewDir, albedo, mappedWorldNorm))  / falloff;
+	//colorOut = lightModel(0.0f, lightDir, vec3(0,0,0), vec3(0,0,0), vec3(0,0,0));
+	colorOut  += (lightModel(lightIntensity , lightDir, viewDir, albedo, mapNormal) * 0.5f)  / falloff;
 //
 //	//global light
-//	//colorOut.rgb += lightModel(worldLightInt, worldLightDir, viewDir, albedo, worldNorm);
+	//colorOut += lightModel(worldLightInt, worldLightDir, viewDir, albedo, mapNormal);
 }
 

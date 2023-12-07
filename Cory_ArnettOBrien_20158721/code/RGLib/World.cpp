@@ -36,21 +36,21 @@ void RGLib::World::RenderWorld()
 		glEndQuery(GL_TIME_ELAPSED_EXT);
 	}
 
-	//for (WorldObject* object : worldObjects)
-	//{
-	//	//check mesh has texture and bind it
-	//	glActiveTexture(GL_TEXTURE0 + 0);
-	//	if (object->getMesh()->meshTex != nullptr)
-	//		object->getMesh()->meshTex->bindToImageUnit(0);
-	//	//TODO else bind empty tex
+	for (WorldObject* object : worldObjects)
+	{
+		//check mesh has texture and bind it
+		glActiveTexture(GL_TEXTURE0 + 0);
+		if (object->getMesh()->meshTex != nullptr)
+			object->getMesh()->meshTex->bindToImageUnit(0);
+		//TODO else bind empty tex
 
-	//	//bind normal map
-	//	glActiveTexture(GL_TEXTURE0 + 2);
-	//	glBindTexture(GL_TEXTURE_2D,object->GetNormal());
+		//bind normal map
+		glActiveTexture(GL_TEXTURE0 + 1);
+		glBindTexture(GL_TEXTURE_2D,object->GetNormal());
 
-	//	//store query data for each mesh rendered 
-	//	object->getMesh()->render();
-	//}
+		//store query data for each mesh rendered 
+		object->getMesh()->render();
+	}
 
 	//for (auto& model : *models) {
 	//	glhelper::Mesh& mesh = meshes.at(model["mesh"]);

@@ -15,7 +15,7 @@ layout(std140) uniform cameraBlock
 uniform mat4 modelToWorld;
 uniform mat3 normToWorld;
 
-out vec3 normWorld;
+out vec3 worldNorm;
 out vec3 fragPosWorld;
 out vec2 texCoord;
 out vec3 biTan;
@@ -26,7 +26,7 @@ void main()
 	gl_Position = worldToClip *  modelToWorld * vec4(vPos, 1.0);
 	fragPosWorld = (modelToWorld * vec4(vPos, 1.0)).xyz;
 	texCoord = vTex;
-	normWorld = normToWorld * vNorm;
+	worldNorm = normToWorld * vNorm;
 	biTan = normToWorld * vBiTan;
 	_tan = normToWorld * vTan;
 }
