@@ -478,7 +478,7 @@ int main()
 
 
 		//TODO remove scene and replace with World class, currently only used for shadows
-		std::vector<glhelper::Renderable*> scene{ &testMesh, &lightHouse, &rock, &rock2, &groundPlane};
+		std::vector<glhelper::Renderable*> scene{ /*&testMesh,*/ &lightHouse, &rock, &rock2, &groundPlane};
 
 		//set up world scene
 		Worldscene = new RGLib::World;
@@ -714,6 +714,9 @@ int main()
 
 			Worldscene->RenderWorld();
 			//glhelper::Mesh* tM = &testMesh;
+
+			glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
+			glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
 
 			glDisable(GL_BLEND);
 			glActiveTexture(GL_TEXTURE0 + 0);
