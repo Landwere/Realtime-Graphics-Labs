@@ -41,7 +41,7 @@ float theta = 0.0f;
 Eigen::Vector3f lightPos(5.f * sinf(theta), 2.f, -5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
 Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
 float specularExponent = 60.f, specularIntensity = 0.05f;
-float lightIntensity = 500.f;
+float lightIntensity = 20.0f;//500.f;
 float fallOffExponent = 2.0f;
 Eigen::Vector3f worldLightDir(40,90, 0);
 float worldLightIntensity = 0.5f;
@@ -163,10 +163,10 @@ GLuint createTexture(const cv::Mat& image)
 //end source
 int main()
 {
-	lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
-
+	//lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
+	//lightPos = Eigen::Vector3f(0, 6, -5);
+	lightPos = Eigen::Vector3f(5.f * sinf(theta), 5.f, 5.f * cosf(theta));
 	worldLightDir.normalize();
-	//lightPos = Eigen::Vector3f(-0.1, 6, 0);
 
 
 	//print out all shaders in path (used for debugging)
@@ -319,7 +319,7 @@ int main()
 		bunnyModelToWorld(0, 0) = 0.2f;
 		bunnyModelToWorld(1, 1) = 0.2f;
 		bunnyModelToWorld(2, 2) = 0.2f;
-		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0.f, 0.5f, 0)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
+		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0.f, 0.0f, 0)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
 
 		modelLoader->loadFromFile(/*"../models/stanford_bunny/scene.gltf"*/"../models/spot/spot_triangulated.obj", &testMesh);
 		testMesh.loadTexture(/*"../models/stanford_bunny/textures/Bunny_baseColor.png"*/"../models/spot/spot_texture.png");
@@ -332,6 +332,12 @@ int main()
 			cv::Mat image = cv::imread("../models/spot/normalmap.png");
 			cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
 			spotNormalMap = createTexture(image);
+		}
+		GLuint spotTexture;
+		{
+			cv::Mat image = cv::imread("../models/spot/spot_texture.png");
+			cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
+			spotTexture = createTexture(image);
 		}
 
 		//Sphere mesh
@@ -425,7 +431,7 @@ int main()
 
 
 
-		std::vector<glhelper::Renderable*> scene{ &testMesh, &lightHouse, &rock, &rock2, &groundPlane};
+		std::vector<glhelper::Renderable*> scene{ /*&testMesh, &lightHouse, &rock, &rock2, &groundPlane*/ &sphereMesh};
 
 		//set up world scene
 		Worldscene = new RGLib::World;
@@ -468,7 +474,7 @@ int main()
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
 
-		bool lightRotating = false;
+		bool lightRotating = true;
 		bool running = true;
 		float lightDir = 0;
 		float lightDir2 = 0;
@@ -577,6 +583,8 @@ int main()
 				lightPos << 5.f * sinf(theta), 5.f, 5.f * cosf(theta);
 				sphereMesh.modelToWorld(makeTranslationMatrix(lightPos));
 				glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
+				glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
+
 			}
 
 			//Rotate light code (does not work properly with the shader)
@@ -648,10 +656,10 @@ int main()
 			//glActiveTexture(GL_TEXTURE0 + 1);
 			//glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
 			
-			//for (glhelper::Renderable* mesh : scene) {
-			//	mesh->render();
+			for (glhelper::Renderable* mesh : scene) {
+				mesh->render();
 
-			//}
+			}
 			//for (glhelper::Renderable* mesh : scene) {
 
 			//	mesh->render();
@@ -659,11 +667,14 @@ int main()
 			//}
 			//Worldscene->RenderWorld();
 			//glhelper::Mesh* tM = &testMesh;
-			//glDisable(GL_CULL_FACE);
+			glDisable(GL_CULL_FACE);
+			glDisable(GL_BLEND);
 			glActiveTexture(GL_TEXTURE0 + 0);
-			//tM->meshTex->bindToImageUnit(0);
-			testMesh.meshTex->bindToImageUnit(0);
 			//glBindTexture(GL_TEXTURE_2D, spotNormalMap);
+
+			//tM->meshTex->bindToImageUnit(0);
+			//testMesh.meshTex->bindToImageUnit(0);
+			glBindTexture(GL_TEXTURE_2D, spotTexture);
 
 			//glBindTexture(GL_TEXTURE_2D, );
 			// --- Your code here ---
@@ -671,7 +682,7 @@ int main()
 			// normal texture too!
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_2D, spotNormalMap);
-
+			
 			testMesh.render();
 
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());

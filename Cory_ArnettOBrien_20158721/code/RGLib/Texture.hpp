@@ -47,6 +47,7 @@ public:
 
 	void genMipmap();
 
+	GLuint tex_;
 
 private:
 	Texture(const Texture&);
@@ -56,7 +57,6 @@ private:
 	unsigned char* pixelData;
 	size_t width_, height_;
 	GLenum target_, internalFormat_, format_, type_, border_;
-	GLuint tex_;
 	
 	friend class CubemapTexture;
 };

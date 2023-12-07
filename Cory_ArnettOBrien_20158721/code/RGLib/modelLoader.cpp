@@ -36,7 +36,7 @@
 		Assimp::Importer imp;
 
 		//load model into scene object
-		const aiScene* pScene = imp.ReadFile(filename, aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs);
+		const aiScene* pScene = imp.ReadFile(filename, aiProcessPreset_TargetRealtime_Quality | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 
 		//check if file was opened ok
 		if (!pScene)
@@ -44,11 +44,23 @@
 			std::cout << "Model Failed to open: " << filename << std::endl;
 			return false;
 		}
+
+
+
 		const aiMesh* _mesh;
+
+
+
 		//get the vertices loaded from the model object and put them in a temporary vector
 		for (int MeshIdx = 0; MeshIdx < pScene->mNumMeshes; MeshIdx++)
 		{
 			_mesh = pScene->mMeshes[MeshIdx];
+
+			std::vector<Eigen::Vector3f> tangents(_mesh->mNumVertices);
+			std::vector<Eigen::Vector3f> biTangents(_mesh->mNumVertices);
+
+			memcpy(biTangents.data(), _mesh->mBitangents, _mesh->mNumVertices * sizeof(aiVector3D));
+			memcpy(tangents.data(), _mesh->mTangents, _mesh->mNumVertices * sizeof(aiVector3D));
 
 			for (int faceIndex = 0; faceIndex < _mesh->mNumFaces; faceIndex++)
 			{
@@ -95,6 +107,8 @@
 			std::vector<GLuint> elems(_mesh->mNumFaces * 3);
 			//Add bi tangents
 			//TODO
+			mesh->bitangent(biTangents);
+			mesh->tangent(tangents);
 			mesh->vert(verts);
 			mesh->norm(norms);
 			mesh->tex(uvs);
