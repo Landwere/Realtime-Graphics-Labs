@@ -447,7 +447,23 @@ int main()
 		groundModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0, 0, 6.5f)) * groundModelToWorld;
 		modelLoader->loadFromFile("../models/groundPlane.obj", &groundPlane);
 		groundPlane.shaderProgram(&shadowMappedShader);
-		groundPlane.modelToWorld(makeScaleMatrix(4) * groundModelToWorld);
+		groundPlane.modelToWorld(makeScaleMatrix(2) * groundModelToWorld);
+
+		glhelper::Mesh waterPlane;
+		waterPlane.meshName = "Water";
+		modelLoader->loadFromFile("../models/groundPlane.obj", &waterPlane);
+		waterPlane.shaderProgram(&blinnPhongShader);
+		Eigen::Matrix4f waterModelToWorld = Eigen::Matrix4f::Identity();
+		waterPlane.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(0, 0, 40.f)) * waterModelToWorld);
+
+
+		glhelper::Mesh Tree1;
+		Tree1.meshName = "tree1";
+		modelLoader->loadFromFile("../models/tree/Tree.obj", &Tree1);
+		Tree1.shaderProgram(&blinnPhongShader);
+		Eigen::Matrix4f treeModelToWorld = Eigen::Matrix4f::Identity();
+		Tree1.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4, 0, 4.f))* treeModelToWorld);
+
 
 #pragma endregion
 
@@ -488,7 +504,7 @@ int main()
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
 		Worldscene->AddToWorld(groundPlane);
-
+		Worldscene->AddToWorld(Tree1);
 		Worldscene->AddWorldObject(lightHouse);
 		//Worldscene->AddWorldObject(testMesh, spotNormalMap);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
@@ -537,8 +553,8 @@ int main()
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		RGLib::FrameBuffer* frameBuffer2 = new RGLib::FrameBuffer(1280, 720);
-		frameBuffer2->init();
+		RGLib::FrameBuffer* reflectionBuffer = new RGLib::FrameBuffer(1280, 720);
+		reflectionBuffer->init();
 		//unsigned int textureframe = frameBuffer2->getTextureLocation();
 
 		Eigen::Vector3f spotLightDir(-1.0f, 0.f, 0.f);
@@ -711,8 +727,17 @@ int main()
 			//}
 			//glDisable(GL_CULL_FACE);
 
-
+			reflectionBuffer->bind();
+		glDepthFunc(GL_LESS);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			Worldscene->RenderWorld();
+			reflectionBuffer->unbind();
+			Worldscene->RenderWorld();
+			glActiveTexture(GL_TEXTURE0 + 0);
+			glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
+			waterPlane.render();
 			//glhelper::Mesh* tM = &testMesh;
 
 			glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);

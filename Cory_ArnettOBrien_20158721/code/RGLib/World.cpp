@@ -115,10 +115,10 @@ void RGLib::World::RenderWorld()
 
 
 	//draw text to window
-	gltBeginDraw();
+	/*gltBeginDraw();
 	gltColor(1.f, 1.f, 1.f, 1.f);
 	gltDrawText2D(fpsText, 10.f, 10.f, 1.f);
-	gltEndDraw();
+	gltEndDraw();*/
 }
 
 void RGLib::World::AddToWorld(glhelper::Mesh &mesh)
