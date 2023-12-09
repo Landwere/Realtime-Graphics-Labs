@@ -63,7 +63,7 @@ function(add_executable_rtg name)
 endfunction()
 # function (name shaders.vert shaders.frag)
 add_executable_rtg(main lambert.vert lambert.frag VertexLighting.vert FragmentLighting.frag FixedColor.frag FixedColor.vert BlinnPhong.vert BlinnPhong.frag ShadowCubeMap.frag
- ShadowCubeMap.vert ShadowMapped.frag ShadowMapped.vert BillboardParticle.frag BillboardParticle.geom BillboardParticle.vert RainParticle.comp NormalShader.vert NormalShader.frag)
+ ShadowCubeMap.vert ShadowMapped.frag ShadowMapped.vert BillboardParticle.frag BillboardParticle.geom BillboardParticle.vert RainParticle.comp NormalShader.vert NormalShader.frag HDRShader.frag HDRShader.vert)
 set(SOURCES test.cpp test.hpp main.cpp)
 doxygen_add_docs(doxygen ${SOURCES} ALL)
 

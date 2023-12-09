@@ -79,7 +79,36 @@ Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
 	output.block<3, 3>(0, 0) = Eigen::AngleAxisf(angle, axis).matrix();
 	return output;
 }
-
+//Quad renderer from https://learnopengl.com/Advanced-Lighting/HDR
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+	if (quadVAO == 0)
+	{
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+//end source
 void loadSpotMesh(glhelper::Mesh* mesh)
 {
 	// ----- Your code here -----
@@ -268,6 +297,7 @@ int main()
 	glhelper::ShaderProgram billboardParticleShader({ "../shaders/BillboardParticle.vert", "../shaders/BillboardParticle.geom", "../shaders/BillboardParticle.frag" });
 	glhelper::ShaderProgram RainPhysicsShader({ "../shaders/RainParticle.comp" });
 	glhelper::ShaderProgram NormalShader({ "..\\shaders\\NormalShader.vert", "..\\shaders\\NormalShader.frag" });
+	glhelper::ShaderProgram HDRShader({ "..\\shaders\\HDRShader.vert", "..\\shaders\\HDRShader.frag" });
 
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularExponent"), specularExponent);
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
@@ -468,6 +498,16 @@ int main()
 
 
 #pragma endregion
+
+		//Colour buffer
+		GLuint colourBuffer;
+		glGenTextures(1, &colourBuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+		GLuint HDRFrameBuffer;
+		glGenFramebuffers(1, &HDRFrameBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colourBuffer, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
@@ -734,17 +774,26 @@ int main()
 			//glDisable(GL_CULL_FACE);
 			//Worldscene->RenderShadowMaps();
 
-			reflectionBuffer->bind();
+			//reflectionBuffer->bind();
+			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+
 		glDepthFunc(GL_LESS);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			Worldscene->RenderWorldObjects();
-			reflectionBuffer->unbind();
+			//reflectionBuffer->unbind();
 			Worldscene->RenderWorldObjects();
 			glActiveTexture(GL_TEXTURE0 + 0);
-			glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
-			waterPlane.render();
+			//glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
+			//waterPlane.render();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			HDRShader.use();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, colourBuffer);
+			renderQuad();
+
 			Worldscene->RenderGUI();
 			//glhelper::Mesh* tM = &testMesh;
 
