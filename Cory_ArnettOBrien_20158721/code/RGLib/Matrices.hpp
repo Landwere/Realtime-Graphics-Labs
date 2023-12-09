@@ -10,4 +10,5 @@ Eigen::Matrix4f makeTranslationMatrix(const Eigen::Vector3f& translate);
 
 Eigen::Matrix4f makeScaleMatrix(float scale);
 
+Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis);
 //end source

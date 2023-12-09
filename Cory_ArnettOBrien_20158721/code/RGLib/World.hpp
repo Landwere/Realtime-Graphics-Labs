@@ -9,7 +9,7 @@
 #include "RGLib/Texture.hpp"
 #include <RGLib/Matrices.hpp>
 #include "Light.hpp"
-
+#include "RGLib/ShadowMap.hpp"
 namespace RGLib
 {
 	class WorldObject
@@ -77,6 +77,9 @@ namespace RGLib
 
 		glhelper::Mesh* ground;
 	private:
+		std::vector<glhelper::Mesh*> shadowRec;
+
+		RGLib::ShadowMap* shadowMap;
 		std::vector<glhelper::Mesh*> /*std::vector<WorldObject*>**/ worldMeshes;
 		std::vector<GLuint> queries;
 		std::ofstream dataFile; //("renderData.csv");

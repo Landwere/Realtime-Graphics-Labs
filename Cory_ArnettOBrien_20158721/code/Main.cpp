@@ -73,12 +73,7 @@ float gravitationalConstant = -0.1f;
 float ringParticleSize = 0.03f;
 const int MAX_N_MASSES = 10;
 
-Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
-{
-	Eigen::Matrix4f output = Eigen::Matrix4f::Identity();
-	output.block<3, 3>(0, 0) = Eigen::AngleAxisf(angle, axis).matrix();
-	return output;
-}
+
 //Quad renderer from https://learnopengl.com/Advanced-Lighting/HDR
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
@@ -592,12 +587,12 @@ int main()
 		glm::vec3 glmLight;
 		glmLight = glm::vec3(90, 0, 0);
 
-		GLuint frameBuffer;
-		glGenFramebuffers(1, &frameBuffer);
+		//GLuint frameBuffer;
+		//glGenFramebuffers(1, &frameBuffer);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+		//glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		RGLib::FrameBuffer* reflectionBuffer = new RGLib::FrameBuffer(1280, 720);
 		reflectionBuffer->init();
@@ -735,12 +730,12 @@ int main()
 				0, 0, 0, 1;
 
 
-			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-			glDisable(GL_CULL_FACE);
-			glViewport(0, 0, shadowMapSize, shadowMapSize);
+			//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+			//glDisable(GL_CULL_FACE);
+			//glViewport(0, 0, shadowMapSize, shadowMapSize);
 
 
-			for (int i = 0; i < 6; ++i) {
+			/*for (int i = 0; i < 6; ++i) {
 
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMapTexture, 0);
 				glClear(GL_DEPTH_BUFFER_BIT);
@@ -759,7 +754,7 @@ int main()
 
 				}
 
-			}
+			}*/
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, windowWidth, windowHeight);
 			glActiveTexture(GL_TEXTURE0 + 1);

@@ -45,7 +45,9 @@ namespace RGLib
 			lightIntensity = intensity;
 		}
 
+
 		float lightWidth;
+		float lightRadius;
 	private:
 		Eigen::Vector3f lightPos;
 		float lightIntensity;

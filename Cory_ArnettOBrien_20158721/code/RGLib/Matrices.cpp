@@ -59,3 +59,10 @@ Eigen::Matrix4f makeIdentityMatrix(float scale)
 
 	return identityMatrix;
 }
+
+Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
+{
+	Eigen::Matrix4f output = Eigen::Matrix4f::Identity();
+	output.block<3, 3>(0, 0) = Eigen::AngleAxisf(angle, axis).matrix();
+	return output;
+}

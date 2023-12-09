@@ -1,6 +1,4 @@
 #include "Mesh.hpp"
-#include "Mesh.hpp"
-#include "Mesh.hpp"
 #include "Constants.hpp"
 #include "Exception.hpp"
 
