@@ -1,6 +1,7 @@
 #include "World.hpp"
-#include "World.hpp"
-#include "World.hpp"
+#include "Constants.hpp"
+
+
 
 
 
@@ -12,9 +13,36 @@ RGLib::World::World()
 	fpsText = gltCreateText();
 
 	frameCount = 0;
+
+	flipMatrix <<
+		-1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 0.0f, 0.0f,
+		0, 0, 1, 0,
+		0, 0, 0, 1;
+
+
+	//Create cubemap for shadows
+	glGenTextures(1, &cubeMapTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+	for (int i = 0; i < 6; ++i)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	}
+	glTextureParameteri(cubeMapTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	cubemapPerspective = perspective(M_PI_2, 1, shadowMapNear, shadowMapFar);
+
+	glGenFramebuffers(1, &frameBuffer);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// Here are the rotations for each face of the cubemap (please do use them!)
+
 }
 
-void RGLib::World::RenderWorld()
+void RGLib::World::RenderWorldObjects()
 {
 	//int i is used to link world objects to their queries
 	//TODO make world objects into their own mini class with queries attached or attach queries to meshes
@@ -114,11 +142,69 @@ void RGLib::World::RenderWorld()
 	lastFrameTime = std::chrono::steady_clock::now();
 
 
+
+}
+
+void RGLib::World::RenderGUI()
+{
 	//draw text to window
-	/*gltBeginDraw();
+	gltBeginDraw();
 	gltColor(1.f, 1.f, 1.f, 1.f);
 	gltDrawText2D(fpsText, 10.f, 10.f, 1.f);
-	gltEndDraw();*/
+	gltEndDraw();
+}
+
+//Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
+//{
+//	Eigen::Matrix4f output = Eigen::Matrix4f::Identity();
+//	output.block<3, 3>(0, 0) = Eigen::AngleAxisf(angle, axis).matrix();
+//	return output;
+//}
+//
+//	const std::array<Eigen::Matrix4f, 6> cubemapRotations{
+//		angleAxisMat4(float(M_PI_2), Eigen::Vector3f(0,1,0)),//POSITIVE_X - rotate right 90 degrees
+//		angleAxisMat4(float(-M_PI_2), Eigen::Vector3f(0,1,0)),//NEGATIVE_X - rotate left 90 degrees
+//		angleAxisMat4(float(-M_PI_2), Eigen::Vector3f(1,0,0)) * angleAxisMat4(float(M_PI), Eigen::Vector3f(0,1,0)),//POSITIVE_Y - rotate up 90 degrees
+//		angleAxisMat4(float(M_PI_2), Eigen::Vector3f(1,0,0)) * angleAxisMat4(float(M_PI), Eigen::Vector3f(0,1,0)),//NEGATIVE_Y - rotate down 90 degrees
+//		angleAxisMat4(float(M_PI), Eigen::Vector3f(0,1,0)),     //POSITIVE_Z - rotate right 180 degrees
+//		Eigen::Matrix4f::Identity()                           //NEGATIVE_Z
+//	};
+void RGLib::World::RenderShadowMaps()
+{
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+	glDisable(GL_CULL_FACE);
+	glViewport(0, 0, shadowMapSize, shadowMapSize);
+
+
+
+	/*for (int i = 0; i < 6; ++i) {
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMapTexture, 0);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		Eigen::Matrix4f clipMatrix;
+
+		clipMatrix = flipMatrix * cubemapPerspective * cubemapRotations[i] * makeTranslationMatrix(-worldLights[0]->GetPos());
+
+
+		glProgramUniformMatrix4fv(shadowCubeMapShader->get(), shadowCubeMapShader->uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
+
+		for (glhelper::Mesh* mesh : worldMeshes)
+		{
+			if (mesh->castsShadow())
+				mesh->render(*shadowCubeMapShader);
+
+		}
+
+	}*/
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, 1280, 720);
+
+	glActiveTexture(GL_TEXTURE0 + 1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+	ground->render();
 }
 
 void RGLib::World::AddToWorld(glhelper::Mesh &mesh)
@@ -138,6 +224,11 @@ void RGLib::World::AddWorldObject(glhelper::Mesh& mesh, GLuint normalMap)
 	WorldObject* wO = new WorldObject(mesh);
 	wO->SetNormal(normalMap);
 	worldObjects.push_back(wO);
+}
+
+void RGLib::World::AddWorldLight(RGLib::Light light)
+{
+	worldLights.push_back(&light);
 }
 
 void RGLib::World::CreateQueries()
@@ -166,4 +257,10 @@ void RGLib::World::ClearWorld()
 {
 	worldMeshes.clear();
 	queries.clear();
+}
+
+void RGLib::World::SetShadowMapShaders(glhelper::ShaderProgram &sMShader, glhelper::ShaderProgram &sCMShader)
+{
+	shadowMappedShader = &sMShader;
+	shadowCubeMapShader = &sCMShader;
 }

@@ -17,6 +17,7 @@
 #include "RGLib/RotateViewer.hpp"
 #include <RGLib/Matrices.hpp>
 #include <RGLib/World.hpp>
+#include <RGLib/Light.hpp>
 #include <opencv2/opencv.hpp>
 #include <RGLib/Matrices.cpp>
 #include "RGLib/FlyViewer.hpp"
@@ -41,10 +42,9 @@ Model* model;
 
 SDL_Event event;
 float theta = 0.0f;
-Eigen::Vector3f lightPos(5.f * sinf(theta), 2.f, -5.f * cosf(theta)), spherePos(5.f, 0.f, 0.f);
 Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
 float specularExponent = 60.f, specularIntensity = 0.05f;
-float lightIntensity =  30.f;
+//float lightIntensity =  30.f;
 float fallOffExponent = 2.0f;
 Eigen::Vector3f worldLightDir(40,90, 0);
 float worldLightIntensity = 0.5f;
@@ -211,7 +211,9 @@ GLuint createTexture(const cv::Mat& image)
 //end source
 int main()
 {
-	lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
+	RGLib::Light* lampLight = new RGLib::Light(100, Eigen::Vector3f(-0.1f, 7.f, 0.f));
+
+	//lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
 	//lightPos = Eigen::Vector3f(0, 6, -5);
 	worldLightDir.normalize();
 
@@ -269,16 +271,16 @@ int main()
 
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularExponent"), specularExponent);
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
-	glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
-	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+	glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lampLight->Intensity());
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
 	glProgramUniform3fv(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightInt"), worldLightIntensity);
 
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("specularExponent"), specularExponent);
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("specularIntensity"), specularIntensity);
-	glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
-	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("lightIntensity"), lightIntensity);
+	glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("lightIntensity"), lampLight->Intensity());
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("falloffExponent"), fallOffExponent);
 	glProgramUniform3fv(NormalShader.get(), NormalShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("worldLightInt"), worldLightIntensity);
@@ -289,7 +291,7 @@ int main()
 
 	glProgramUniform1f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("nearPlane"), shadowMapNear);
 	glProgramUniform1f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("farPlane"), shadowMapFar);
-	glProgramUniform3f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
+	glProgramUniform3f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 
 	glProgramUniform4f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("color"), 0.27f, 0.33f, 0.34f, 1.f);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("nearPlane"), shadowMapNear);
@@ -298,7 +300,7 @@ int main()
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightRadius"), lightWidth);
 	glProgramUniform1i(shadowMappedShader.get(), shadowMappedShader.uniformLoc("sampleRadius"), sampleRadius);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("bias"), shadowMapBias);
-	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
+	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 
 	GLuint ringVao;
 	glGenVertexArrays(1, &ringVao);
@@ -390,7 +392,7 @@ int main()
 		//Sphere mesh
 		glhelper::Mesh sphereMesh;
 		sphereMesh.meshName = "Sphere";
-		sphereMesh.modelToWorld(makeTranslationMatrix(lightPos));
+		sphereMesh.modelToWorld(makeTranslationMatrix(lampLight->GetPos()));
 		modelLoader->loadFromFile("../models/sphere.obj", &sphereMesh);
 		sphereMesh.shaderProgram(&lambertShader);
 		sphereMesh.setCastsShadow(false);
@@ -483,7 +485,7 @@ int main()
 		cubemapPerspective = perspective(M_PI_2, 1, shadowMapNear, shadowMapFar);
 
 		// Here are the rotations for each face of the cubemap (please do use them!)
-		const std::array<Eigen::Matrix4f, 6> cubemapRotations{
+		 std::array<Eigen::Matrix4f, 6> cubemapRotations{
 			angleAxisMat4(float(M_PI_2), Eigen::Vector3f(0,1,0)),//POSITIVE_X - rotate right 90 degrees
 			angleAxisMat4(float(-M_PI_2), Eigen::Vector3f(0,1,0)),//NEGATIVE_X - rotate left 90 degrees
 			angleAxisMat4(float(-M_PI_2), Eigen::Vector3f(1,0,0)) * angleAxisMat4(float(M_PI), Eigen::Vector3f(0,1,0)),//POSITIVE_Y - rotate up 90 degrees
@@ -494,18 +496,22 @@ int main()
 
 
 		//TODO remove scene and replace with World class, currently only used for shadows
-		std::vector<glhelper::Renderable*> scene{ /*&testMesh,*/ &lightHouse, &rock, &rock2, &groundPlane};
+		std::vector<glhelper::Renderable*> scene{ /*&testMesh,*//* &lightHouse,*/ &rock, &rock2, &groundPlane};
 
 		//set up world scene
 		Worldscene = new RGLib::World;
 		//Worldscene->AddToWorld(testMesh);
+		Worldscene->SetShadowMapShaders(shadowMappedShader, shadowCubeMapShader);
+
+		Worldscene->AddWorldLight(*lampLight);
+		//Worldscene->AddToWorld(groundPlane);
 		Worldscene->AddToWorld(sphereMesh);
 		Worldscene->AddToWorld(lightHouse);
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
-		Worldscene->AddToWorld(groundPlane);
 		Worldscene->AddToWorld(Tree1);
 		Worldscene->AddWorldObject(lightHouse);
+		Worldscene->ground = &groundPlane;
 		//Worldscene->AddWorldObject(testMesh, spotNormalMap);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
 
@@ -586,26 +592,26 @@ int main()
 				{
 					if (event.key.keysym.sym == SDLK_DOWN) {
 						if (event.key.keysym.mod & KMOD_SHIFT) {
-							lightIntensity -= 0.1f;
-							if (lightIntensity < 0.f) lightIntensity = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+							lampLight->setIntensity(lampLight->Intensity() - 0.1f);
+							if (lampLight->Intensity() < 0.f) lampLight->setIntensity(0);
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lampLight->Intensity());
 						}
 						else {
-							lightIntensity -= 10.0f;
-							if (lightIntensity < 0.f) lightIntensity = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+							lampLight->setIntensity(lampLight->Intensity() - 10.f);
+							if (lampLight->Intensity() < 0.f) lampLight->setIntensity(0);
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lampLight->Intensity());
 						}
 					}
 					if (event.key.keysym.sym == SDLK_UP) {
 						if (event.key.keysym.mod & KMOD_SHIFT) {
-							lightIntensity += 0.1f;
-							if (lightIntensity < 0.f) lightIntensity = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+							lampLight->setIntensity(lampLight->Intensity() + 0.1f);
+							if (lampLight->Intensity() < 0.f) lampLight->setIntensity(0);
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lampLight->Intensity());
 						}
 						else {
-							lightIntensity += 10.0f;
-							if (lightIntensity < 0.f) lightIntensity = 0.f;
-							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lightIntensity);
+							lampLight->setIntensity(lampLight->Intensity() + 10.f);
+							if (lampLight->Intensity() < 0.f) lampLight->setIntensity(0);
+							glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightIntensity"), lampLight->Intensity());
 						}
 					}
 					if (event.key.keysym.sym == SDLK_RIGHT) {
@@ -643,10 +649,10 @@ int main()
 			if (lightRotating) {
 				theta += 0.01f;
 				if (theta > 2 * 3.14159f) theta = 0.f;
-				lightPos << 5.f * sinf(theta), 5.f, 5.f * cosf(theta);
-				sphereMesh.modelToWorld(makeTranslationMatrix(lightPos));
-				glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
-				glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lightPos.x(), lightPos.y(), lightPos.z());
+				lampLight->GetPos() << 5.f * sinf(theta), 5.f, 5.f * cosf(theta);
+				sphereMesh.modelToWorld(makeTranslationMatrix(lampLight->GetPos()));
+				glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+				glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 
 			}
 
@@ -701,7 +707,7 @@ int main()
 
 				Eigen::Matrix4f clipMatrix;
 
-				clipMatrix = flipMatrix * cubemapPerspective * cubemapRotations[i] * makeTranslationMatrix(-lightPos);
+				clipMatrix = flipMatrix * cubemapPerspective * cubemapRotations[i] * makeTranslationMatrix(-lampLight->GetPos());
 
 
 				glProgramUniformMatrix4fv(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
@@ -719,25 +725,27 @@ int main()
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
 			
-	
-			//for (glhelper::Renderable* mesh : scene) {
+			groundPlane.render();
+		/*	for (glhelper::Renderable* mesh : scene) {
 
-			//	mesh->render();
+				mesh->render();
 
-			//}
+			}*/
 			//glDisable(GL_CULL_FACE);
+			//Worldscene->RenderShadowMaps();
 
 			reflectionBuffer->bind();
 		glDepthFunc(GL_LESS);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			Worldscene->RenderWorld();
+			Worldscene->RenderWorldObjects();
 			reflectionBuffer->unbind();
-			Worldscene->RenderWorld();
+			Worldscene->RenderWorldObjects();
 			glActiveTexture(GL_TEXTURE0 + 0);
 			glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
 			waterPlane.render();
+			Worldscene->RenderGUI();
 			//glhelper::Mesh* tM = &testMesh;
 
 			glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);

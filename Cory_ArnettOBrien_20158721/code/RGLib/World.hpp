@@ -7,6 +7,9 @@
 #include <chrono>
 #include "RGLib/json.hpp"
 #include "RGLib/Texture.hpp"
+#include <RGLib/Matrices.hpp>
+#include "Light.hpp"
+
 namespace RGLib
 {
 	class WorldObject
@@ -50,13 +53,14 @@ namespace RGLib
 
 	public:
 		World();
-		void RenderWorld();
-
+		void RenderWorldObjects();
+		void RenderGUI();
+		void RenderShadowMaps();
 		void AddToWorld(glhelper::Mesh& mesh);
 
 		void AddWorldObject(glhelper::Mesh& mesh);
 		void AddWorldObject(glhelper::Mesh& mesh, GLuint normalMap);
-
+		void AddWorldLight(RGLib::Light light);
 		//create GL queries for each mesh in world
 		void CreateQueries();
 
@@ -69,6 +73,9 @@ namespace RGLib
 		std::map<std::string, glhelper::ShaderProgram>* shaders;
 		std::map<std::string, glhelper::Texture>* textures;*/
 
+		void SetShadowMapShaders(glhelper::ShaderProgram &sMShader, glhelper::ShaderProgram &sCMShader);
+
+		glhelper::Mesh* ground;
 	private:
 		std::vector<glhelper::Mesh*> /*std::vector<WorldObject*>**/ worldMeshes;
 		std::vector<GLuint> queries;
@@ -78,6 +85,22 @@ namespace RGLib
 		std::chrono::time_point<std::chrono::steady_clock> lastFrameTime;
 		float frameDuration;
 		std::vector< WorldObject*> worldObjects;
+
+
+		Eigen::Matrix4f flipMatrix;
+
+		std::vector<RGLib::Light*> worldLights;
+
+		//shadow
+		float shadowMapSize;
+		const float shadowMapNear = 1.f, shadowMapFar = 1000.f;
+		float shadowMapBias = 1.0f;
+		GLuint cubeMapTexture;
+		Eigen::Matrix4f cubemapPerspective;
+		glhelper::ShaderProgram* shadowMappedShader;
+		glhelper::ShaderProgram* shadowCubeMapShader;
+		GLuint frameBuffer;
+
 	};
 
 	
