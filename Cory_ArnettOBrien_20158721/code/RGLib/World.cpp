@@ -46,8 +46,8 @@ void RGLib::World::RenderWorldObjects()
 {
 	//int i is used to link world objects to their queries
 	//TODO make world objects into their own mini class with queries attached or attach queries to meshes
-	shadowRec.push_back(ground);
-	shadowMap->RenderShadowMap(worldMeshes, shadowRec, worldLights[0]);
+	
+	//shadowMap->RenderShadowMap(worldMeshes, shadowRec, worldLights[0]);
 
 	int i = 0;
 	for (glhelper::Mesh* mesh : worldMeshes)
@@ -246,8 +246,8 @@ void RGLib::World::CreateQueries()
 	}
 	dataFile.clear();
 
-	shadowMap = new RGLib::ShadowMap(512, worldLights[0]);
-
+	//shadowMap = new RGLib::ShadowMap(512, worldLights[0]);
+	//shadowRec.push_back(ground);
 }
 
 

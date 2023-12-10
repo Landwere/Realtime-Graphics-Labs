@@ -21,11 +21,7 @@ RGLib::ShadowMap::ShadowMap(int mapSize, RGLib::Light* light)
 
 	//Set up cubemap
 	glGenTextures(1, &cubeMapTexture);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-	for (int i = 0; i < 6; ++i)
-	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	}
+
 	glTextureParameteri(cubeMapTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	Eigen::Matrix4f cubemapPerspective;
 
@@ -60,6 +56,14 @@ std::array<Eigen::Matrix4f, 6> cubemapRotations{
 
 void RGLib::ShadowMap::RenderShadowMap(std::vector<glhelper::Mesh*> shadowCasters, std::vector<glhelper::Mesh*> shadowRecivers, RGLib::Light* light)
 {
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+	for (int i = 0; i < 6; ++i)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	}
+	glEnable(GL_DEPTH_TEST);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	glDisable(GL_CULL_FACE);
 	glViewport(0, 0, shadowMapSize, shadowMapSize);

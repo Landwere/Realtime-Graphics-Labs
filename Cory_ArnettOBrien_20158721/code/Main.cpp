@@ -279,7 +279,7 @@ int main()
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),//look at
 		glm::vec3(0.0f, 1.0f, 0.0f),//up direction
-		90.0f, windowWidth / windowHeight, 0.1f, 9000.0f); // fov, aspect ratio based on window dimensions
+		90.0f, windowWidth / windowHeight, 0.4f, 900.0f); // fov, aspect ratio based on window dimensions
 
 	//glhelper::RotateViewer viewer(windowWidth, windowHeight);
 	glhelper::FlyViewer viewer(windowWidth, windowHeight);
@@ -326,6 +326,8 @@ int main()
 	glProgramUniform1i(shadowMappedShader.get(), shadowMappedShader.uniformLoc("sampleRadius"), sampleRadius);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("bias"), shadowMapBias);
 	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+
+	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("HDRBuffer"), 0);
 
 	GLuint ringVao;
 	glGenVertexArrays(1, &ringVao);
@@ -495,14 +497,38 @@ int main()
 #pragma endregion
 
 		//Colour buffer
-		GLuint colourBuffer;
-		glGenTextures(1, &colourBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+
 		GLuint HDRFrameBuffer;
 		glGenFramebuffers(1, &HDRFrameBuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colourBuffer, 0);
+		GLuint colourBuffer;
+		glGenTextures(1, &colourBuffer);
+		glBindTexture(GL_TEXTURE_2D, colourBuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourBuffer, 0);
+		//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colourBuffer, 0);
+		
+		GLuint renderBuffer;
+		glGenRenderbuffers(1, &renderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight);
+
+		//attach depth buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer);
+
+		//Colour buffer error check 
+		auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "Colour buffer not created correctly: " << status << std::endl;
+		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
 
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
@@ -540,12 +566,11 @@ int main()
 
 		Worldscene->AddWorldLight(*lampLight);
 		//Worldscene->AddToWorld(groundPlane);
-		Worldscene->AddToWorld(sphereMesh);
+		//Worldscene->AddToWorld(sphereMesh);
 		Worldscene->AddToWorld(lightHouse);
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
 		Worldscene->AddToWorld(Tree1);
-		Worldscene->AddWorldObject(lightHouse);
 		Worldscene->ground = &groundPlane;
 		//Worldscene->AddWorldObject(testMesh, spotNormalMap);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
@@ -587,12 +612,12 @@ int main()
 		glm::vec3 glmLight;
 		glmLight = glm::vec3(90, 0, 0);
 
-		//GLuint frameBuffer;
-		//glGenFramebuffers(1, &frameBuffer);
+		GLuint frameBuffer;
+		glGenFramebuffers(1, &frameBuffer);
 
-		//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		//glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		RGLib::FrameBuffer* reflectionBuffer = new RGLib::FrameBuffer(1280, 720);
 		reflectionBuffer->init();
@@ -730,12 +755,12 @@ int main()
 				0, 0, 0, 1;
 
 
-			//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-			//glDisable(GL_CULL_FACE);
-			//glViewport(0, 0, shadowMapSize, shadowMapSize);
+			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+			glDisable(GL_CULL_FACE);
+			glViewport(0, 0, shadowMapSize, shadowMapSize);
 
 
-			/*for (int i = 0; i < 6; ++i) {
+			for (int i = 0; i < 6; ++i) {
 
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMapTexture, 0);
 				glClear(GL_DEPTH_BUFFER_BIT);
@@ -754,13 +779,10 @@ int main()
 
 				}
 
-			}*/
+			}
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, windowWidth, windowHeight);
-			glActiveTexture(GL_TEXTURE0 + 1);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-			
-			groundPlane.render();
+
 		/*	for (glhelper::Renderable* mesh : scene) {
 
 				mesh->render();
@@ -771,56 +793,69 @@ int main()
 
 			//reflectionBuffer->bind();
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+			glClearColor(0.1f, 0.13f, 0.17f, 1.0f);
 
-		glDepthFunc(GL_LESS);
+		//glDepthFunc(GL_LESS);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			Worldscene->RenderWorldObjects();
+		//glEnable(GL_CULL_FACE);
+		//glCullFace(GL_BACK);
+			//Worldscene->RenderWorldObjects();
+
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+			
+			groundPlane.render();
+			glActiveTexture(GL_TEXTURE0 + 0);
+
 			//reflectionBuffer->unbind();
 			Worldscene->RenderWorldObjects();
-			glActiveTexture(GL_TEXTURE0 + 0);
+			//glActiveTexture(GL_TEXTURE0 + 0);
 			//glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
 			//waterPlane.render();
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			HDRShader.use();
-			glActiveTexture(GL_TEXTURE0);
+			glDisable(GL_DEPTH_TEST);
+			//glDisable(GL_CULL_FACE);
 			glBindTexture(GL_TEXTURE_2D, colourBuffer);
 			renderQuad();
 
-			Worldscene->RenderGUI();
-			//glhelper::Mesh* tM = &testMesh;
+			//Worldscene->RenderGUI();
+			////glhelper::Mesh* tM = &testMesh;
 
-			glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
-			glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
+			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
+			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
 
-			glDisable(GL_BLEND);
-			glActiveTexture(GL_TEXTURE0 + 0);
-			glBindTexture(GL_TEXTURE_2D, spotTexture);
-			glActiveTexture(GL_TEXTURE0 + 2);
-			glBindTexture(GL_TEXTURE_2D, spotNormalMap);
-			testMesh.render();
-			
+			//glDisable(GL_BLEND);
+			//glActiveTexture(GL_TEXTURE0 + 0);
+			//glBindTexture(GL_TEXTURE_2D, spotTexture);
+			//glActiveTexture(GL_TEXTURE0 + 2);
+			//glBindTexture(GL_TEXTURE_2D, spotNormalMap);
+			//testMesh.render();
+			//
 
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
+			//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
 
-			//glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
-			glUseProgram(RainPhysicsShader.get());
-			glDispatchCompute(nRParticles, 1, 1);
+			////glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
+			//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
+			//glUseProgram(RainPhysicsShader.get());
+			//glDispatchCompute(nRParticles, 1, 1);
 
-			glEnable(GL_BLEND);
-			glDepthMask(GL_FALSE);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			//glEnable(GL_BLEND);
+			//glDepthMask(GL_FALSE);
+			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
-			glBindVertexArray(ringVao);
-			billboardParticleShader.use();
-			glDrawArrays(GL_POINTS, 0, nRParticles);
-			billboardParticleShader.unuse();
-			glDepthMask(GL_TRUE);
-			
+			//glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+			//glBindVertexArray(ringVao);
+			//billboardParticleShader.use();
+			//glDrawArrays(GL_POINTS, 0, nRParticles);
+			//billboardParticleShader.unuse();
+			//glDepthMask(GL_TRUE);
+			//
 
 			SDL_GL_SwapWindow(window);
 

@@ -9,8 +9,8 @@ uniform sampler2D HDRBuffer;
 
 void main()
 {
-	vec3 HDRColour = texture(HDRBuffer, texCoord).xyz;
-	colourOut = vec4(1,1,1,1);//vec4(HDRColour, 1.0);
+	vec4 HDRColour = texture(HDRBuffer, texCoord);
+	colourOut = vec4(HDRColour);
 }
 
 //end source

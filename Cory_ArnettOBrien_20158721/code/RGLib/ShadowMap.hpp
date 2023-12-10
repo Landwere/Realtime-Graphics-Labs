@@ -7,6 +7,7 @@
 #include "RGLib/Light.hpp"
 #include "RGLib/Matrices.hpp"
 #include "Constants.hpp"
+#define SDL_MAIN_HANDLED
 
 namespace RGLib
 {
