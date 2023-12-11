@@ -740,11 +740,13 @@ int main()
 			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
-
+			//Clear buffers before rendering shadows
+			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+			glEnable(GL_BLEND);
+			glEnable(GL_DEPTH_TEST);
 
 
 			Eigen::Matrix4f flipMatrix;
@@ -781,6 +783,7 @@ int main()
 
 			}
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			
 			glViewport(0, 0, windowWidth, windowHeight);
 
 		/*	for (glhelper::Renderable* mesh : scene) {
@@ -793,14 +796,13 @@ int main()
 
 			//reflectionBuffer->bind();
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
-			glClearColor(0.1f, 0.13f, 0.17f, 1.0f);
+			//glClearColor(0.1f, 0.13f, 0.17f, 1.0f);
 
 		//glDepthFunc(GL_LESS);
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
 			//Worldscene->RenderWorldObjects();
