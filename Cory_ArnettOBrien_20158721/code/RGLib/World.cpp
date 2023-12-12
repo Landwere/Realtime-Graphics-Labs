@@ -76,11 +76,20 @@ void RGLib::World::RenderWorldObjects()
 		//TODO else bind empty tex
 
 		//bind normal map
-		glActiveTexture(GL_TEXTURE0 + 1);
-		glBindTexture(GL_TEXTURE_2D,object->GetNormal());
+		if (object->GetNormal() != NULL)
+		{
+			glDisable(GL_BLEND);
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_2D, object->GetNormal());
+		}
+
 
 		//store query data for each mesh rendered 
 		object->getMesh()->render();
+		//Unbind textures
+		glActiveTexture(GL_TEXTURE0 + 0);
+		glBindTexture(GL_TEXTURE_2D, NULL);
+
 	}
 
 	//for (auto& model : *models) {

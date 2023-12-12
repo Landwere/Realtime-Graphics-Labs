@@ -494,6 +494,13 @@ int main()
 		Eigen::Matrix4f treeModelToWorld = Eigen::Matrix4f::Identity();
 		Tree1.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4, 0, 4.f))* treeModelToWorld);
 
+		glhelper::Mesh pinecone;
+		pinecone.meshName = "Pinecone";
+		modelLoader->loadFromFile("../models/pinecone/pinecone.fbx", & pinecone);
+		pinecone.loadTexture("../models/pinecone/pinecone_1001_BaseColor.jpg");
+		pinecone.shaderProgram(&blinnPhongShader);
+		Eigen::Matrix4f pineconeMTW = Eigen::Matrix4f::Identity();
+		pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4.2f, 0, 4.2f)) * makeScaleMatrix(30.f) * pineconeMTW);
 
 #pragma endregion
 
@@ -524,7 +531,7 @@ int main()
 				// Make a box collision shape, set its transform, mass, inertia and restitution
 				// then make the rigidbody with these properties and add it to the world.
 				btBoxShape* box;
-				box = new btBoxShape(btVector3(5, 0.1f, 5));
+				box = new btBoxShape(btVector3(20, 0.1f, 20));
 				btRigidBody* floor;
 				btRigidBody::btRigidBodyConstructionInfo floorInfo{ 0, 0, box };
 				floor = new btRigidBody(floorInfo);
@@ -554,7 +561,7 @@ int main()
 				ball = new btRigidBody(ballInfo);
 				ball->setRestitution(1.f);
 				ball->setCollisionShape(sphere);
-				ball->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(0.0f, 5.0f, 0.0f)));
+				ball->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(4.1f, 5.0f, 4.0f)));
 				ball->setActivationState(DISABLE_DEACTIVATION);
 				world->addRigidBody(ball);
 			}
@@ -631,12 +638,13 @@ int main()
 		Worldscene->AddWorldLight(*lampLight);
 		//Worldscene->AddToWorld(groundPlane);
 		//Worldscene->AddToWorld(sphereMesh);
-		//Worldscene->AddToWorld(lightHouse);
+		Worldscene->AddToWorld(lightHouse);
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
 		Worldscene->AddToWorld(Tree1);
+		Worldscene->AddToWorld(pinecone);
 		Worldscene->ground = &groundPlane;
-		//Worldscene->AddWorldObject(testMesh, spotNormalMap);
+		Worldscene->AddWorldObject(testMesh, spotNormalMap);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
 
 		for (auto& model : models) {
@@ -806,7 +814,7 @@ int main()
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
 			//Clear buffers before rendering shadows
-			//glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -860,7 +868,7 @@ int main()
 			//Worldscene->RenderShadowMaps();
 
 			//reflectionBuffer->bind();
-			//glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 			//glClearColor(0.1f, 0.13f, 0.17f, 1.0f);
 
 		//glDepthFunc(GL_LESS);
@@ -882,21 +890,21 @@ int main()
 			ball->getMotionState()->getWorldTransform(ballTran);
 			btVector3 ballPos = ballTran.getOrigin();
 			std::cout << "ball pos: " << ballPos.y() << std::endl;
-			testMesh.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(ballPos.x(), ballPos.y(), ballPos.z())));
+			pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(ballPos.x(), ballPos.y(), ballPos.z()) ) * makeScaleMatrix(0.2f));
 
 			//reflectionBuffer->unbind();
 			Worldscene->RenderWorldObjects();
 
 
-			glDisable(GL_BLEND);
-			glActiveTexture(GL_TEXTURE0 + 0);
-			glBindTexture(GL_TEXTURE_2D, spotTexture);
-			glActiveTexture(GL_TEXTURE0 + 2);
-			glBindTexture(GL_TEXTURE_2D, spotNormalMap);
-			testMesh.render();
-			glBindTexture(GL_TEXTURE_2D, NULL);
-			glActiveTexture(GL_TEXTURE0 + 0);
-			glBindTexture(GL_TEXTURE_2D, NULL);
+			//glDisable(GL_BLEND);
+			//glActiveTexture(GL_TEXTURE0 + 0);
+			//glBindTexture(GL_TEXTURE_2D, spotTexture);
+			//glActiveTexture(GL_TEXTURE0 + 2);
+			//glBindTexture(GL_TEXTURE_2D, spotNormalMap);
+			//testMesh.render();
+			//glBindTexture(GL_TEXTURE_2D, NULL);
+			//glActiveTexture(GL_TEXTURE0 + 0);
+			//glBindTexture(GL_TEXTURE_2D, NULL);
 
 			//glActiveTexture(GL_TEXTURE0 + 0);
 			//glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
@@ -904,10 +912,10 @@ int main()
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			////RENDER QUAD TO SCREEN
-			//HDRShader.use();
-			//glDisable(GL_DEPTH_TEST);
-			//glBindTexture(GL_TEXTURE_2D, colourBuffer);
-			//renderQuad();
+			HDRShader.use();
+			glDisable(GL_DEPTH_TEST);
+			glBindTexture(GL_TEXTURE_2D, colourBuffer);
+			renderQuad();
 
 			//Worldscene->RenderGUI();
 			////glhelper::Mesh* tM = &testMesh;
