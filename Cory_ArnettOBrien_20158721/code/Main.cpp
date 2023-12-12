@@ -27,6 +27,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <bullet/btBulletDynamicsCommon.h>
 
 namespace fs = std::filesystem;
 
@@ -496,6 +497,69 @@ int main()
 
 #pragma endregion
 
+		//BULLET physics
+		
+			// This sets up the physics world for your simulation.
+			// I used unique_ptr here for convenience but it would probably be neater
+			// to wrap up the creation and destruction of the physics world into a class.
+			std::unique_ptr<btDefaultCollisionConfiguration> collisionConfig =
+				std::make_unique<btDefaultCollisionConfiguration>();
+			std::unique_ptr<btCollisionDispatcher> dispatcher =
+				std::make_unique<btCollisionDispatcher>(collisionConfig.get());
+			std::unique_ptr<btBroadphaseInterface> overlappingPairCache =
+				std::make_unique<btDbvtBroadphase>();
+			std::unique_ptr<btSequentialImpulseConstraintSolver> solver =
+				std::make_unique<btSequentialImpulseConstraintSolver>();
+			std::unique_ptr<btDiscreteDynamicsWorld> world =
+				std::make_unique<btDiscreteDynamicsWorld>(
+					dispatcher.get(), overlappingPairCache.get(), solver.get(), collisionConfig.get());
+
+			// You may want to set appropriate gravity here.
+			world->setGravity(btVector3(0, -1, 0));
+			// When you create your shapes (box and sphere) add them to this array. 
+			// You should then delete them at the end of the program.
+			btAlignedObjectArray<btCollisionShape*> collisionShapes;
+			{
+				// Make a rigidbody for the floor
+				// Make a box collision shape, set its transform, mass, inertia and restitution
+				// then make the rigidbody with these properties and add it to the world.
+				btBoxShape* box;
+				box = new btBoxShape(btVector3(5, 0.1f, 5));
+				btRigidBody* floor;
+				btRigidBody::btRigidBodyConstructionInfo floorInfo{ 0, 0, box };
+				floor = new btRigidBody(floorInfo);
+				floor->setRestitution(1.0f);
+				floor->setCollisionShape(box);
+				floor->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(0.0f, 0.f, 0.0f)));
+				world->addCollisionObject(floor);
+			}
+			btRigidBody* ball;
+
+			{
+				// Make a rigidbody for the ball
+				// Make a sphere collision shape, set its transform, mass, inertia and restitution
+				// then make the rigidbody with these properties and add it to the world.
+				// I recommend setting body->setActivationState(DISABLE_DEACTIVATION)
+				// By default, the sphere will be dectivated if it stops moving and you'll need to call
+				// body->activate(); again for impulses and forces to have any effect.
+				// This is more efficient, but annoying for debugging!
+				btSphereShape* sphere;
+				sphere = new btSphereShape(btScalar(1));
+				btTransform ballTr;
+				ballTr.setOrigin(btVector3(0.0f, 5.f, 0));
+				//sphere->calculateLocalInertia(1, btVector3(0, 0, 0));
+				btDefaultMotionState* ballMS = new btDefaultMotionState(ballTr);
+
+				btRigidBody::btRigidBodyConstructionInfo ballInfo{ 1, ballMS, sphere };
+				ball = new btRigidBody(ballInfo);
+				ball->setRestitution(1.f);
+				ball->setCollisionShape(sphere);
+				ball->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(0.0f, 5.0f, 0.0f)));
+				ball->setActivationState(DISABLE_DEACTIVATION);
+				world->addRigidBody(ball);
+			}
+
+		
 		//Colour buffer
 
 		GLuint HDRFrameBuffer;
@@ -567,7 +631,7 @@ int main()
 		Worldscene->AddWorldLight(*lampLight);
 		//Worldscene->AddToWorld(groundPlane);
 		//Worldscene->AddToWorld(sphereMesh);
-		Worldscene->AddToWorld(lightHouse);
+		//Worldscene->AddToWorld(lightHouse);
 		Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
 		Worldscene->AddToWorld(Tree1);
@@ -630,6 +694,7 @@ int main()
 		{
 			Uint64 frameStartTime = SDL_GetTicks64();
 
+			world->stepSimulation((desiredFrametime / 1000.0f), 10);
 
 
 			while (SDL_PollEvent(&event))
@@ -741,7 +806,7 @@ int main()
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
 			//Clear buffers before rendering shadows
-			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+			//glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -795,7 +860,7 @@ int main()
 			//Worldscene->RenderShadowMaps();
 
 			//reflectionBuffer->bind();
-			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+			//glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 			//glClearColor(0.1f, 0.13f, 0.17f, 1.0f);
 
 		//glDepthFunc(GL_LESS);
@@ -813,18 +878,36 @@ int main()
 			groundPlane.render();
 			glActiveTexture(GL_TEXTURE0 + 0);
 
+			btTransform ballTran;
+			ball->getMotionState()->getWorldTransform(ballTran);
+			btVector3 ballPos = ballTran.getOrigin();
+			std::cout << "ball pos: " << ballPos.y() << std::endl;
+			testMesh.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(ballPos.x(), ballPos.y(), ballPos.z())));
+
 			//reflectionBuffer->unbind();
 			Worldscene->RenderWorldObjects();
+
+
+			glDisable(GL_BLEND);
+			glActiveTexture(GL_TEXTURE0 + 0);
+			glBindTexture(GL_TEXTURE_2D, spotTexture);
+			glActiveTexture(GL_TEXTURE0 + 2);
+			glBindTexture(GL_TEXTURE_2D, spotNormalMap);
+			testMesh.render();
+			glBindTexture(GL_TEXTURE_2D, NULL);
+			glActiveTexture(GL_TEXTURE0 + 0);
+			glBindTexture(GL_TEXTURE_2D, NULL);
+
 			//glActiveTexture(GL_TEXTURE0 + 0);
 			//glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
 			//waterPlane.render();
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			HDRShader.use();
-			glDisable(GL_DEPTH_TEST);
-			//glDisable(GL_CULL_FACE);
-			glBindTexture(GL_TEXTURE_2D, colourBuffer);
-			renderQuad();
+			////RENDER QUAD TO SCREEN
+			//HDRShader.use();
+			//glDisable(GL_DEPTH_TEST);
+			//glBindTexture(GL_TEXTURE_2D, colourBuffer);
+			//renderQuad();
 
 			//Worldscene->RenderGUI();
 			////glhelper::Mesh* tM = &testMesh;
@@ -832,13 +915,7 @@ int main()
 			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
 			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
 
-			//glDisable(GL_BLEND);
-			//glActiveTexture(GL_TEXTURE0 + 0);
-			//glBindTexture(GL_TEXTURE_2D, spotTexture);
-			//glActiveTexture(GL_TEXTURE0 + 2);
-			//glBindTexture(GL_TEXTURE_2D, spotNormalMap);
-			//testMesh.render();
-			//
+
 
 			//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
 
