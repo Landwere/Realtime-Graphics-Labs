@@ -62,7 +62,7 @@ void main()
 
 	//vec4 normalColor = vec4((normal.xyz * 2) - 1);
 	vec3 normScaled = vec3((normal.xyz * 2 ) -1);
-	vec3 mapNormal = (normScaled.x *  _tan, normScaled.y *  biTan, normScaled.z * worldNorm);
+	vec3 mapNormal = ( normScaled.x *  _tan, normScaled.y *  biTan, normScaled.z * worldNorm);
 	mapNormal =  mapNormal;
 	vec4 diffuseColor = vec4( albedo.xyz * dot(worldNorm, lightDir), 1.0f);
 	float specularPower = pow(clamp(dot(reflect(lightDir, mapNormal), -viewDir), 0, 1), 10);
@@ -96,7 +96,8 @@ void main()
 //	
 	float spot = pow(max(dot(-lightDir, spotLightDir), 0.0f), 1);
 	colorOut.rgb = vec3(0);
-			colorOut += ((30.0f) * (diffuseColor + specularColor) * spot) / (pow(lightDistance, 2));
+			//colorOut += ((30.0f) * (diffuseColor + specularColor) * spot) / (pow(lightDistance, 2));
+			colorOut += clamp((lightModel(lightIntensity / 2, lightDir, viewDir, albedo, mapNormal) * spot) / falloff, 0.f,1.f);
 //
 
 //	vec3 mappedWorldNorm = vec3((normal.xyz * 2 ) -1);
@@ -110,6 +111,6 @@ void main()
 	//colorOut  += (lightModel(lightIntensity , lightDir, viewDir, albedo, mapNormal) * 0.5f)  / falloff;
 //
 //	//global light
-	colorOut += lightModel(worldLightInt / 2, worldLightDir, viewDir, albedo, mapNormal);
+	colorOut += clamp(lightModel(worldLightInt / 2, worldLightDir, viewDir, albedo, mapNormal),0.f,1.f);
 }
 
