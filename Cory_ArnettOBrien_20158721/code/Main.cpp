@@ -233,6 +233,28 @@ GLuint createTexture(const cv::Mat& image)
 
 	return texture;
 }
+
+GLuint createTexture(cv::String filename)
+{
+	cv::Mat image = cv::imread(filename);
+	cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
+
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, image.cols, image.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data);
+
+	glGenerateTextureMipmap(texture);
+
+	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// This isn't strictly necessary as GL_REPEAT is the default mode.
+	glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	image.release();
+	return texture;
+}
 //end source
 int main()
 {
@@ -404,18 +426,10 @@ int main()
 		testMesh.modelToWorld(bunnyModelToWorld);
 		testMesh.shaderProgram(&NormalShader);
 
-		GLuint spotNormalMap;
-		{
-			cv::Mat image = cv::imread("../models/spot/normalmap.png");
-			cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
-			spotNormalMap = createTexture(image);
-		}
-		GLuint spotTexture;
-		{
-			cv::Mat image = cv::imread("../models/spot/spot_texture.png");
-			cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
-			spotTexture = createTexture(image);
-		}
+		GLuint spotNormalMap = createTexture("../models/spot/normalmap.png");
+
+		GLuint spotTexture = createTexture("../models/spot/spot_texture.png");
+
 
 		//Sphere mesh
 		glhelper::Mesh sphereMesh;
@@ -436,8 +450,10 @@ int main()
 		modelLoader->loadFromFile("../models/lighthouse2/source/Lighthouse.fbx", &lightHouse);
 		lightHouse.loadTexture("../models/lighthouse2/textures/Base_color.png");
 
+		GLuint lightHouseNormal = createTexture("../models/lighthouse2/textures/Normal.png");
+
 		lightHouse.modelToWorld(lighthouseModelToWorld);
-		lightHouse.shaderProgram(&blinnPhongShader);
+		lightHouse.shaderProgram(&NormalShader);
 		lightHouse.setCastsShadow(false);
 
 		//Rock Mesh
@@ -449,7 +465,8 @@ int main()
 		rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.7, 0.7f, 2.1)) * makeRotationMatrix(0, 0, -0) * rockModelToWorld;
 		modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-scaled.obj", &rock);
 		rock.loadTexture("../models/obj-nat-rock/textures/nat-rock-diff.jpeg");
-		rock.shaderProgram(&blinnPhongShader);
+		GLuint rockNormal = createTexture("../models/obj-nat-rock/textures/nat-rock-norm.jpeg");
+		rock.shaderProgram(&NormalShader);
 		rock.modelToWorld(rockModelToWorld);
 
 		glhelper::Mesh rock2;
@@ -640,13 +657,15 @@ int main()
 		Worldscene->AddWorldLight(*lampLight);
 		//Worldscene->AddToWorld(groundPlane);
 		//Worldscene->AddToWorld(sphereMesh);
-		Worldscene->AddToWorld(lightHouse);
-		Worldscene->AddToWorld(rock);
+		//Worldscene->AddToWorld(lightHouse);
+		//Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
 		Worldscene->AddToWorld(Tree1);
 		Worldscene->AddToWorld(pinecone);
 		Worldscene->ground = &groundPlane;
 		Worldscene->AddWorldObject(testMesh, spotNormalMap);
+		Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
+		Worldscene->AddWorldObject(rock, rockNormal);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
 
 		for (auto& model : models) {
@@ -700,6 +719,7 @@ int main()
 		Eigen::Vector3f spotLightDir(-1.0f, 0.f, 0.f);
 		Eigen::AngleAxisf rotation;
 		Eigen::Vector3f rotDir;
+		bool hdrEnable = true;
 		while (running)
 		{
 			Uint64 frameStartTime = SDL_GetTicks64();
@@ -776,6 +796,16 @@ int main()
 					if (event.key.keysym.sym == SDLK_p)
 					{
 						ReloadConfig();
+					}
+					if (event.key.keysym.sym == SDLK_o)
+					{
+						if (hdrEnable)
+							hdrEnable = false;
+						else
+							hdrEnable = true;
+						glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("enabled"), hdrEnable);
+
+						std::cout << "HDR ENABLED = " << hdrEnable << std::endl;
 					}
 				}
 #pragma endregion
@@ -892,7 +922,7 @@ int main()
 			btTransform ballTran;
 			ball->getMotionState()->getWorldTransform(ballTran);
 			btVector3 ballPos = ballTran.getOrigin();
-			std::cout << "ball pos: " << ballPos.y() << std::endl;
+			//std::cout << "ball pos: " << ballPos.y() << std::endl;
 			pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(ballPos.x(), ballPos.y(), ballPos.z()) ) * makeScaleMatrix(0.2f));
 
 			//reflectionBuffer->unbind();
@@ -928,24 +958,24 @@ int main()
 
 
 
-			//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
 
-			////glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
-			//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
-			//glUseProgram(RainPhysicsShader.get());
-			//glDispatchCompute(nRParticles, 1, 1);
+			//glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
+			glUseProgram(RainPhysicsShader.get());
+			glDispatchCompute(nRParticles, 1, 1);
 
-			//glEnable(GL_BLEND);
-			//glDepthMask(GL_FALSE);
-			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glEnable(GL_BLEND);
+			glDepthMask(GL_FALSE);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			//glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
-			//glBindVertexArray(ringVao);
-			//billboardParticleShader.use();
-			//glDrawArrays(GL_POINTS, 0, nRParticles);
-			//billboardParticleShader.unuse();
-			//glDepthMask(GL_TRUE);
-			//
+			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+			glBindVertexArray(ringVao);
+			billboardParticleShader.use();
+			glDrawArrays(GL_POINTS, 0, nRParticles);
+			billboardParticleShader.unuse();
+			glDepthMask(GL_TRUE);
+			
 
 			SDL_GL_SwapWindow(window);
 

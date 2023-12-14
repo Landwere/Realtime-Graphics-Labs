@@ -6,7 +6,7 @@ out vec4 colourOut;
 in vec2 texCoord;
 
 uniform sampler2D HDRBuffer;
-
+uniform bool enabled;
 void main()
 {
 	vec4 HDRColour = texture(HDRBuffer, texCoord);
@@ -19,8 +19,10 @@ void main()
 	vec3 map = HDRColour.xyz / ( HDRColour.xyz + vec3(1.0));
 
 	map.xyz = pow(map.xyz, vec3(1.0 / gamme));
-
-	colourOut = vec4(map.xyz, 1.0);
+	if(enabled)
+		colourOut = vec4(map.xyz, 1.0);
+	else
+		colourOut = HDRColour;
 }
 
 //end source
