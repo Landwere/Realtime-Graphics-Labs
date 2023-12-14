@@ -476,6 +476,7 @@ int main()
 		Eigen::Matrix4f groundModelToWorld = Eigen::Matrix4f::Identity();
 		groundModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0, 0, 6.5f)) * groundModelToWorld;
 		modelLoader->loadFromFile("../models/groundPlane.obj", &groundPlane);
+		groundPlane.loadTexture("../models/Forest-Ground_01.png");
 		groundPlane.shaderProgram(&shadowMappedShader);
 		groundPlane.modelToWorld(makeScaleMatrix(2) * groundModelToWorld);
 
@@ -490,6 +491,7 @@ int main()
 		glhelper::Mesh Tree1;
 		Tree1.meshName = "tree1";
 		modelLoader->loadFromFile("../models/tree/Tree.obj", &Tree1);
+		Tree1.loadTexture("../models/tree/textures/Ivy_branch_Variation_1_Diffuse-Ivy_branch_Variation_1_Opacit.png");
 		Tree1.shaderProgram(&blinnPhongShader);
 		Eigen::Matrix4f treeModelToWorld = Eigen::Matrix4f::Identity();
 		Tree1.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4, 0, 4.f))* treeModelToWorld);

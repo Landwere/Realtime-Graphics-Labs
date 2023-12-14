@@ -5,9 +5,11 @@ out vec4 colorOut;
 uniform vec4 color;
 in vec3 fragPosWorld;
 in vec3 worldNorm;
+in vec2 texCoord;
 
 uniform samplerCube shadowMap;
 uniform vec3 lightPosWorld;
+uniform sampler2D albedoTex;
 
 uniform float nearPlane, farPlane;
 
@@ -20,11 +22,15 @@ void main()
 	// and nearPlane values.
 	// If the point is in shadow, scale down the light intensity
 
+	vec3 albedo = texture(albedoTex, texCoord).xyz;
 	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
+	vec4 diffuseColor = vec4( albedo.xyz * dot(worldNorm, lightDir), 1.0f);
+	
+
 	float lightDot = clamp(dot(lightDir, normalize(worldNorm)), 0, 1);
 	//lightDot = 1;
-	vec3 colorRgb = color.rgb * lightDot;
-	
+	vec3 colorRgb = diffuseColor.rgb ;
+
 	float realDist = distance(lightPosWorld, fragPosWorld);
 	float lightDist = texture(shadowMap, -lightDir).r * (farPlane - nearPlane) + nearPlane;
 	if( realDist > lightDist + 1.0f )
