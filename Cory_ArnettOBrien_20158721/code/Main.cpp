@@ -884,7 +884,8 @@ int main()
 
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-			
+			glActiveTexture(GL_TEXTURE0 + 0);
+			groundPlane.meshTex->bindToImageUnit(0);
 			groundPlane.render();
 			glActiveTexture(GL_TEXTURE0 + 0);
 

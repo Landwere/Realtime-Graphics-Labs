@@ -27,8 +27,6 @@ void main()
 	vec4 diffuseColor = vec4( albedo.xyz * dot(worldNorm, lightDir), 1.0f);
 	
 
-	float lightDot = clamp(dot(lightDir, normalize(worldNorm)), 0, 1);
-	//lightDot = 1;
 	vec3 colorRgb = diffuseColor.rgb ;
 
 	float realDist = distance(lightPosWorld, fragPosWorld);
