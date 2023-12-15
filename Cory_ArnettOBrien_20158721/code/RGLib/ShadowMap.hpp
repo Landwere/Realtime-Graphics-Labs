@@ -19,6 +19,8 @@ namespace RGLib
 
 		void RenderShadowMap(std::vector<glhelper::Mesh*> shadowCasters, std::vector<glhelper::Mesh*> shadowRecivers, RGLib::Light* light);
 
+		void CreateCubeMap(std::vector<glhelper::Mesh*> shadowCasters, RGLib::Light* light);
+
 	private:
 		Eigen::Matrix4f flipMatrix;
 		int shadowMapSize;

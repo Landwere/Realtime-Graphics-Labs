@@ -41,6 +41,13 @@ RGLib::ShadowMap::ShadowMap(int mapSize, RGLib::Light* light)
 		0, 0, 1, 0,
 		0, 0, 0, 1;
 
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+	for (int i = 0; i < 6; ++i)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	}
+
+
 }
 
 std::array<Eigen::Matrix4f, 6> cubemapRotations{
@@ -57,18 +64,30 @@ std::array<Eigen::Matrix4f, 6> cubemapRotations{
 void RGLib::ShadowMap::RenderShadowMap(std::vector<glhelper::Mesh*> shadowCasters, std::vector<glhelper::Mesh*> shadowRecivers, RGLib::Light* light)
 {
 
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-	for (int i = 0; i < 6; ++i)
-	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	}
-	glEnable(GL_DEPTH_TEST);
 
+
+
+
+	glViewport(0, 0, 1280, 720);
+	glActiveTexture(GL_TEXTURE0 + 1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+
+	for (glhelper::Mesh* mesh : shadowRecivers)
+	{
+		mesh->meshTex->bindToImageUnit(0);
+		mesh->render(*shadowMappedShader);
+	}
+
+}
+
+void RGLib::ShadowMap::CreateCubeMap(std::vector<glhelper::Mesh*> shadowCasters, RGLib::Light* light)
+{
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	glDisable(GL_CULL_FACE);
+
+	glEnable(GL_DEPTH_TEST);
+
 	glViewport(0, 0, shadowMapSize, shadowMapSize);
-
-
 	for (int i = 0; i < 6; ++i) {
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMapTexture, 0);
@@ -90,13 +109,4 @@ void RGLib::ShadowMap::RenderShadowMap(std::vector<glhelper::Mesh*> shadowCaster
 
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, 1280, 720);
-	glActiveTexture(GL_TEXTURE0 + 1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-
-	for (glhelper::Mesh* mesh : shadowRecivers)
-	{
-		mesh->render(*shadowMappedShader);
-	}
-
 }

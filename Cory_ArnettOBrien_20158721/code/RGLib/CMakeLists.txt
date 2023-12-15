@@ -40,6 +40,8 @@ FrameBuffer.cpp
 Light.hpp
 ShadowMap.cpp
 ShadowMap.hpp
+WaterRenderer.hpp
+WaterRenderer.cpp
 )
 
 target_compile_features(RGLib PRIVATE cxx_std_20)

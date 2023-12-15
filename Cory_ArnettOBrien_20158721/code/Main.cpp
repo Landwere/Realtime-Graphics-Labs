@@ -316,6 +316,7 @@ int main()
 	glhelper::ShaderProgram RainPhysicsShader({ "../shaders/RainParticle.comp" });
 	glhelper::ShaderProgram NormalShader({ "..\\shaders\\NormalShader.vert", "..\\shaders\\NormalShader.frag" });
 	glhelper::ShaderProgram HDRShader({ "..\\shaders\\HDRShader.vert", "..\\shaders\\HDRShader.frag" });
+	glhelper::ShaderProgram waterShader({ "..\\shaders\\Water.vert", "..\\shaders\\Water.frag" });
 
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularExponent"), specularExponent);
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
@@ -351,6 +352,9 @@ int main()
 	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 
 	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("HDRBuffer"), 0);
+
+	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("reflectionTexture"), 0);
+
 
 	GLuint ringVao;
 	glGenVertexArrays(1, &ringVao);
@@ -500,10 +504,10 @@ int main()
 		glhelper::Mesh waterPlane;
 		waterPlane.meshName = "Water";
 		modelLoader->loadFromFile("../models/groundPlane.obj", &waterPlane);
-		waterPlane.shaderProgram(&blinnPhongShader);
+		waterPlane.shaderProgram(&waterShader);
 		Eigen::Matrix4f waterModelToWorld = Eigen::Matrix4f::Identity();
 		waterPlane.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(0, 0, 40.f)) * waterModelToWorld);
-
+		
 
 		glhelper::Mesh Tree1;
 		Tree1.meshName = "tree1";
@@ -845,6 +849,12 @@ int main()
 			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
+			reflectionBuffer->bind();
+			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_CLIP_DISTANCE0);
+			Worldscene->RenderWorldObjects();
+			reflectionBuffer->unbind();
 			//Clear buffers before rendering shadows
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 
@@ -853,7 +863,7 @@ int main()
 			glEnable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);
 
-
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			Eigen::Matrix4f flipMatrix;
 			flipMatrix <<
 				-1.0f, 0.0f, 0.0f, 0.0f,
@@ -887,6 +897,8 @@ int main()
 				}
 
 			}
+			//Worldscene->CreateShadowMaps();
+
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			
 			glViewport(0, 0, windowWidth, windowHeight);
@@ -899,24 +911,21 @@ int main()
 			//glDisable(GL_CULL_FACE);
 			//Worldscene->RenderShadowMaps();
 
-			//reflectionBuffer->bind();
+
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
-			//glClearColor(0.1f, 0.13f, 0.17f, 1.0f);
 
-		//glDepthFunc(GL_LESS);
-
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
-			//Worldscene->RenderWorldObjects();
+			glActiveTexture(GL_TEXTURE0 + 0);
+			glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
+			waterPlane.render();
+			glBindTexture(GL_TEXTURE_2D, 0);
 
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
 			glActiveTexture(GL_TEXTURE0 + 0);
 			groundPlane.meshTex->bindToImageUnit(0);
 			groundPlane.render();
+			//Worldscene->RenderShadowMaps();
+
 			glActiveTexture(GL_TEXTURE0 + 0);
 
 			btTransform ballTran;
@@ -939,9 +948,7 @@ int main()
 			//glActiveTexture(GL_TEXTURE0 + 0);
 			//glBindTexture(GL_TEXTURE_2D, NULL);
 
-			//glActiveTexture(GL_TEXTURE0 + 0);
-			//glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
-			//waterPlane.render();
+
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			////RENDER QUAD TO SCREEN

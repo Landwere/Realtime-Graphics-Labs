@@ -55,6 +55,7 @@ namespace RGLib
 		World();
 		void RenderWorldObjects();
 		void RenderGUI();
+		void CreateShadowMaps();
 		void RenderShadowMaps();
 		void AddToWorld(glhelper::Mesh& mesh);
 

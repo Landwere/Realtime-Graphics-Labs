@@ -166,6 +166,11 @@ void RGLib::World::RenderGUI()
 	gltEndDraw();
 }
 
+void RGLib::World::CreateShadowMaps()
+{
+	shadowMap->CreateCubeMap(worldMeshes, worldLights[0]);
+}
+
 //Eigen::Matrix4f angleAxisMat4(float angle, const Eigen::Vector3f& axis)
 //{
 //	Eigen::Matrix4f output = Eigen::Matrix4f::Identity();
@@ -184,10 +189,10 @@ void RGLib::World::RenderGUI()
 void RGLib::World::RenderShadowMaps()
 {
 	
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
-	glDisable(GL_CULL_FACE);
-	glViewport(0, 0, shadowMapSize, shadowMapSize);
+	//glDisable(GL_CULL_FACE);
+	//glViewport(0, 0, shadowMapSize, shadowMapSize);
 
 
 
@@ -211,12 +216,15 @@ void RGLib::World::RenderShadowMaps()
 		}
 
 	}*/
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, 1280, 720);
 
-	glActiveTexture(GL_TEXTURE0 + 1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-	ground->render();
+	shadowMap->RenderShadowMap(worldMeshes, shadowRec, worldLights[0]);
+
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glViewport(0, 0, 1280, 720);
+
+	//glActiveTexture(GL_TEXTURE0 + 1);
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+	//ground->render();
 }
 
 void RGLib::World::AddToWorld(glhelper::Mesh &mesh)
@@ -255,8 +263,8 @@ void RGLib::World::CreateQueries()
 	}
 	dataFile.clear();
 
-	//shadowMap = new RGLib::ShadowMap(512, worldLights[0]);
-	//shadowRec.push_back(ground);
+	shadowMap = new RGLib::ShadowMap(512, worldLights[0]);
+	shadowRec.push_back(ground);
 }
 
 
