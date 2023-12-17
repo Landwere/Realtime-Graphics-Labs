@@ -9,6 +9,7 @@ out vec4 colorOut;
 
 void main()
 {
+
 	vec2 nDeviceSpace = (clipSpace.xy / clipSpace.w) / 2.0f + 0.5f;
 	vec2 reflectTexCoords = vec2(nDeviceSpace.x, -nDeviceSpace.y);
 

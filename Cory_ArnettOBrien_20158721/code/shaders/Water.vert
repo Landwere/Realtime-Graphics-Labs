@@ -12,14 +12,20 @@ layout(std140) uniform cameraBlock
 };
 uniform mat4 modelToWorld;
 
-const vec4 clipPlane = vec4(0, -1, 0, 0.00000001);
+
+uniform float clipDist;
+uniform float clipDir;
+ vec4 clipPlane;
 
 out vec4 clipSpace;
 
 
 void main()
 {
+	clipPlane = vec4(0, clipDir, 0, clipDist);
+
 		vec4 worldPos = modelToWorld * vec4(vPos, 1.0);
+		//water needs to clip objects above a certain height to give the illusion only the water is reflecting
 		gl_ClipDistance[0] = dot(worldPos, clipPlane);
 
 		gl_Position = worldToClip *  modelToWorld * vec4(vPos, 1.0);

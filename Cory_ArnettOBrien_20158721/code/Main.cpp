@@ -29,6 +29,16 @@
 #include <assimp/postprocess.h>
 #include <bullet/btBulletDynamicsCommon.h>
 
+/*! \mainpage Cory Arnett-O'Brien
+	Newline 
+
+*/
+
+
+/// <summary>
+/// Summary test
+/// </summary>
+
 namespace fs = std::filesystem;
 
 int windowWidth = 1280;
@@ -354,6 +364,8 @@ int main()
 	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("HDRBuffer"), 0);
 
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("reflectionTexture"), 0);
+	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), 1);
+	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDir"), -1);
 
 
 	GLuint ringVao;
@@ -506,7 +518,7 @@ int main()
 		modelLoader->loadFromFile("../models/groundPlane.obj", &waterPlane);
 		waterPlane.shaderProgram(&waterShader);
 		Eigen::Matrix4f waterModelToWorld = Eigen::Matrix4f::Identity();
-		waterPlane.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(0, 0, 40.f)) * waterModelToWorld);
+		waterPlane.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(0, 0.1f, 20.f)) * waterModelToWorld);
 		
 
 		glhelper::Mesh Tree1;
@@ -724,6 +736,8 @@ int main()
 		Eigen::AngleAxisf rotation;
 		Eigen::Vector3f rotDir;
 		bool hdrEnable = true;
+		float clipDist = 1;
+		float clipDir = -1;
 		while (running)
 		{
 			Uint64 frameStartTime = SDL_GetTicks64();
@@ -810,6 +824,28 @@ int main()
 						glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("enabled"), hdrEnable);
 
 						std::cout << "HDR ENABLED = " << hdrEnable << std::endl;
+					}
+					if (event.key.keysym.sym == SDLK_8)
+					{
+						clipDist += clipDist + 0.1f;
+						glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), clipDist);
+					}
+					if (event.key.keysym.sym == SDLK_2)
+					{
+						clipDist += clipDist - 0.1f;
+						glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), clipDist);
+					}
+					if (event.key.keysym.sym == SDLK_6)
+					{
+						clipDir += clipDir + 1.f;
+
+						glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDir"), clipDir);
+					}
+					if (event.key.keysym.sym == SDLK_4)
+					{
+						clipDir += clipDir - 1.f;
+
+						glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDir"), clipDir);
 					}
 				}
 #pragma endregion

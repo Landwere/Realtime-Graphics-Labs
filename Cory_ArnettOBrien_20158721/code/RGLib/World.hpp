@@ -10,6 +10,13 @@
 #include <RGLib/Matrices.hpp>
 #include "Light.hpp"
 #include "RGLib/ShadowMap.hpp"
+
+//!  World
+/*! 
+* The world class handles all the objects within the game scene and renders them accordingly 
+* The world class is also responsible for outputting performance metrics
+*/
+
 namespace RGLib
 {
 	class WorldObject
@@ -47,11 +54,14 @@ namespace RGLib
 		GLuint normalMap;
 		GLuint query;
 	};
+	/*! Text world class */
 
 	class World
 	{
 
 	public:
+		/** constructor for calss
+		*/
 		World();
 		void RenderWorldObjects();
 		void RenderGUI();
