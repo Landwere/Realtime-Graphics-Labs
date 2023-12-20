@@ -74,6 +74,7 @@ endfunction()
 # function (name shaders.vert shaders.frag)
 add_executable_rtg(main lambert.vert lambert.frag VertexLighting.vert FragmentLighting.frag FixedColor.frag FixedColor.vert BlinnPhong.vert BlinnPhong.frag ShadowCubeMap.frag
  ShadowCubeMap.vert ShadowMapped.frag ShadowMapped.vert BillboardParticle.frag BillboardParticle.geom BillboardParticle.vert RainParticle.comp NormalShader.vert NormalShader.frag HDRShader.frag HDRShader.vert Water.frag Water.vert)
-set(SOURCES main.cpp RGLib/World.cpp)
+
+set(SOURCES Main.cpp RGLib shaders)
 doxygen_add_docs(doxygen ${SOURCES} ALL)
 

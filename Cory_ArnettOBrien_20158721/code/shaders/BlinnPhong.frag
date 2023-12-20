@@ -42,6 +42,9 @@ vec3 lightModel(float lIntensity, vec3 lDirection, vec3 viewDir, vec3 albedo)
 
 void main()
 {
+
+
+
 	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
 	vec3 viewDir = normalize(cameraPos.xyz - fragPosWorld);
 	float lightDistance =  length(lightPosWorld - fragPosWorld) ;

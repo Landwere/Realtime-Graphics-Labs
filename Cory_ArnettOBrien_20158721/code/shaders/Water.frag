@@ -14,8 +14,9 @@ void main()
 	vec2 reflectTexCoords = vec2(nDeviceSpace.x, -nDeviceSpace.y);
 
 	vec4 reflectionColour = texture(reflectionTexture, reflectTexCoords);
-
+	vec4 refractionColour = vec4(0,0,1,0.1);
 	colorOut = reflectionColour;
-	colorOut += vec4(0,0,0.1,1);
+	colorOut = mix(reflectionColour, refractionColour, 0.5);
+	//colorOut += vec4(0,0,0.1,1);
 	//colorOut.rgb = vec3(0,0,1);
 }

@@ -10,6 +10,7 @@ in vec2 texCoord;
 uniform samplerCube shadowMap;
 uniform vec3 lightPosWorld;
 uniform sampler2D albedoTex;
+uniform float bias;
 
 uniform float nearPlane, farPlane;
 
@@ -31,7 +32,7 @@ void main()
 
 	float realDist = distance(lightPosWorld, fragPosWorld);
 	float lightDist = texture(shadowMap, -lightDir).r * (farPlane - nearPlane) + nearPlane;
-	if( realDist > lightDist + 1.0f )
+	if( realDist > lightDist + bias )
 	{
 		colorRgb *= 0.1f;
 	}

@@ -33,6 +33,7 @@ uniform float worldLightInt;
 
 uniform vec3 spotLightDir;
 
+//Light model used to add light to model, with additional normal input for normal mapping
 vec4 lightModel(float lIntensity, vec3 lDirection, vec3 viewDir, vec3 albedo, vec3 normWorld)
 {
 	//float specHighExponent = specularExponent * 2;
@@ -55,12 +56,7 @@ void main()
 	vec3 albedo = texture(albedoTex, texCoord).xyz;
 	vec4 normal = texture(normalTex, texCoord);
 
-	// --- Your Code Here
-	// Note that we're just using the mesh normal here (transformed to world space)
-	// Change this to sample your normal map texture, and use it to adjust the normal.
-	// Remember to rescale the normal from [0,1] to [-1,1]
-
-	//vec4 normalColor = vec4((normal.xyz * 2) - 1);
+	//Calculate colour based on code from normal lab passed through to lightModel
 	vec3 normScaled = vec3((normal.xyz * 2 ) -1);
 	vec3 mapNormal = ( normScaled.x *  _tan, normScaled.y *  biTan, normScaled.z * worldNorm);
 	mapNormal =  mapNormal;
@@ -82,22 +78,15 @@ void main()
 //
 	float falloff = pow(lightDistance, 2);
 
-//
-//
-////	//dot product betwwen lighthouse light direction and object light direction
-////	float shape = dot(spotLightDir ,lightDir);
-////	float add;
-////	add = 0;
-//////	if (shape > 0.5)
-//////		add = 1;
-////	add = mix(0,1,shape);
-////	if (add < 0.5 || add > 2)
-////		add = 0;
-//	
+	//spot controls spotlight from lighthouse
 	float spot = pow(max(dot(-lightDir, spotLightDir), 0.0f), 1);
+
+	//reset the colour just in case
 	colorOut.rgb = vec3(0);
 			//colorOut += ((30.0f) * (diffuseColor + specularColor) * spot) / (pow(lightDistance, 2));
-			colorOut += clamp((lightModel(lightIntensity / 2, lightDir, viewDir, albedo, mapNormal) * spot) / falloff, 0.f,1.f);
+
+	//apply lighting based on normal map and lighthouse spotlight (half lightIntensity because normal mapping seems to add more light)
+	colorOut += clamp((lightModel(lightIntensity / 2, lightDir, viewDir, albedo, mapNormal) * spot) / falloff, 0.f,1.f);
 //
 
 //	vec3 mappedWorldNorm = vec3((normal.xyz * 2 ) -1);
@@ -110,7 +99,7 @@ void main()
 	//colorOut = lightModel(0.0f, lightDir, vec3(0,0,0), vec3(0,0,0), vec3(0,0,0));
 	//colorOut  += (lightModel(lightIntensity , lightDir, viewDir, albedo, mapNormal) * 0.5f)  / falloff;
 //
-//	//global light
+//	//apply global light (half lightIntensity because normal mapping seems to add more light)
 	colorOut += clamp(lightModel(worldLightInt / 2, worldLightDir, viewDir, albedo, mapNormal),0.f,1.f);
 }
 

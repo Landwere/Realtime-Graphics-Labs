@@ -29,13 +29,13 @@
 #include <assimp/postprocess.h>
 #include <bullet/btBulletDynamicsCommon.h>
 
-/*! \mainpage Cory Arnett-O'Brien
-	Newline 
+/*! \mainpage Cory Arnett-O'Brien, Realtime computer graphics
+	This is the Doxygen documentation for the realtime computer graphics program created by Cory Arnett-O'Brien for the CMP7172 assignment
 
 */
 
 
-/// <summary>
+///! <summary>
 /// Summary test
 /// </summary>
 
@@ -64,8 +64,8 @@ int sampleRadius = 1;
 
 //shadow
 const float shadowMapNear = 1.f, shadowMapFar = 1000.f;
-float shadowMapBias = 1.0f;
-const int shadowMapSize = 1024;
+float shadowMapBias = 1.0f; /*! shadow map depth distance bias to prevent artefacts*/
+const int shadowMapSize = 1024; /*!<Shadow map resolution*/
 
 nlohmann::json models;
 std::map<std::string, glhelper::Mesh> meshes;
@@ -115,6 +115,7 @@ void renderQuad()
 	glBindVertexArray(0);
 }
 //end source
+//TODO Remove loadSpotMeshFunction ONLY USED FOR TESTING source Moodle
 void loadSpotMesh(glhelper::Mesh* mesh)
 {
 	// ----- Your code here -----
@@ -159,7 +160,7 @@ void loadSpotMesh(glhelper::Mesh* mesh)
 	//mesh->elems(elems);
 	mesh->tex(uvs);
 }
-
+//end source
 void ReloadConfig()
 {
 	Model* modelLoader = new Model();
@@ -243,7 +244,7 @@ GLuint createTexture(const cv::Mat& image)
 
 	return texture;
 }
-
+//create texture function from Texture lab by David Walton adjusted to take filename input
 GLuint createTexture(cv::String filename)
 {
 	cv::Mat image = cv::imread(filename);
@@ -268,7 +269,7 @@ GLuint createTexture(cv::String filename)
 //end source
 int main()
 {
-	RGLib::Light* lampLight = new RGLib::Light(100, Eigen::Vector3f(-0.1f, 7.f, 0.f));
+	RGLib::Light* lampLight = new RGLib::Light(100, Eigen::Vector3f(-0.1f, 7.f, 0.f)); /*Light from lighthouse lamp*/
 
 	//lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
 	//lightPos = Eigen::Vector3f(0, 6, -5);
@@ -314,10 +315,9 @@ int main()
 		glm::vec3(0.0f, 1.0f, 0.0f),//up direction
 		90.0f, windowWidth / windowHeight, 0.4f, 900.0f); // fov, aspect ratio based on window dimensions
 
-	//glhelper::RotateViewer viewer(windowWidth, windowHeight);
 	glhelper::FlyViewer viewer(windowWidth, windowHeight);
 
-	//Shader
+	//Compile shader programs
 	glhelper::ShaderProgram lambertShader({ "..\\shaders\\Lambert.vert", "..\\shaders\\Lambert.frag" });
 	glhelper::ShaderProgram blinnPhongShader({ "..\\shaders\\BlinnPhong.vert", "..\\shaders\\BlinnPhong.frag" });
 	glhelper::ShaderProgram shadowCubeMapShader({ "..\\shaders\\ShadowCubeMap.vert", "..\\shaders\\ShadowCubeMap.frag" });
@@ -327,7 +327,7 @@ int main()
 	glhelper::ShaderProgram NormalShader({ "..\\shaders\\NormalShader.vert", "..\\shaders\\NormalShader.frag" });
 	glhelper::ShaderProgram HDRShader({ "..\\shaders\\HDRShader.vert", "..\\shaders\\HDRShader.frag" });
 	glhelper::ShaderProgram waterShader({ "..\\shaders\\Water.vert", "..\\shaders\\Water.frag" });
-
+	//set up blinnPhong shader uniforms
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularExponent"), specularExponent);
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
 	glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
@@ -335,7 +335,7 @@ int main()
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("falloffExponent"), fallOffExponent);
 	glProgramUniform3fv(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("worldLightInt"), worldLightIntensity);
-
+	//set up NormalShader shader uniforms
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("specularExponent"), specularExponent);
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("specularIntensity"), specularIntensity);
 	glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
@@ -347,7 +347,8 @@ int main()
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
 
 	//glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
-
+	
+	//set up Shadow map shader uniforms
 	glProgramUniform1f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("nearPlane"), shadowMapNear);
 	glProgramUniform1f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("farPlane"), shadowMapFar);
 	glProgramUniform3f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
@@ -361,13 +362,13 @@ int main()
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("bias"), shadowMapBias);
 	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 
-	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("HDRBuffer"), 0);
-
+	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("HDRBuffer"), 0); /*! set HDR shader buffer to 0 (should be 0 by default)*/
+	//set up water shader uniforms
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("reflectionTexture"), 0);
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), 1);
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDir"), -1);
 
-
+	//Create particles (work in progress)
 	GLuint ringVao;
 	glGenVertexArrays(1, &ringVao);
 	glhelper::ShaderStorageBuffer particleBuffer(nRParticles * 4 * sizeof(float)),
@@ -888,8 +889,10 @@ int main()
 			reflectionBuffer->bind();
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_CLIP_DISTANCE0);
 			Worldscene->RenderWorldObjects();
+			glDisable(GL_CLIP_DISTANCE0);
 			reflectionBuffer->unbind();
 			//Clear buffers before rendering shadows
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
@@ -984,23 +987,7 @@ int main()
 			//glActiveTexture(GL_TEXTURE0 + 0);
 			//glBindTexture(GL_TEXTURE_2D, NULL);
 
-
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			////RENDER QUAD TO SCREEN
-			HDRShader.use();
-			glDisable(GL_DEPTH_TEST);
-			glBindTexture(GL_TEXTURE_2D, colourBuffer);
-			renderQuad();
-
-			//Worldscene->RenderGUI();
-			////glhelper::Mesh* tM = &testMesh;
-
-			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
-			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
-
-
-
+			//render Rain particles from research paper (Work in progress)
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
 
 			//glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
@@ -1018,6 +1005,25 @@ int main()
 			glDrawArrays(GL_POINTS, 0, nRParticles);
 			billboardParticleShader.unuse();
 			glDepthMask(GL_TRUE);
+
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			////RENDER QUAD TO SCREEN
+			HDRShader.use();
+			glDisable(GL_DEPTH_TEST);
+			glBindTexture(GL_TEXTURE_2D, colourBuffer);
+			renderQuad();
+
+			//Worldscene->RenderGUI();
+			////glhelper::Mesh* tM = &testMesh;
+
+			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
+			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
+
+
+
+
 			
 
 			SDL_GL_SwapWindow(window);

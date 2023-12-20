@@ -22,11 +22,7 @@ out vec4 clipSpace;
 
 void main()
 {
-	clipPlane = vec4(0, clipDir, 0, clipDist);
 
-		vec4 worldPos = modelToWorld * vec4(vPos, 1.0);
-		//water needs to clip objects above a certain height to give the illusion only the water is reflecting
-		gl_ClipDistance[0] = dot(worldPos, clipPlane);
 
 		gl_Position = worldToClip *  modelToWorld * vec4(vPos, 1.0);
 		clipSpace = worldToClip * modelToWorld * vec4(vPos, 1.0f);
