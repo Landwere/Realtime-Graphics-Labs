@@ -12,7 +12,7 @@ in vec3 fragPosWorld;
 in vec2 texCoord;
 in vec3 biTan;
 in vec3 _tan;
-
+in mat3 TBNMatrix;
 out vec4 colorOut;
 
 uniform vec4 albedo;
@@ -50,16 +50,17 @@ vec4 lightModel(float lIntensity, vec3 lDirection, vec3 viewDir, vec3 albedo, ve
 void main()
 {
 
-	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
+	vec3 lightDir =  normalize(lightPosWorld - fragPosWorld);
 	vec3 viewDir = normalize(cameraPos.xyz - fragPosWorld);
 	float lightDistance = length(lightPosWorld - fragPosWorld);
 	vec3 albedo = texture(albedoTex, texCoord).xyz;
 	vec4 normal = texture(normalTex, texCoord);
-
+	
 	//Calculate colour based on code from normal lab passed through to lightModel
 	vec3 normScaled = vec3((normal.xyz * 2 ) -1);
-	vec3 mapNormal = ( normScaled.x *  _tan, normScaled.y *  biTan, normScaled.z * worldNorm);
-	mapNormal =  mapNormal;
+	float a = dot(normScaled, worldNorm);
+	vec3 mapNormal; /*TBNMatrix * normScaled;*/ vec3(dot( normScaled,  _tan),dot( normScaled,  biTan), dot(normScaled, worldNorm));
+	mapNormal = (dot( normScaled,  _tan),dot( normScaled,  biTan), normScaled.z * worldNorm);
 	vec4 diffuseColor = vec4( albedo.xyz * dot(worldNorm, lightDir), 1.0f);
 	float specularPower = pow(clamp(dot(reflect(lightDir, mapNormal), -viewDir), 0, 1), 10);
 	vec4 specularColor = vec4(specularPower * vec3(1,1,1), 1.0);
