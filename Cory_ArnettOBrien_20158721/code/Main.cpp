@@ -79,10 +79,9 @@ float ringMinRadius = 5.f;
 float ringMaxRadius = 100.f;
 float gridWidth = 6;
 float particleInitialVelocity = 0.0f;
-float particleMass = 0.1f;
-float gravitationalConstant = -0.1f;
+float particleMass = 1.f;
+float gravitationalConstant = -1.f;
 float ringParticleSize = 0.03f;
-const int MAX_N_MASSES = 10;
 
 
 //Quad renderer from https://learnopengl.com/Advanced-Lighting/HDR
@@ -378,7 +377,7 @@ int main()
 	{
 		std::vector<Eigen::Vector4f> particlePositions(nRParticles), particleVelocities(nRParticles);
 		std::default_random_engine eng;
-		std::uniform_real_distribution<> radDist(ringMinRadius, ringMaxRadius), angleDist(0.0f, 2.0f * (float)M_PI);
+		std::uniform_real_distribution<> radDist(ringMinRadius, ringMaxRadius);
 
 		for (size_t i = 0; i < nRParticles; ++i) {
 			//float angle = angleDist(eng);
@@ -397,9 +396,7 @@ int main()
 		particleBuffer.update(particlePositions);
 		velocityBuffer.update(particleVelocities);
 	}
-	std::array<Eigen::Vector3f, MAX_N_MASSES> massLocations;
-	std::array<float, MAX_N_MASSES> masses;
-	int nMasses = 1;
+
 
 	glBindVertexArray(ringVao);
 	glBindBuffer(GL_ARRAY_BUFFER, particleBuffer.get());
@@ -411,9 +408,6 @@ int main()
 	glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), ringParticleSize);
 	glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.4f, 0.48f, 0.59f);
 
-	glProgramUniform3fv(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("massPositions"), MAX_N_MASSES, massLocations[0].data());
-	//glProgramUniform1fv(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("masses"), MAX_N_MASSES, &(masses[0]));
-	//glProgramUniform1i(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("nMasses"), nMasses);
 	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("gravitationalConstant"), gravitationalConstant);
 	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("timeStep"), 1.f / 33.3f);
 	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("particleMass"), particleMass);
@@ -992,6 +986,7 @@ int main()
 
 			//glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
+
 			glUseProgram(RainPhysicsShader.get());
 			glDispatchCompute(nRParticles, 1, 1);
 
@@ -1015,7 +1010,7 @@ int main()
 			glBindTexture(GL_TEXTURE_2D, colourBuffer);
 			renderQuad();
 
-			//Worldscene->RenderGUI();
+			Worldscene->RenderGUI();
 			////glhelper::Mesh* tM = &testMesh;
 
 			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);

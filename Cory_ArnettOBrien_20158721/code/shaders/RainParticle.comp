@@ -38,21 +38,21 @@ void main() {
     // Remember to use gl_GlobalInvocationID to find which particle to modify!
     vec3 force;
     vec4 _pos = pos[ gl_GlobalInvocationID.x];
-
         vec3 displacement = windHorizontal;
         float gravity = (gravitationalConstant * particleMass);
 
-        force.y += (gravity );
+        force += (gravity );
     
     vec3 velocity = vel[gl_GlobalInvocationID.x].xyz;
     vec3 acceleration = force / particleMass;
-    velocity.y += (acceleration.y * timeStep);
+    velocity.y += (gravity * timeStep);
+    //velocity.y += -0.1f;
 
     vel[gl_GlobalInvocationID.x].xyz = velocity;
     pos[gl_GlobalInvocationID.x].xyz += velocity * timeStep;
     if (pos[gl_GlobalInvocationID.x].y < 0)
     {
-        pos[gl_GlobalInvocationID.x].y = 20;
+        pos[gl_GlobalInvocationID.x].y = 30;
         velocity = vec3(0,0,0);
         vel[gl_GlobalInvocationID.x].xyz = velocity;
     }
