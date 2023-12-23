@@ -12,5 +12,6 @@ void main()
 	float radialFalloff = 1 - 2*length(texCoords - vec2(0.5, 0.5));
 
 	fragColor = vec4(particleColor, radialFalloff);
+
 }
 

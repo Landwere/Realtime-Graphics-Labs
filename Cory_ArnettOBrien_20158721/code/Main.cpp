@@ -81,7 +81,7 @@ float gridWidth = 6;
 float particleInitialVelocity = 0.0f;
 float particleMass = 1.f;
 float gravitationalConstant = -1.f;
-float ringParticleSize = 0.03f;
+float rainParticleSize = 0.03f;
 
 
 //Quad renderer from https://learnopengl.com/Advanced-Lighting/HDR
@@ -405,7 +405,7 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), ringParticleSize);
+	glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), rainParticleSize);
 	glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.4f, 0.48f, 0.59f);
 
 	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("gravitationalConstant"), gravitationalConstant);
