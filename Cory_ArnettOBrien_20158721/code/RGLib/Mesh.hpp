@@ -41,6 +41,11 @@ public:
 
 	void setTexture(glhelper::Texture &texture);
 
+	VertexBuffer* getVbo()
+	{
+		return vert_.get();
+	}
+
 	std::string meshName;
 
 	std::unique_ptr< glhelper::Texture> meshTex;

@@ -42,6 +42,8 @@ ShadowMap.cpp
 ShadowMap.hpp
 WaterRenderer.hpp
 WaterRenderer.cpp
+InstanceRenderer.cpp
+InstanceRenderer.hpp
 )
 
 target_compile_features(RGLib PRIVATE cxx_std_20)
