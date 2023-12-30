@@ -46,6 +46,11 @@ public:
 		return vert_.get();
 	}
 
+	VertexBuffer* getTbo()
+	{
+		return tex_.get();
+	}
+
 	std::string meshName;
 
 	std::unique_ptr< glhelper::Texture> meshTex;

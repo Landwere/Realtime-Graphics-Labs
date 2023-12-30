@@ -128,14 +128,14 @@ namespace RGLib {
 
 		// Define the structure of a vertex for OpenGL to select values from vertex buffer
 		// and store in vertexPos2DLocation attribute
-		glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(TextureVertex), (void*)offsetof(TextureVertex, x));
+		//glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, sizeof(m->getTbo()), (void*)offsetof(m->getTbo(), x));
 
 		// Enable the attribute to be passed vertices from the vertex buffer object
 		glEnableVertexAttribArray(vertexUVLocation);
 
 		// Define where the vertex specification will find the colour data and how much
 		// Colour data is four float values, located at where the r member is.  Stride is a vertex apart
-		glVertexAttribPointer(vertexUVLocation, 2, GL_FLOAT, GL_FALSE, sizeof(TextureVertex), (void*)offsetof(TextureVertex, u));
+		//glVertexAttribPointer(vertexUVLocation, 2, GL_FLOAT, GL_FALSE, sizeof(m->getTbo()), (void*)offsetof(m->getTbo(), u));
 
 		// 6. Unbind the vertex buffer before defining the input for the
 		// transformation matrices instance buffer
@@ -162,7 +162,7 @@ namespace RGLib {
 		// Select the texture
 		glActiveTexture(GL_TEXTURE0);
 		glUniform1i(samplerId, 0);
-		glBindTexture(GL_TEXTURE_2D, m->getMaterial()->getTextureName());
+		glBindTexture(GL_TEXTURE_2D, m->meshTex->tex());
 
 		// 11. Draw the instances
 

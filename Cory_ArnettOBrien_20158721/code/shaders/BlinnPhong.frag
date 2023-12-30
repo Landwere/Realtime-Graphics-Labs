@@ -49,7 +49,7 @@ void main()
 	vec3 viewDir = normalize(cameraPos.xyz - fragPosWorld);
 	float lightDistance =  length(lightPosWorld - fragPosWorld) ;
 
-	vec3 albedo = texture(albedoTex, texCoord).xyz;
+	vec4 albedo = texture(albedoTex, texCoord);
 	
 	float falloff = pow(lightDistance, 2);
 
@@ -63,13 +63,20 @@ void main()
 //	if (add < 0.5 || add > 2)
 //		add = 0;
 	
+	//transparency
+	if(albedo.a < 1.0f)
+	{
+		discard;
+	}
+
+
 	float spot = pow(max(dot(-lightDir, spotLightDir), 0.0f), 1);
 
 	colorOut.rgb = vec3(0);
 	colorOut.a = 1;
 	//Point  
-	colorOut.rgb += (lightModel(lightIntensity, lightDir, viewDir, albedo) * spot  )  / falloff;
+	colorOut.rgb += (lightModel(lightIntensity, lightDir, viewDir, albedo.xyz) * spot  )  / falloff;
 	//global light
-	colorOut.rgb += lightModel(worldLightInt, worldLightDir, viewDir, albedo);
+	colorOut.rgb += lightModel(worldLightInt, worldLightDir, viewDir, albedo.xyz);
 }
 

@@ -191,11 +191,11 @@ Mesh& Mesh::drawMode(GLenum mode)
 void Mesh::loadTexture(cv::String filename)
 {
 	cv::Mat textureImage = cv::imread(filename);
-	cv::cvtColor(textureImage, textureImage, cv::COLOR_BGR2RGB);
+	cv::cvtColor(textureImage, textureImage, cv::COLOR_BGRA2RGBA);
 
-
-	 meshTex = std::make_unique< glhelper::Texture>(GL_TEXTURE_2D, GL_RGB8, textureImage.cols, textureImage.rows,
-		0, GL_RGB, GL_UNSIGNED_BYTE, textureImage.data, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+	//TODO Change to accept RGBA for transparency
+	 meshTex = std::make_unique< glhelper::Texture>(GL_TEXTURE_2D, GL_RGBA8, textureImage.cols, textureImage.rows,
+		0, GL_RGBA, GL_UNSIGNED_BYTE, textureImage.data, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
 	meshTex->genMipmap();
 

@@ -362,6 +362,7 @@ int main()
 	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 
 	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("HDRBuffer"), 0); /*! set HDR shader buffer to 0 (should be 0 by default)*/
+	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("duplicateBuffer"), 2);
 	//set up water shader uniforms
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("reflectionTexture"), 0);
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), 1);
@@ -611,6 +612,16 @@ int main()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourBuffer, 0);
+		//second colour buffer for use in depth of field 
+		GLuint colourBuffer2;
+		glGenTextures(1, &colourBuffer2);
+		glBindTexture(GL_TEXTURE_2D, colourBuffer2);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 		//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colourBuffer, 0);
 		
 		GLuint renderBuffer;
@@ -733,6 +744,10 @@ int main()
 		bool hdrEnable = true;
 		float clipDist = 1;
 		float clipDir = -1;
+		int nRays = 5;
+		float aperture = 0.05;
+
+		
 		while (running)
 		{
 			Uint64 frameStartTime = SDL_GetTicks64();
@@ -944,7 +959,12 @@ int main()
 			//glDisable(GL_CULL_FACE);
 			//Worldscene->RenderShadowMaps();
 
-
+	/*		for (int i = 0; i < nRays; i++)
+			{
+				glm::vec3 bokeh = right * cosf(i * 2 * M_PI / n) + p_up * sinf(i * 2 * M_PI / n);
+				glm::mat4 modelview = glm::lookAt(eye + aperture * bokeh, object, p_up);
+				glm::mat4 mvp = projection * modelview;
+			}*/
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 
 			glActiveTexture(GL_TEXTURE0 + 0);
@@ -1003,11 +1023,14 @@ int main()
 
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+			glCopyImageSubData(colourBuffer, GL_TEXTURE_2D, 0, 0, 0, 0, colourBuffer2, GL_TEXTURE_2D, 0, 0, 0, 0, windowWidth, windowHeight, 1);
 			////RENDER QUAD TO SCREEN
 			HDRShader.use();
 			glDisable(GL_DEPTH_TEST);
+			glActiveTexture(GL_TEXTURE0 + 0);
 			glBindTexture(GL_TEXTURE_2D, colourBuffer);
+			glActiveTexture(GL_TEXTURE0 + 2);
+			glBindTexture(GL_TEXTURE_2D, colourBuffer2);
 			renderQuad();
 
 			Worldscene->RenderGUI();
