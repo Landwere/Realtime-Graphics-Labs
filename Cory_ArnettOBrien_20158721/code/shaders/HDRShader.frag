@@ -9,14 +9,16 @@ uniform sampler2D HDRBuffer;
 uniform sampler2D duplicateBuffer;
 uniform sampler2D depthTexture;
 uniform bool enabled;
+uniform vec3 camPosWorld;
 
 const float PI = 3.141;
-
+//Blur funcion based off https://gamedev.stackexchange.com/questions/203335/opengl-4-depth-of-field with modifications to fit standard variables
 vec4 blurPixel(vec2 texCoord)
 {
 	vec4 blurColour = texture(HDRBuffer, texCoord);
 
-	float depth = texture(depthTexture, texCoord).r;
+	//float depth = texture(depthTexture, texCoord).r;
+	float depth = blurColour.a;
 	if (depth < 0.1)
 		return blurColour;
 	float x = 0.4;

@@ -362,7 +362,7 @@ int main()
 	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 
 	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("HDRBuffer"), 0); /*! set HDR shader buffer to 0 (should be 0 by default)*/
-	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("duplicateBuffer"), 2);
+	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("depthTexture"), 2);
 	//set up water shader uniforms
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("reflectionTexture"), 0);
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), 1);
@@ -603,6 +603,10 @@ int main()
 		GLuint HDRFrameBuffer;
 		glGenFramebuffers(1, &HDRFrameBuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+		GLuint renderBuffer;
+		glGenRenderbuffers(1, &renderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight);
 		GLuint colourBuffer;
 		glGenTextures(1, &colourBuffer);
 		glBindTexture(GL_TEXTURE_2D, colourBuffer);
@@ -611,7 +615,12 @@ int main()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		
+
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourBuffer, 0);
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+
 		//second colour buffer for use in depth of field 
 		GLuint colourBuffer2;
 		glGenTextures(1, &colourBuffer2);
@@ -624,11 +633,9 @@ int main()
 
 		//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colourBuffer, 0);
 		
-		GLuint renderBuffer;
-		glGenRenderbuffers(1, &renderBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight);
-
+		
+		//glStencilFunc(GL_ALWAYS, 1, depthTexture);
+		
 		//attach depth buffer
 		glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer);
@@ -640,6 +647,24 @@ int main()
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+
+		GLuint dframeBuffer;
+		glGenFramebuffers(1, &dframeBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, dframeBuffer);
+		GLuint depthTexture;
+		glGenTextures(1, &depthTexture);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowWidth, windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -682,11 +707,11 @@ int main()
 		//Worldscene->AddToWorld(lightHouse);
 		//Worldscene->AddToWorld(rock);
 		Worldscene->AddToWorld(rock2);
-		Worldscene->AddToWorld(Tree1);
-		Worldscene->AddToWorld(pinecone);
+		//Worldscene->AddToWorld(Tree1);
+		//Worldscene->AddToWorld(pinecone);
 		Worldscene->ground = &groundPlane;
 		Worldscene->AddWorldObject(testMesh, spotNormalMap);
-		Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
+		//Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
 		Worldscene->AddWorldObject(rock, rockNormal);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
 
@@ -714,7 +739,8 @@ int main()
 
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDepthFunc(GL_LEQUAL);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
@@ -966,6 +992,8 @@ int main()
 				glm::mat4 mvp = projection * modelview;
 			}*/
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+			glEnable(GL_DEPTH_TEST);
+			glClearDepth(1.0);
 
 			glActiveTexture(GL_TEXTURE0 + 0);
 			glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
@@ -1023,6 +1051,15 @@ int main()
 
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_FRAMEBUFFER, dframeBuffer);
+			glDrawBuffer(GL_NONE);
+			glDisable(GL_CULL_FACE);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_DEPTH_TEST);
+			Worldscene->RenderWorldObjects();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glDrawBuffer(GL_BACK);
+
 			glCopyImageSubData(colourBuffer, GL_TEXTURE_2D, 0, 0, 0, 0, colourBuffer2, GL_TEXTURE_2D, 0, 0, 0, 0, windowWidth, windowHeight, 1);
 			////RENDER QUAD TO SCREEN
 			HDRShader.use();
@@ -1030,7 +1067,7 @@ int main()
 			glActiveTexture(GL_TEXTURE0 + 0);
 			glBindTexture(GL_TEXTURE_2D, colourBuffer);
 			glActiveTexture(GL_TEXTURE0 + 2);
-			glBindTexture(GL_TEXTURE_2D, colourBuffer2);
+			glBindTexture(GL_TEXTURE_2D, depthTexture);
 			renderQuad();
 
 			Worldscene->RenderGUI();
