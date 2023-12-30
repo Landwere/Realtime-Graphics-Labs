@@ -17,10 +17,12 @@ vec4 blurPixel(vec2 texCoord)
 {
 	vec4 blurColour = texture(HDRBuffer, texCoord);
 
-	//float depth = texture(depthTexture, texCoord).r;
-	float depth = blurColour.a;
+	float depth = texture(depthTexture, texCoord).r;
+	//float depth = blurColour.a;
 	if (depth < 0.1)
+	{
 		return blurColour;
+		}
 	float x = 0.4;
 // tent function
 if(x > 0.5)

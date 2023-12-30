@@ -326,6 +326,8 @@ int main()
 	glhelper::ShaderProgram NormalShader({ "..\\shaders\\NormalShader.vert", "..\\shaders\\NormalShader.frag" });
 	glhelper::ShaderProgram HDRShader({ "..\\shaders\\HDRShader.vert", "..\\shaders\\HDRShader.frag" });
 	glhelper::ShaderProgram waterShader({ "..\\shaders\\Water.vert", "..\\shaders\\Water.frag" });
+	glhelper::ShaderProgram DOFShader({ "..\\shaders\\DepthTest.vert", "..\\shaders\\DepthTest.frag" });
+
 	//set up blinnPhong shader uniforms
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularExponent"), specularExponent);
 	glProgramUniform1f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("specularIntensity"), specularIntensity);
@@ -367,6 +369,9 @@ int main()
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("reflectionTexture"), 0);
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), 1);
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDir"), -1);
+
+	glProgramUniform1f(DOFShader.get(), DOFShader.uniformLoc("nearPlane"), shadowMapNear);
+	glProgramUniform1f(DOFShader.get(), DOFShader.uniformLoc("farPlane"), shadowMapFar);
 
 	//Create particles (work in progress)
 	GLuint ringVao;
@@ -603,10 +608,7 @@ int main()
 		GLuint HDRFrameBuffer;
 		glGenFramebuffers(1, &HDRFrameBuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
-		GLuint renderBuffer;
-		glGenRenderbuffers(1, &renderBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight);
+
 		GLuint colourBuffer;
 		glGenTextures(1, &colourBuffer);
 		glBindTexture(GL_TEXTURE_2D, colourBuffer);
@@ -637,6 +639,10 @@ int main()
 		//glStencilFunc(GL_ALWAYS, 1, depthTexture);
 		
 		//attach depth buffer
+		GLuint renderBuffer;
+		glGenRenderbuffers(1, &renderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer);
 
@@ -663,7 +669,9 @@ int main()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
@@ -1016,6 +1024,7 @@ int main()
 			pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(ballPos.x(), ballPos.y(), ballPos.z()) ) * makeScaleMatrix(0.2f));
 
 			//reflectionBuffer->unbind();
+
 			Worldscene->RenderWorldObjects();
 
 
@@ -1049,18 +1058,25 @@ int main()
 			billboardParticleShader.unuse();
 			glDepthMask(GL_TRUE);
 
+			glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), viewer.position().x(), viewer.position().y(), viewer.position().z());
+			//glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+			Eigen::Matrix4f clipMatrix;
+			clipMatrix = flipMatrix * cubemapPerspective *  makeTranslationMatrix(-Eigen::Vector3f(cam->getPosX(), cam->getPosY(), cam->getPosZ()));
 
+
+			glProgramUniformMatrix4fv(DOFShader.get(), DOFShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glBindFramebuffer(GL_FRAMEBUFFER, dframeBuffer);
 			glDrawBuffer(GL_NONE);
 			glDisable(GL_CULL_FACE);
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
-			Worldscene->RenderWorldObjects();
+			rock.render(DOFShader);
+			rock2.render(DOFShader);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glDrawBuffer(GL_BACK);
 
-			glCopyImageSubData(colourBuffer, GL_TEXTURE_2D, 0, 0, 0, 0, colourBuffer2, GL_TEXTURE_2D, 0, 0, 0, 0, windowWidth, windowHeight, 1);
+			//glCopyImageSubData(colourBuffer, GL_TEXTURE_2D, 0, 0, 0, 0, colourBuffer2, GL_TEXTURE_2D, 0, 0, 0, 0, windowWidth, windowHeight, 1);
 			////RENDER QUAD TO SCREEN
 			HDRShader.use();
 			glDisable(GL_DEPTH_TEST);
