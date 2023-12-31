@@ -106,7 +106,7 @@ Eigen::Matrix3f FlyViewer::rotation() const
 
 Eigen::Vector3f FlyViewer::position() const
 {
-	Eigen::Vector4f pos = (translate_ * rotate_).inverse() * Eigen::Vector4f(0.f, 0.f, 0.f, 1.f);
+	Eigen::Vector4f pos = (rotate_ * translate_ ).inverse() * Eigen::Vector4f(0.f, 0.f, 0.f, 1.f);
 	return pos.block<3, 1>(0, 0);
 }
 

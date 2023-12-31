@@ -1057,7 +1057,7 @@ int main()
 			glDrawArrays(GL_POINTS, 0, nRParticles);
 			billboardParticleShader.unuse();
 			glDepthMask(GL_TRUE);
-
+			std::cout << "camPOs " << viewer.position().x() << viewer.position().y() << viewer.position().z() << std::endl;
 			glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), viewer.position().x(), viewer.position().y(), viewer.position().z());
 			//glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 			Eigen::Matrix4f clipMatrix;
@@ -1073,6 +1073,8 @@ int main()
 			glEnable(GL_DEPTH_TEST);
 			rock.render(DOFShader);
 			rock2.render(DOFShader);
+			groundPlane.render(DOFShader);
+
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glDrawBuffer(GL_BACK);
 
