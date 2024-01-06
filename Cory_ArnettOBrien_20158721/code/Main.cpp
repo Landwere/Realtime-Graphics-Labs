@@ -363,6 +363,8 @@ int main()
 	glProgramUniform1i(shadowMappedShader.get(), shadowMappedShader.uniformLoc("sampleRadius"), sampleRadius);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("bias"), shadowMapBias);
 	glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+	glProgramUniform3fv(shadowMappedShader.get(), shadowMappedShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
+	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("worldLightInt"), worldLightIntensity);
 
 	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("HDRBuffer"), 0); /*! set HDR shader buffer to 0 (should be 0 by default)*/
 	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("depthTexture"), 2);
@@ -717,9 +719,11 @@ int main()
 		//Worldscene->AddToWorld(rock);
 		//Worldscene->AddToWorld(Tree1);
 		//Worldscene->AddToWorld(pinecone);
+		Worldscene->AddWorldObject(Tree1);
+		Worldscene->AddWorldObject(pinecone);
 		Worldscene->ground = &groundPlane;
 		Worldscene->AddWorldObject(testMesh, spotNormalMap);
-		//Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
+		Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
 		Worldscene->AddWorldObject(rock, rockNormal);
 		Worldscene->AddWorldObject(rock2, rockNormal);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
@@ -777,12 +781,7 @@ int main()
 		Eigen::AngleAxisf rotation;
 		Eigen::Vector3f rotDir;
 		bool hdrEnable = true;
-		float clipDist = 1;
-		float clipDir = -1;
-		int nRays = 5;
-		float aperture = 0.05;
-
-		
+	
 		while (running)
 		{
 			Uint64 frameStartTime = SDL_GetTicks64();
@@ -870,28 +869,7 @@ int main()
 
 						std::cout << "HDR ENABLED = " << hdrEnable << std::endl;
 					}
-					if (event.key.keysym.sym == SDLK_8)
-					{
-						clipDist += clipDist + 0.1f;
-						glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), clipDist);
-					}
-					if (event.key.keysym.sym == SDLK_2)
-					{
-						clipDist += clipDist - 0.1f;
-						glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), clipDist);
-					}
-					if (event.key.keysym.sym == SDLK_6)
-					{
-						clipDir += clipDir + 1.f;
-
-						glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDir"), clipDir);
-					}
-					if (event.key.keysym.sym == SDLK_4)
-					{
-						clipDir += clipDir - 1.f;
-
-						glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDir"), clipDir);
-					}
+					
 				}
 #pragma endregion
 			}
@@ -929,6 +907,7 @@ int main()
 			lightMat = makeRotationMatrix(90, 0, 0);
 			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
+			glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
 			//Render reflections
 			reflectionBuffer->bind();
