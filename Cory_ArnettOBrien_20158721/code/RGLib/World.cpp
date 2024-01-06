@@ -152,9 +152,34 @@ void RGLib::World::RenderWorldObjects()
 	//calculate duration per frame based upon time since last frame
 	frameDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastFrameTime).count() * 1e-9f;
 	lastFrameTime = std::chrono::steady_clock::now();
+}
+
+void RGLib::World::RenderWorldObjects(glhelper::ShaderProgram& shader)
+{
+	for (WorldObject* object : worldObjects)
+	{
+		//check mesh has texture and bind it
+		glActiveTexture(GL_TEXTURE0 + 0);
+		if (object->getMesh()->meshTex != nullptr)
+			object->getMesh()->meshTex->bindToImageUnit(0);
+		//TODO else bind empty tex
+
+		//bind normal map
+		if (object->GetNormal() != NULL)
+		{
+			glDisable(GL_BLEND);
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_2D, object->GetNormal());
+		}
 
 
+		//store query data for each mesh rendered 
+		object->getMesh()->render(shader);
+		//Unbind textures
+		glActiveTexture(GL_TEXTURE0 + 0);
+		glBindTexture(GL_TEXTURE_2D, NULL);
 
+	}
 }
 
 void RGLib::World::RenderGUI()
@@ -271,6 +296,14 @@ void RGLib::World::CreateQueries()
 
 void RGLib::World::Clean()
 {
+	for (glhelper::Mesh* mesh : worldMeshes)
+	{
+		delete(&mesh->meshTex);
+	}
+	for (WorldObject* object : worldObjects)
+	{
+		delete(object);
+	}
 	//save data to file
 	dataFile.close();
 }

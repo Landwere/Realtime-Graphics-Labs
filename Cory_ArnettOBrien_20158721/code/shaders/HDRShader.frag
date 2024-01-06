@@ -12,7 +12,8 @@ uniform bool enabled;
 uniform vec3 camPosWorld;
 
 const float PI = 3.141;
-//Blur funcion based off https://gamedev.stackexchange.com/questions/203335/opengl-4-depth-of-field with modifications to fit standard variables
+//Blur funcion based off https://gamedev.stackexchange.com/questions/203335/opengl-4-depth-of-field 
+//with modifications to fit standard variables and include tone mapped colours
 vec4 blurPixel(vec2 texCoord, vec3 colour)
 {
 	vec4 blurColour = vec4(colour, 1.0);//texture(HDRBuffer, texCoord);

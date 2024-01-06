@@ -83,6 +83,7 @@ float particleMass = 1.f;
 float gravitationalConstant = -1.f;
 float rainParticleSize = 0.03f;
 
+void Clean();
 
 //Quad renderer from https://learnopengl.com/Advanced-Lighting/HDR
 unsigned int quadVAO = 0;
@@ -624,14 +625,14 @@ int main()
 		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
 
 		//second colour buffer for use in depth of field 
-		GLuint colourBuffer2;
-		glGenTextures(1, &colourBuffer2);
-		glBindTexture(GL_TEXTURE_2D, colourBuffer2);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		//GLuint colourBuffer2;
+		//glGenTextures(1, &colourBuffer2);
+		//glBindTexture(GL_TEXTURE_2D, colourBuffer2);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 		//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colourBuffer, 0);
 		
@@ -714,13 +715,13 @@ int main()
 		//Worldscene->AddToWorld(sphereMesh);
 		//Worldscene->AddToWorld(lightHouse);
 		//Worldscene->AddToWorld(rock);
-		Worldscene->AddToWorld(rock2);
 		//Worldscene->AddToWorld(Tree1);
 		//Worldscene->AddToWorld(pinecone);
 		Worldscene->ground = &groundPlane;
 		Worldscene->AddWorldObject(testMesh, spotNormalMap);
 		//Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
 		Worldscene->AddWorldObject(rock, rockNormal);
+		Worldscene->AddWorldObject(rock2, rockNormal);
 		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
 
 		for (auto& model : models) {
@@ -929,6 +930,7 @@ int main()
 			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
+			//Render reflections
 			reflectionBuffer->bind();
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -993,16 +995,12 @@ int main()
 			//glDisable(GL_CULL_FACE);
 			//Worldscene->RenderShadowMaps();
 
-	/*		for (int i = 0; i < nRays; i++)
-			{
-				glm::vec3 bokeh = right * cosf(i * 2 * M_PI / n) + p_up * sinf(i * 2 * M_PI / n);
-				glm::mat4 modelview = glm::lookAt(eye + aperture * bokeh, object, p_up);
-				glm::mat4 mvp = projection * modelview;
-			}*/
+
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 			glEnable(GL_DEPTH_TEST);
 			glClearDepth(1.0);
 
+			//Render scene
 			glActiveTexture(GL_TEXTURE0 + 0);
 			glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
 			waterPlane.render();
@@ -1023,20 +1021,8 @@ int main()
 			//std::cout << "ball pos: " << ballPos.y() << std::endl;
 			pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(ballPos.x(), ballPos.y(), ballPos.z()) ) * makeScaleMatrix(0.2f));
 
-			//reflectionBuffer->unbind();
-
 			Worldscene->RenderWorldObjects();
 
-
-			//glDisable(GL_BLEND);
-			//glActiveTexture(GL_TEXTURE0 + 0);
-			//glBindTexture(GL_TEXTURE_2D, spotTexture);
-			//glActiveTexture(GL_TEXTURE0 + 2);
-			//glBindTexture(GL_TEXTURE_2D, spotNormalMap);
-			//testMesh.render();
-			//glBindTexture(GL_TEXTURE_2D, NULL);
-			//glActiveTexture(GL_TEXTURE0 + 0);
-			//glBindTexture(GL_TEXTURE_2D, NULL);
 
 			//render Rain particles from research paper (Work in progress)
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
@@ -1064,16 +1050,15 @@ int main()
 			clipMatrix = flipMatrix * cubemapPerspective *  makeTranslationMatrix(-Eigen::Vector3f(cam->getPosX(), cam->getPosY(), cam->getPosZ()));
 
 
-			//glProgramUniformMatrix4fv(DOFShader.get(), DOFShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
+			glProgramUniformMatrix4fv(DOFShader.get(), DOFShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glBindFramebuffer(GL_FRAMEBUFFER, dframeBuffer);
 			glDrawBuffer(GL_NONE);
 			glDisable(GL_CULL_FACE);
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
-			rock.render(DOFShader);
-			rock2.render(DOFShader);
-			groundPlane.render(DOFShader);
+			Worldscene->RenderWorldObjects(DOFShader);
+
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glDrawBuffer(GL_BACK);
@@ -1110,11 +1095,19 @@ int main()
 		};
 
 		//Clean up
+		Clean();
+		glDeleteBuffers(1, &HDRFrameBuffer);
+		glDeleteBuffers(1, &dframeBuffer);
+		glDeleteBuffers(1, &colourBuffer);
+		delete(reflectionBuffer);
+		Worldscene->Clean();
 
+		SDL_GL_DeleteContext(context);
+		SDL_DestroyWindow(window);
+		SDL_Quit();
 		return 0;
 	}
 
 void Clean()
 {
-
 }

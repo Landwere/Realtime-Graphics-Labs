@@ -29,6 +29,12 @@ namespace RGLib
 		};
 		WorldObject()
 		{};
+		~WorldObject()
+		{
+			glDeleteTextures(1, &normalMap);
+			delete(&objMesh->meshTex);
+		}
+
 		std::string getName()
 		{
 			return objMesh->meshName;
@@ -64,6 +70,7 @@ namespace RGLib
 		*/
 		World();
 		void RenderWorldObjects();
+		void RenderWorldObjects(glhelper::ShaderProgram& shader);
 		void RenderGUI();
 		void CreateShadowMaps();
 		void RenderShadowMaps();
