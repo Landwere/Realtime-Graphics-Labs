@@ -653,7 +653,7 @@ int main()
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
+		//Depth frame buffer used for depth of field calculations
 		GLuint dframeBuffer;
 		glGenFramebuffers(1, &dframeBuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, dframeBuffer);
@@ -1064,7 +1064,7 @@ int main()
 			clipMatrix = flipMatrix * cubemapPerspective *  makeTranslationMatrix(-Eigen::Vector3f(cam->getPosX(), cam->getPosY(), cam->getPosZ()));
 
 
-			glProgramUniformMatrix4fv(DOFShader.get(), DOFShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
+			//glProgramUniformMatrix4fv(DOFShader.get(), DOFShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glBindFramebuffer(GL_FRAMEBUFFER, dframeBuffer);
 			glDrawBuffer(GL_NONE);

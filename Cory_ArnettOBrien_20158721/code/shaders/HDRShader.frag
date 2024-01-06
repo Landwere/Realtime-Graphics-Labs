@@ -13,9 +13,9 @@ uniform vec3 camPosWorld;
 
 const float PI = 3.141;
 //Blur funcion based off https://gamedev.stackexchange.com/questions/203335/opengl-4-depth-of-field with modifications to fit standard variables
-vec4 blurPixel(vec2 texCoord)
+vec4 blurPixel(vec2 texCoord, vec3 colour)
 {
-	vec4 blurColour = texture(HDRBuffer, texCoord);
+	vec4 blurColour = vec4(colour, 1.0);//texture(HDRBuffer, texCoord);
 
 	float depth = texture(depthTexture, texCoord).r;
 	//float depth = blurColour.a;
@@ -24,16 +24,13 @@ vec4 blurPixel(vec2 texCoord)
 		return blurColour;
 		}
 	float x = 0.4;
-// tent function
-if(x > 0.5)
-    x = 1.0 - x; // from 0 to 0.5
 
-x *= 2.0; // from 0 to 1
-x *= 2.0; // from 0 to 2
-x -= 1.0; // from -1 to 1
+	x *= 2.0; // from 0 to 1
+	x *= 2.0; // from 0 to 2
+	x -= 1.0; // from -1 to 1
 
-x = abs(x);
-x = pow(x, 10.0);
+	x = abs(x);
+	x = pow(x, 10.0);
 
 	float directions = 16;
 	float quality = 10;
@@ -60,12 +57,12 @@ void main()
 
 	//reinhard tone map
 	vec3 map = HDRColour.xyz / ( HDRColour.xyz + vec3(1.0));
-
 	map.xyz = pow(map.xyz, vec3(1.0 / gamme));
+
 	if(enabled)
 		colourOut = vec4(map.xyz, 1.0);
 	else
-		colourOut = blurPixel(texCoord[0]);
+		colourOut = blurPixel(texCoord[0], map.xyz) ;
 }
 
 //end source
