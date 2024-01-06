@@ -35,12 +35,6 @@ vec3 lightModel(float lIntensity, vec3 lDirection, vec3 albedo, bool sCasting)
 
 void main()
 {
-	// Your code here
-	// Perform a shadow test here - compare the real distance from light to fragment
-	// with the value you load from your depth texture.
-	// Don't forget to scale your depth back to the right range using the farPlane
-	// and nearPlane values.
-	// If the point is in shadow, scale down the light intensity
 
 	vec3 albedo = texture(albedoTex, texCoord).xyz;
 	vec3 lightDir = normalize(lightPosWorld - fragPosWorld);
@@ -51,9 +45,9 @@ void main()
 	vec3 colorRgb = diffuseColor.rgb ;
 
 
-
+	//render from spotlight with shadows
 	colorOut.rgb += (lightModel(2, lightDir, albedo.xyz, true) * spot );
-	
+	//add ambient light
 	colorOut.rgb += (lightModel(worldLightInt, worldLightDir, albedo.xyz, false));
 
 	colorOut.a = 1.0;

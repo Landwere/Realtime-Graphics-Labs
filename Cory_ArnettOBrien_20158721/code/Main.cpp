@@ -366,13 +366,16 @@ int main()
 	glProgramUniform3fv(shadowMappedShader.get(), shadowMappedShader.uniformLoc("worldLightDir"), 1, worldLightDir.data());
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("worldLightInt"), worldLightIntensity);
 
+	//set up HDR shader uniforms
 	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("HDRBuffer"), 0); /*! set HDR shader buffer to 0 (should be 0 by default)*/
 	glProgramUniform1i(HDRShader.get(), HDRShader.uniformLoc("depthTexture"), 2);
+
 	//set up water shader uniforms
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("reflectionTexture"), 0);
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDist"), 1);
 	glProgramUniform1f(waterShader.get(), waterShader.uniformLoc("clipDir"), -1);
 
+	//set up Depth of feild shader uniforms
 	glProgramUniform1f(DOFShader.get(), DOFShader.uniformLoc("nearPlane"), shadowMapNear);
 	glProgramUniform1f(DOFShader.get(), DOFShader.uniformLoc("farPlane"), shadowMapFar);
 
@@ -413,7 +416,7 @@ int main()
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
+	//set up particle uniforms
 	glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), rainParticleSize);
 	glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.4f, 0.48f, 0.59f);
 
@@ -422,7 +425,7 @@ int main()
 	glProgramUniform1f(RainPhysicsShader.get(), RainPhysicsShader.uniformLoc("particleMass"), particleMass);
 
 
-	//Model class repurposed to be a model loader 
+	//Model class re-purposed to be a model loader 
 	Model* modelLoader = new Model();
 
 	ReloadConfig();
@@ -430,14 +433,14 @@ int main()
 
 
 #pragma region Meshes
-	//Test Mesh (stanford bunny)
+	//Test Mesh (spot the cow)
 		glhelper::Mesh testMesh;
 		testMesh.meshName = "TestMesh";
 
 		Eigen::Matrix4f bunnyModelToWorld = Eigen::Matrix4f::Identity();
-		bunnyModelToWorld(0, 0) = 0.2f;
-		bunnyModelToWorld(1, 1) = 0.2f;
-		bunnyModelToWorld(2, 2) = 0.2f;
+		bunnyModelToWorld(0, 0) = 0.3f;
+		bunnyModelToWorld(1, 1) = 0.3f;
+		bunnyModelToWorld(2, 2) = 0.3f;
 		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(6.f, 0.5f, 0)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
 		loadSpotMesh(&testMesh);
 		//modelLoader->loadFromFile(/*"../models/stanford_bunny/scene.gltf"*/"../models/spot/spot_triangulated.obj", &testMesh);
@@ -451,7 +454,7 @@ int main()
 		GLuint spotTexture = createTexture("../models/spot/spot_texture.png");
 
 
-		//Sphere mesh
+		//Sphere mesh used to show light position for debugging 
 		glhelper::Mesh sphereMesh;
 		sphereMesh.meshName = "Sphere";
 		sphereMesh.modelToWorld(makeTranslationMatrix(lampLight->GetPos()));
@@ -462,16 +465,12 @@ int main()
 		//Lighthouse Mesh
 		glhelper::Mesh lightHouse;
 		lightHouse.meshName = "LightHouse";
-
 		Eigen::Matrix4f lighthouseModelToWorld = Eigen::Matrix4f::Identity();
 		lighthouseModelToWorld = makeIdentityMatrix(1);
 		lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.1f, 0.f, 0.f)) * makeRotationMatrix(16, 0, -90) * lighthouseModelToWorld;
-
 		modelLoader->loadFromFile("../models/lighthouse2/source/Lighthouse.fbx", &lightHouse);
 		lightHouse.loadTexture("../models/lighthouse2/textures/Base_color.png");
-
 		GLuint lightHouseNormal = createTexture("../models/lighthouse2/textures/Normal.png");
-
 		lightHouse.modelToWorld(lighthouseModelToWorld);
 		lightHouse.shaderProgram(&NormalShader);
 		lightHouse.setCastsShadow(false);
@@ -479,7 +478,6 @@ int main()
 		//Rock Mesh
 		glhelper::Mesh rock;
 		rock.meshName = "Rock";
-
 		Eigen::Matrix4f rockModelToWorld = Eigen::Matrix4f::Identity();
 		rockModelToWorld = makeIdentityMatrix(1);
 		rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.7, 0.7f, 2.1)) * makeRotationMatrix(0, 0, -0) * rockModelToWorld;
@@ -488,17 +486,18 @@ int main()
 		GLuint rockNormal = createTexture("../models/obj-nat-rock/textures/nat-rock-norm.jpeg");
 		rock.shaderProgram(&NormalShader);
 		rock.modelToWorld(rockModelToWorld);
-
+		//Second rock mesh
 		glhelper::Mesh rock2;
+		rock2.meshName = "Rock 2";
 		Eigen::Matrix4f rock2ModelToWorld = makeTranslationMatrix(Eigen::Vector3f(4.32f, 0.3f, -7.75f));
 		modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-scaled.obj", &rock2);
 		rock2.loadTexture("../models/obj-nat-rock/textures/nat-rock-diff.jpeg");
 		rock2.shaderProgram(&blinnPhongShader);
 		rock2.modelToWorld(rock2ModelToWorld);
 
-		//Second Rock Mesh
+		//River Rock Mesh
 		glhelper::Mesh riverRock;
-		riverRock.meshName = "rock 2";
+		riverRock.meshName = "river rock";
 		Eigen::Matrix4f riverRockModelToWorld = Eigen::Matrix4f::Identity();
 		riverRockModelToWorld = makeIdentityMatrix(0.01f);
 		riverRockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-5, -0.5f, 0)) * riverRockModelToWorld;
@@ -1022,7 +1021,8 @@ int main()
 			glDrawArrays(GL_POINTS, 0, nRParticles);
 			billboardParticleShader.unuse();
 			glDepthMask(GL_TRUE);
-			std::cout << "camPOs " << viewer.position().x() << viewer.position().y() << viewer.position().z() << std::endl;
+
+			//std::cout << "camPOs " << viewer.position().x() << viewer.position().y() << viewer.position().z() << std::endl;
 			glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), viewer.position().x(), viewer.position().y(), viewer.position().z());
 			//glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 			Eigen::Matrix4f clipMatrix;
