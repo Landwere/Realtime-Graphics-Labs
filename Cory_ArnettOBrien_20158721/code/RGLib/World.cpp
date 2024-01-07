@@ -1,5 +1,6 @@
 #include "World.hpp"
 #include "Constants.hpp"
+#include <glm/ext/matrix_transform.hpp>
 
 
 
@@ -181,6 +182,55 @@ void RGLib::World::RenderWorldObjects(glhelper::ShaderProgram& shader)
 
 	}
 }
+template<typename T, int m, int n>
+inline glm::mat<m, n, float, glm::precision::highp> E2GLM(const Eigen::Matrix<T, m, n>& em)
+{
+	glm::mat<m, n, float, glm::precision::highp> mat;
+	for (int i = 0; i < m; ++i)
+	{
+		for (int j = 0; j < n; ++j)
+		{
+			mat[j][i] = em(i, j);
+		}
+	}
+	return mat;
+}
+glm::mat4 test;
+void RGLib::World::RenderReflectedObjects()
+{
+	for (WorldObject* object : worldObjects)
+	{
+		Eigen::Matrix4f mtwCache = object->getMesh()->modelToWorld();
+		Eigen::Matrix4f pineconeMTW = Eigen::Matrix4f::Identity();
+		test = glm::scale(glm::translate(E2GLM(object->getMesh()->modelToWorld())
+			, glm::vec3(0, 0, -1)), glm::vec3(1, 1, -1));
+		//Eigen::Scaling(makeTranslationMatrix(Eigen::Vector3f(0, 0, -1) * object->getMesh()->modelToWorld()), Eigen::Vector3f(1, 1, -1));
+		object->getMesh()->modelToWorld(object->getMesh()->modelToWorld() * makeTranslationMatrix(Eigen::Vector3f(0, -0.1f, 0)) * makeRotationMatrix(0, 0, -180));
+		//check mesh has texture and bind it
+		glActiveTexture(GL_TEXTURE0 + 0);
+		if (object->getMesh()->meshTex != nullptr)
+			object->getMesh()->meshTex->bindToImageUnit(0);
+		//TODO else bind empty tex
+
+		//bind normal map
+		if (object->GetNormal() != NULL)
+		{
+			glDisable(GL_BLEND);
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_2D, object->GetNormal());
+		}
+
+
+		//store query data for each mesh rendered 
+		object->getMesh()->render();
+		//Unbind textures
+		glActiveTexture(GL_TEXTURE0 + 0);
+		glBindTexture(GL_TEXTURE_2D, NULL);
+		object->getMesh()->modelToWorld(mtwCache);
+	}
+
+}
+
 
 void RGLib::World::RenderGUI()
 {
@@ -270,6 +320,7 @@ void RGLib::World::AddWorldObject(glhelper::Mesh& mesh, GLuint normalMap)
 	wO->SetNormal(normalMap);
 	worldObjects.push_back(wO);
 }
+
 
 void RGLib::World::AddWorldLight(RGLib::Light light)
 {

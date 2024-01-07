@@ -510,7 +510,7 @@ int main()
 		glhelper::Mesh groundPlane;
 		groundPlane.meshName = "Ground";
 		Eigen::Matrix4f groundModelToWorld = Eigen::Matrix4f::Identity();
-		groundModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0, 0, 6.5f)) * groundModelToWorld;
+		groundModelToWorld = makeTranslationMatrix(Eigen::Vector3f(0, 0, 0.f)) * groundModelToWorld;
 		modelLoader->loadFromFile("../models/groundPlane.obj", &groundPlane);
 		groundPlane.loadTexture("../models/Forest-Ground_01.png");
 		groundPlane.shaderProgram(&shadowMappedShader);
@@ -779,7 +779,7 @@ int main()
 		Eigen::Vector3f spotLightDir(-1.0f, 0.f, 0.f);
 		Eigen::AngleAxisf rotation;
 		Eigen::Vector3f rotDir;
-		bool hdrEnable = true;
+		bool hdrEnable = false;
 	
 		while (running)
 		{
@@ -977,11 +977,21 @@ int main()
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 			glEnable(GL_DEPTH_TEST);
 			glClearDepth(1.0);
-
+			glEnable(GL_STENCIL_TEST);
 			//Render scene
 			glActiveTexture(GL_TEXTURE0 + 0);
-			glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
+			//glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
+			glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+			glStencilMask(0xFF); // Write to stencil buffer
+			glDepthMask(GL_FALSE);
+			glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
 			waterPlane.render();
+			glStencilFunc(GL_EQUAL, 1, 0xFF); // Pass test if stencil value is 1
+			glStencilMask(0x00); // Don't write anything to stencil buffer
+			glDepthMask(GL_TRUE);
+			Worldscene->RenderReflectedObjects();
+			glDisable(GL_STENCIL_TEST);
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			glActiveTexture(GL_TEXTURE0 + 1);
@@ -1000,7 +1010,6 @@ int main()
 			pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(ballPos.x(), ballPos.y(), ballPos.z()) ) * makeScaleMatrix(0.2f));
 
 			Worldscene->RenderWorldObjects();
-
 
 			//render Rain particles from research paper (Work in progress)
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());

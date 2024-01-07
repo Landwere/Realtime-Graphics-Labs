@@ -10,7 +10,6 @@
 #include <RGLib/Matrices.hpp>
 #include "Light.hpp"
 #include "RGLib/ShadowMap.hpp"
-
 //!  World
 /*! 
 * The world class handles all the objects within the game scene and renders them accordingly 
@@ -71,6 +70,7 @@ namespace RGLib
 		World();
 		void RenderWorldObjects();
 		void RenderWorldObjects(glhelper::ShaderProgram& shader);
+		void RenderReflectedObjects();
 		void RenderGUI();
 		void CreateShadowMaps();
 		void RenderShadowMaps();
