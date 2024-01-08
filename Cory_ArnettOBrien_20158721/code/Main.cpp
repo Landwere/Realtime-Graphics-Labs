@@ -467,8 +467,8 @@ int main()
 		lightHouse.meshName = "LightHouse";
 		Eigen::Matrix4f lighthouseModelToWorld = Eigen::Matrix4f::Identity();
 		lighthouseModelToWorld = makeIdentityMatrix(1);
-		lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.1f, 0.f, 0.f)) * makeRotationMatrix(16, 0, -90) * lighthouseModelToWorld;
-		modelLoader->loadFromFile("../models/lighthouse2/source/Lighthouse.fbx", &lightHouse);
+		lighthouseModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.1f, 0.f, 0.f)) * makeRotationMatrix(0, 16, 0) * lighthouseModelToWorld;
+		modelLoader->loadFromFile("../models/lighthouse2/source/Lighthouse-scaled.fbx", &lightHouse);
 		lightHouse.loadTexture("../models/lighthouse2/textures/Base_color.png");
 		GLuint lightHouseNormal = createTexture("../models/lighthouse2/textures/Normal.png");
 		lightHouse.modelToWorld(lighthouseModelToWorld);
@@ -480,8 +480,8 @@ int main()
 		rock.meshName = "Rock";
 		Eigen::Matrix4f rockModelToWorld = Eigen::Matrix4f::Identity();
 		rockModelToWorld = makeIdentityMatrix(1);
-		rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-0.7, 0.7f, 2.1)) * makeRotationMatrix(0, 0, -0) * rockModelToWorld;
-		modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-scaled.obj", &rock);
+		rockModelToWorld = makeTranslationMatrix(Eigen::Vector3f(-4.7, 0.f, -2.1)) * makeRotationMatrix(0, -180, 0) * rockModelToWorld;
+		modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-scaled2.obj", &rock);
 		rock.loadTexture("../models/obj-nat-rock/textures/nat-rock-diff.jpeg");
 		GLuint rockNormal = createTexture("../models/obj-nat-rock/textures/nat-rock-norm.jpeg");
 		rock.shaderProgram(&NormalShader);
@@ -489,11 +489,11 @@ int main()
 		//Second rock mesh
 		glhelper::Mesh rock2;
 		rock2.meshName = "Rock 2";
-		Eigen::Matrix4f rock2ModelToWorld = makeTranslationMatrix(Eigen::Vector3f(4.32f, 0.3f, -7.75f));
-		modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-scaled.obj", &rock2);
+		Eigen::Matrix4f rock2ModelToWorld = makeIdentityMatrix(1); 
+		modelLoader->loadFromFile("../models/obj-nat-rock/source/nat-rock-Scaled2.obj", &rock2);
 		rock2.loadTexture("../models/obj-nat-rock/textures/nat-rock-diff.jpeg");
 		rock2.shaderProgram(&blinnPhongShader);
-		rock2.modelToWorld(rock2ModelToWorld);
+		rock2.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(9, 0.f, -4.1)) * makeRotationMatrix(0,-180,0) * makeScaleMatrix(1) * rock2ModelToWorld);
 
 		//River Rock Mesh
 		glhelper::Mesh riverRock;
@@ -526,11 +526,11 @@ int main()
 
 		glhelper::Mesh Tree1;
 		Tree1.meshName = "tree1";
-		modelLoader->loadFromFile("../models/tree/Tree.obj", &Tree1);
+		modelLoader->loadFromFile("../models/tree/Tree-scaled.obj", &Tree1);
 		Tree1.loadTexture("../models/tree/textures/Ivy_branch_Variation_1_Diffuse-Ivy_branch_Variation_1_Opacit.png");
 		Tree1.shaderProgram(&blinnPhongShader);
 		Eigen::Matrix4f treeModelToWorld = Eigen::Matrix4f::Identity();
-		Tree1.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4, 0, 4.f))* treeModelToWorld);
+		Tree1.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4, 0, 4.f)) * makeScaleMatrix(1) * treeModelToWorld);
 
 		glhelper::Mesh pinecone;
 		pinecone.meshName = "Pinecone";
@@ -980,6 +980,7 @@ int main()
 			glEnable(GL_STENCIL_TEST);
 			//Render scene
 			glActiveTexture(GL_TEXTURE0 + 0);
+			//Stencil functions from https://open.gl/depthstencils
 			//glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
 			glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
 			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
@@ -990,9 +991,13 @@ int main()
 			glStencilFunc(GL_EQUAL, 1, 0xFF); // Pass test if stencil value is 1
 			glStencilMask(0x00); // Don't write anything to stencil buffer
 			glDepthMask(GL_TRUE);
+			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.0f, 0.0f, 0.1f);
 			Worldscene->RenderReflectedObjects();
+			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.0f, 0.0f, 0.0f);
+
 			glDisable(GL_STENCIL_TEST);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			//end source
+			//glBindTexture(GL_TEXTURE_2D, 0);
 
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);

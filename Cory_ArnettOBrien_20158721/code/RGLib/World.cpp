@@ -200,12 +200,13 @@ void RGLib::World::RenderReflectedObjects()
 {
 	for (WorldObject* object : worldObjects)
 	{
+		
 		Eigen::Matrix4f mtwCache = object->getMesh()->modelToWorld();
 		Eigen::Matrix4f pineconeMTW = Eigen::Matrix4f::Identity();
 		test = glm::scale(glm::translate(E2GLM(object->getMesh()->modelToWorld())
 			, glm::vec3(0, 0, -1)), glm::vec3(1, 1, -1));
 		//Eigen::Scaling(makeTranslationMatrix(Eigen::Vector3f(0, 0, -1) * object->getMesh()->modelToWorld()), Eigen::Vector3f(1, 1, -1));
-		object->getMesh()->modelToWorld(object->getMesh()->modelToWorld() * makeTranslationMatrix(Eigen::Vector3f(0, -0.1f, 0)) * makeRotationMatrix(0, 0, -180));
+		object->getMesh()->modelToWorld(object->getMesh()->modelToWorld() * makeTranslationMatrix(Eigen::Vector3f(0, -0.1f, 0)) * makeRotationMatrix(0, -180, -180));
 		//check mesh has texture and bind it
 		glActiveTexture(GL_TEXTURE0 + 0);
 		if (object->getMesh()->meshTex != nullptr)

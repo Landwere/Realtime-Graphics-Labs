@@ -33,6 +33,8 @@ uniform float worldLightInt;
 
 uniform vec3 spotLightDir;
 
+uniform vec3 colourOverride;
+
 //Light model used to add light to model, with additional normal input for normal mapping
 vec4 lightModel(float lIntensity, vec3 lDirection, vec3 viewDir, vec3 albedo, vec3 normWorld)
 {
@@ -102,5 +104,8 @@ void main()
 //
 //	//apply global light (half lightIntensity because normal mapping seems to add more light)
 	colorOut += clamp(lightModel(worldLightInt / 2, worldLightDir, viewDir, albedo, mapNormal),0.f,1.f);
+
+	if(colourOverride != vec3(0,0,0))
+		colorOut.rgb += colourOverride;
 }
 
