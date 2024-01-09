@@ -9,6 +9,10 @@ layout(std430, binding=1) buffer particleVelocities {
     vec4 vel[];
 };
 
+layout(std430, binding=2) buffer splashPositions {
+    vec4 sPos[];
+};
+
 uniform float masses[10];
 uniform vec3 massPositions[10];
 uniform int nMasses;
@@ -52,9 +56,23 @@ void main() {
     pos[gl_GlobalInvocationID.x].xyz += velocity * timeStep;
     if (pos[gl_GlobalInvocationID.x].y < 0)
     {
+        //set splashPositions
+        sPos[gl_GlobalInvocationID.x].xyz =  pos[gl_GlobalInvocationID.x].xyz;
+        //currently no depth testing so all splash should be at Y 0
+         sPos[gl_GlobalInvocationID.x].y = 0;
+         sPos[gl_GlobalInvocationID.x].w = 2;
         pos[gl_GlobalInvocationID.x].y = 30;
         velocity = vec3(0,0,0);
         vel[gl_GlobalInvocationID.x].xyz = velocity;
+    }
+    //time out splashes
+    if(sPos[gl_GlobalInvocationID.x].w > 0)
+    {
+        sPos[gl_GlobalInvocationID.x].w = sPos[gl_GlobalInvocationID.x].w - 1 * timeStep;
+    }
+    else
+    {
+        sPos[gl_GlobalInvocationID.x].xyz = vec3(999,999,999);
     }
 }
 

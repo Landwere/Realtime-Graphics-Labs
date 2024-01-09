@@ -382,8 +382,9 @@ int main()
 	glProgramUniform1f(DOFShader.get(), DOFShader.uniformLoc("farPlane"), shadowMapFar);
 
 	//Create particles (work in progress)
-	GLuint rainVao;
+	GLuint rainVao, splashVao;
 	glGenVertexArrays(1, &rainVao);
+	glGenVertexArrays(1, &splashVao);
 	glhelper::ShaderStorageBuffer particleBuffer(nRParticles * 4 * sizeof(float)),
 		velocityBuffer(nRParticles * 4 * sizeof(float)), splashBuffer(nRParticles * 4 * sizeof(float));
 
@@ -418,6 +419,14 @@ int main()
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	glBindVertexArray(splashVao);
+	glBindBuffer(GL_ARRAY_BUFFER, splashBuffer.get());
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
 	//set up particle uniforms
 	glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), rainParticleSize);
 	glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.4f, 0.48f, 0.59f);
@@ -1026,6 +1035,8 @@ int main()
 			//glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
 
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, splashBuffer.get());
+
 			glUseProgram(RainPhysicsShader.get());
 			glDispatchCompute(nRParticles, 1, 1);
 
@@ -1036,6 +1047,12 @@ int main()
 			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
 			glBindVertexArray(rainVao);
 			billboardParticleShader.use();
+			glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), rainParticleSize);
+			glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.4f, 0.48f, 0.59f);
+			glDrawArrays(GL_POINTS, 0, nRParticles);
+			glBindVertexArray(splashVao);
+			glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), rainParticleSize * 3);
+			glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.15f, 0.20f, 0.3f);
 			glDrawArrays(GL_POINTS, 0, nRParticles);
 			billboardParticleShader.unuse();
 			glDepthMask(GL_TRUE);
