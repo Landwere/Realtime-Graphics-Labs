@@ -106,6 +106,6 @@ void main()
 	colorOut += clamp(lightModel(worldLightInt / 2, worldLightDir, viewDir, albedo, mapNormal),0.f,1.f);
 
 	if(colourOverride != vec3(0,0,0))
-		colorOut.rgb += colourOverride;
+		colorOut.rgb *= colourOverride;
 }
 

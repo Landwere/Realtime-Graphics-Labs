@@ -62,6 +62,8 @@ float worldLightIntensity = 0.5f;
 float lightWidth = 0.01f;
 int sampleRadius = 1;
 
+Eigen::Vector4f skyColour(0.01f, 0.01f, 0.01f, 1.0f);
+
 //shadow
 const float shadowMapNear = 1.f, shadowMapFar = 1000.f;
 float shadowMapBias = 1.0f; /*! shadow map depth distance bias to prevent artefacts*/
@@ -380,10 +382,10 @@ int main()
 	glProgramUniform1f(DOFShader.get(), DOFShader.uniformLoc("farPlane"), shadowMapFar);
 
 	//Create particles (work in progress)
-	GLuint ringVao;
-	glGenVertexArrays(1, &ringVao);
+	GLuint rainVao;
+	glGenVertexArrays(1, &rainVao);
 	glhelper::ShaderStorageBuffer particleBuffer(nRParticles * 4 * sizeof(float)),
-		velocityBuffer(nRParticles * 4 * sizeof(float));
+		velocityBuffer(nRParticles * 4 * sizeof(float)), splashBuffer(nRParticles * 4 * sizeof(float));
 
 	// Initialise ring particle positions and velocities		
 	{
@@ -410,7 +412,7 @@ int main()
 	}
 
 
-	glBindVertexArray(ringVao);
+	glBindVertexArray(rainVao);
 	glBindBuffer(GL_ARRAY_BUFFER, particleBuffer.get());
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -880,6 +882,7 @@ int main()
 				sphereMesh.modelToWorld(makeTranslationMatrix(lampLight->GetPos()));
 				glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 				glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+				glProgramUniform3f(waterShader.get(), waterShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 
 			}
 
@@ -907,10 +910,11 @@ int main()
 			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 			glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
+			glProgramUniform3f(waterShader.get(), waterShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
 			//Render reflections
 			reflectionBuffer->bind();
-			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			glClearColor(skyColour[0], skyColour[1], skyColour[2], skyColour[3]);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_CLIP_DISTANCE0);
@@ -920,7 +924,7 @@ int main()
 			//Clear buffers before rendering shadows
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 
-			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			glClearColor(skyColour[0], skyColour[1], skyColour[2], skyColour[3]);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_BLEND);
 			glEnable(GL_DEPTH_TEST);
@@ -991,7 +995,7 @@ int main()
 			glStencilFunc(GL_EQUAL, 1, 0xFF); // Pass test if stencil value is 1
 			glStencilMask(0x00); // Don't write anything to stencil buffer
 			glDepthMask(GL_TRUE);
-			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.0f, 0.0f, 0.1f);
+			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.3f, 0.3f, 0.6f);
 			Worldscene->RenderReflectedObjects();
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.0f, 0.0f, 0.0f);
 
@@ -1030,7 +1034,7 @@ int main()
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
-			glBindVertexArray(ringVao);
+			glBindVertexArray(rainVao);
 			billboardParticleShader.use();
 			glDrawArrays(GL_POINTS, 0, nRParticles);
 			billboardParticleShader.unuse();

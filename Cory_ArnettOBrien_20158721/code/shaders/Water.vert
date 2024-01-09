@@ -19,6 +19,7 @@ uniform float clipDir;
 
 out vec4 clipSpace;
 
+out vec3 fragPosWorld;
 
 void main()
 {
@@ -26,5 +27,6 @@ void main()
 
 		gl_Position = worldToClip *  modelToWorld * vec4(vPos, 1.0);
 		clipSpace = worldToClip * modelToWorld * vec4(vPos, 1.0f);
+		fragPosWorld = (modelToWorld * vec4(vPos, 1.0)).xyz;
 
 }
