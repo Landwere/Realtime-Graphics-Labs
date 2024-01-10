@@ -725,7 +725,7 @@ int main()
 		Worldscene->AddWorldLight(*lampLight);
 		//Worldscene->AddToWorld(groundPlane);
 		//Worldscene->AddToWorld(sphereMesh);
-		//Worldscene->AddToWorld(lightHouse);
+		Worldscene->AddToWorld(lightHouse);
 		//Worldscene->AddToWorld(rock);
 		//Worldscene->AddToWorld(Tree1);
 		//Worldscene->AddToWorld(pinecone);
@@ -805,7 +805,6 @@ int main()
 				{
 					running = false;
 					//Worldscene->Clean();
-					delete Worldscene;
 
 					return 0;
 				}
@@ -963,14 +962,14 @@ int main()
 
 
 				glProgramUniformMatrix4fv(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
-
+				glBeginQuery(GL_TIME_ELAPSED_EXT, Worldscene->GetQueries()["Shadows"]);
 				for (glhelper::Renderable* mesh : scene)
 				{
 					if (mesh->castsShadow())
 						mesh->render(shadowCubeMapShader);
 
 				}
-
+				glEndQuery(GL_TIME_ELAPSED_EXT);
 			}
 			//Worldscene->CreateShadowMaps();
 
@@ -1038,6 +1037,9 @@ int main()
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, splashBuffer.get());
 
 			glUseProgram(RainPhysicsShader.get());
+			//Begin query for rain particles (included compute)
+			glBeginQuery(GL_TIME_ELAPSED_EXT, Worldscene->GetQueries()["Rain Particles"]);
+
 			glDispatchCompute(nRParticles, 1, 1);
 
 			glEnable(GL_BLEND);
@@ -1054,6 +1056,7 @@ int main()
 			glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), rainParticleSize * 3);
 			glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.15f, 0.20f, 0.3f);
 			glDrawArrays(GL_POINTS, 0, nRParticles);
+			glEndQuery(GL_TIME_ELAPSED_EXT);
 			billboardParticleShader.unuse();
 			glDepthMask(GL_TRUE);
 
@@ -1071,8 +1074,9 @@ int main()
 			glDisable(GL_CULL_FACE);
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
+			glBeginQuery(GL_TIME_ELAPSED_EXT, Worldscene->GetQueries()["DepthofField"]);
 			Worldscene->RenderWorldObjects(DOFShader);
-
+			glEndQuery(GL_TIME_ELAPSED_EXT);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glDrawBuffer(GL_BACK);
@@ -1096,7 +1100,7 @@ int main()
 
 
 
-			
+			Worldscene->RecordQueries();
 
 			SDL_GL_SwapWindow(window);
 

@@ -1,4 +1,6 @@
 #include "World.hpp"
+#include "World.hpp"
+#include "World.hpp"
 #include "Constants.hpp"
 #include <glm/ext/matrix_transform.hpp>
 
@@ -12,9 +14,9 @@ RGLib::World::World()
 
 	dataFile.open("renderData.csv", std::ios_base::app);
 	fpsText = gltCreateText();
-
+	frameCountText = gltCreateText();
 	frameCount = 0;
-
+	frameSync = 0;
 	flipMatrix <<
 		-1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, -1.0f, 0.0f, 0.0f,
@@ -53,7 +55,7 @@ void RGLib::World::RenderWorldObjects()
 	int i = 0;
 	for (glhelper::Mesh* mesh : worldMeshes)
 	{
-		GLuint currentQuery = queries[i];
+		GLuint currentQuery = NULL;//queries[i];
 		i++;
 		
 		//check mesh has texture and bind it
@@ -86,7 +88,17 @@ void RGLib::World::RenderWorldObjects()
 
 
 		//store query data for each mesh rendered 
-		object->getMesh()->render();
+		if (!object->IsQueryQueued())
+		{
+			glBeginQuery(GL_TIME_ELAPSED_EXT, object->GetQuery());
+			object->getMesh()->render();
+			glEndQuery(GL_TIME_ELAPSED_EXT);
+			object->SetQueryQueued(true);
+		}
+		else
+		{
+			object->getMesh()->render();
+		}
 		//Unbind textures
 		glActiveTexture(GL_TEXTURE0 + 0);
 		glBindTexture(GL_TEXTURE_2D, NULL);
@@ -109,51 +121,48 @@ void RGLib::World::RenderWorldObjects()
 
 
 	//only print every 30 frames to make console readable in realtime
-	if (frameCount >= 30)
-	{
-		//reset i to 0 to link queries
-		i = 0;
-		//total time rendering each mesh
-		GLuint64 totalTime = 0;
+	//if (frameCount >= 30)
+	//{
+	//	//reset i to 0 to link queries
+	//	i = 0;
+	//	//total time rendering each mesh
+	//	GLuint64 totalTime = 0;
 
-		for (GLuint& query : queries)
-		{
-			GLint availible = 0;
-			while (!availible)
-			{
-				glGetQueryObjectiv(query, GL_QUERY_RESULT_AVAILABLE, &availible);
-			}
-			GLuint64 timeElapsed;
-			glGetQueryObjectui64v(query, GL_QUERY_RESULT, &timeElapsed);
-			totalTime += timeElapsed;
-			//convert time to milliseconds for console output
-			std::cout << "Mesh: " << worldMeshes[i]->meshName << " " << timeElapsed / 1e6f << "\n";
-			//TODO change to show names on colums and data on rows for easy chart creation
-			dataFile << worldMeshes[i]->meshName << timeElapsed << ", ";
-			i++;
-		}
+	//	//for (GLuint& query : queries)
+	//	//{
+	//	//	GLint availible = 0;
+	//	//	while (!availible)
+	//	//	{
+	//	//		glGetQueryObjectiv(query, GL_QUERY_RESULT_AVAILABLE, &availible);
+	//	//	}
+	//	//	GLuint64 timeElapsed;
+	//	//	glGetQueryObjectui64v(query, GL_QUERY_RESULT, &timeElapsed);
+	//	//	totalTime += timeElapsed;
+	//	//	//convert time to milliseconds for console output
+	//	//	std::cout << "Mesh: " << worldMeshes[i]->meshName << " " << timeElapsed / 1e6f << "\n";
+	//	//	//TODO change to show names on colums and data on rows for easy chart creation
+	//	//	//dataFile << worldMeshes[i]->meshName << timeElapsed << ", ";
+	//	//	i++;
+	//	//}
 
-		//to fps
-		std::cout << "Total Render Time: " << totalTime / 1e6f << "ms" << "\n";
-		//GLuint64 fps;
-		//fps = 1 / ((totalTime / 1e6f) / 1000.f);
+	//	//to fps
+	//	//std::cout << "Total Render Time: " << totalTime / 1e6f << "ms" << "\n";
+	//	//GLuint64 fps;
+	//	//fps = 1 / ((totalTime / 1e6f) / 1000.f);
 
-		//print to console and convert frameDuration to fps
-		std::cout << "Total FPS: " << std::to_string(1 / frameDuration) << "fps" << "\n";
-		dataFile << "Total mesh render time: " << totalTime << " FPS: " << std::to_string(1 / frameDuration) << "\n";
+	//	//print to console and convert frameDuration to fps
+	//	std::cout << "Total FPS: " << std::to_string(1 / frameDuration) << "fps" << "\n";
+	//	//dataFile << "Total mesh render time: " << totalTime << " FPS: " << std::to_string(1 / frameDuration) << "\n";
 
-		gltSetText(fpsText, (std::string("FPS: ") + std::to_string(1 / frameDuration)).c_str());
+	//	gltSetText(fpsText, (std::string("FPS: ") + std::to_string(1 / frameDuration)).c_str());
 
-		//dataFile.flush();
-		frameCount = 0;
-	}
+	//	//dataFile.flush();
+	//	frameCount = 0;
+	//}
 
-	frameCount++;
 
-	//calculate duration per frame based upon time since last frame
-	frameDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastFrameTime).count() * 1e-9f;
-	lastFrameTime = std::chrono::steady_clock::now();
 }
+
 
 void RGLib::World::RenderWorldObjects(glhelper::ShaderProgram& shader)
 {
@@ -174,13 +183,29 @@ void RGLib::World::RenderWorldObjects(glhelper::ShaderProgram& shader)
 		}
 
 
+			/*GLint availible = 0;
+			while (!availible)
+			{
+				glGetQueryObjectiv(object->GetQuery(), GL_QUERY_RESULT_AVAILABLE, &availible);
+			}
+			GLuint64 timeElapsed;
+			glGetQueryObjectui64v(object->GetQuery(), GL_QUERY_RESULT, &timeElapsed);*/
+			//convert time to milliseconds for console output
+			//std::cout << "Mesh: " << worldMeshes[i]->meshName << " " << timeElapsed / 1e6f << "\n";
+			//TODO change to show names on colums and data on rows for easy chart creation
+			//dataFile << worldMeshes[i]->meshName << timeElapsed << ", ";
+		
+
+
 		//store query data for each mesh rendered 
+
 		object->getMesh()->render(shader);
+
 		//Unbind textures
 		glActiveTexture(GL_TEXTURE0 + 0);
 		glBindTexture(GL_TEXTURE_2D, NULL);
-
 	}
+
 }
 template<typename T, int m, int n>
 inline glm::mat<m, n, float, glm::precision::highp> E2GLM(const Eigen::Matrix<T, m, n>& em)
@@ -198,6 +223,7 @@ inline glm::mat<m, n, float, glm::precision::highp> E2GLM(const Eigen::Matrix<T,
 glm::mat4 test;
 void RGLib::World::RenderReflectedObjects()
 {
+	glBeginQuery(GL_TIME_ELAPSED_EXT, queries["Reflections"]);
 	for (WorldObject* object : worldObjects)
 	{
 		
@@ -229,6 +255,7 @@ void RGLib::World::RenderReflectedObjects()
 		glBindTexture(GL_TEXTURE_2D, NULL);
 		object->getMesh()->modelToWorld(mtwCache);
 	}
+	glEndQuery(GL_TIME_ELAPSED_EXT);
 
 }
 
@@ -239,7 +266,10 @@ void RGLib::World::RenderGUI()
 	gltBeginDraw();
 	gltColor(1.f, 1.f, 1.f, 1.f);
 	gltDrawText2D(fpsText, 10.f, 10.f, 1.f);
+
+	gltDrawText2D(frameCountText, 10.f, 40.f, 1.f);
 	gltEndDraw();
+
 }
 
 void RGLib::World::CreateShadowMaps()
@@ -336,14 +366,91 @@ void RGLib::World::CreateQueries()
 	{
 		GLuint query;
 		glGenQueries(1, &query);
-		queries.push_back(query);
+		//queries.push_back(query);
 	}
 	dataFile.clear();
 
 	shadowMap = new RGLib::ShadowMap(512, worldLights[0]);
 	shadowRec.push_back(ground);
-}
 
+	for (WorldObject* object : worldObjects)
+	{
+		dataFile << object->getName() << ", ";
+	}
+
+	queries["Reflections"] = NULL;
+	queries["DepthofField"] = NULL;
+	queries["Rain Particles"] = NULL;
+	queries["Shadows"] = NULL;
+	std::map <std::string, GLuint> ::iterator iter;
+	for (iter = queries.begin(); iter != queries.end(); iter++)
+	{
+		GLuint query;
+		glGenQueries(1, &query);
+		(*iter).second = query;
+		dataFile << (*iter).first << ", ";
+	}
+}
+void RGLib::World::RecordQueries()
+{
+	bool allAvailible = true;
+
+
+	for (WorldObject* object : worldObjects)
+	{
+		GLint availible = 0;
+
+		glGetQueryObjectiv(object->GetQuery(), GL_QUERY_RESULT_AVAILABLE, &availible);
+
+		if (!availible)
+			allAvailible = false;
+	}
+
+	if (allAvailible)
+	{
+		dataFile << "\n";
+
+		for (WorldObject* object : worldObjects)
+		{
+			//wait for query to become available 
+			//while (!availible)
+			//{
+			//}
+			GLuint64 timeElapsed;
+			glGetQueryObjectui64v(object->GetQuery(), GL_QUERY_RESULT, &timeElapsed);
+			dataFile << timeElapsed << ", ";
+			object->SetQueryQueued(false);
+		}
+		for (std::pair pair : queries)
+		{
+			GLuint64 timeElapsed;
+			glGetQueryObjectui64v(pair.second, GL_QUERY_RESULT, &timeElapsed);
+			dataFile << timeElapsed << ", ";
+		}
+		frameSync++;
+	}
+	
+
+	if (frameCount >= 30)
+	{
+	
+		//print to console and convert frameDuration to fps
+		std::cout << "Total FPS: " << std::to_string(1 / frameDuration) << "fps" << "\n";
+		//dataFile << "Total mesh render time: " << totalTime << " FPS: " << std::to_string(1 / frameDuration) << "\n";
+
+		gltSetText(fpsText, (std::string("FPS: ") + std::to_string(1 / frameDuration)).c_str());
+
+		//dataFile.flush();
+		frameCount = 0;
+	}
+	gltSetText(frameCountText, (std::string("Frame Sync: ") + std::to_string(frameSync)).c_str());
+
+	frameCount++;
+
+	//calculate duration per frame based upon time since last frame
+	frameDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastFrameTime).count() * 1e-9f;
+	lastFrameTime = std::chrono::steady_clock::now();
+}
 
 
 void RGLib::World::Clean()
@@ -365,6 +472,8 @@ void RGLib::World::ClearWorld()
 	worldMeshes.clear();
 	queries.clear();
 }
+
+
 
 void RGLib::World::SetShadowMapShaders(glhelper::ShaderProgram &sMShader, glhelper::ShaderProgram &sCMShader)
 {

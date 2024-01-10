@@ -24,6 +24,7 @@ namespace RGLib
 		WorldObject(glhelper::Mesh& mesh)
 		{
 			objMesh = &mesh;
+			glGenQueries(1, &query);
 			//world->AddWorldObject(*this);
 		};
 		WorldObject()
@@ -31,6 +32,7 @@ namespace RGLib
 		~WorldObject()
 		{
 			glDeleteTextures(1, &normalMap);
+			glDeleteQueries(1, &query);
 			delete(&objMesh->meshTex);
 		}
 
@@ -54,10 +56,26 @@ namespace RGLib
 			return normalMap;
 		}
 
+		GLuint GetQuery()
+		{
+			return query;
+		}
+
+		bool IsQueryQueued()
+		{
+			return queryQueued;
+		}
+
+		void SetQueryQueued(bool _true)
+		{
+			queryQueued = _true;
+		}
+
 	private:
 		glhelper::Mesh* objMesh;
 		GLuint normalMap;
 		GLuint query;
+		bool queryQueued = false;
 	};
 	/*! Text world class */
 
@@ -75,7 +93,7 @@ namespace RGLib
 		void CreateShadowMaps();
 		void RenderShadowMaps();
 		void AddToWorld(glhelper::Mesh& mesh);
-
+		void RecordQueries();
 		void AddWorldObject(glhelper::Mesh& mesh);
 		void AddWorldObject(glhelper::Mesh& mesh, GLuint normalMap);
 		void AddWorldLight(RGLib::Light light);
@@ -85,6 +103,11 @@ namespace RGLib
 		void Clean();
 
 		void ClearWorld();
+
+		std::map< std::string, GLuint> GetQueries()
+		{
+			return queries;
+		}
 
 		nlohmann::json* models;
 		/*std::map<std::string, glhelper::Mesh>* meshes;
@@ -99,10 +122,14 @@ namespace RGLib
 
 		RGLib::ShadowMap* shadowMap;
 		std::vector<glhelper::Mesh*> /*std::vector<WorldObject*>**/ worldMeshes;
-		std::vector<GLuint> queries;
+		//std::vector<GLuint> queries;
+		std::map< std::string, GLuint> queries;
 		std::ofstream dataFile; //("renderData.csv");
 		GLTtext* fpsText;
+		GLTtext* frameCountText;
+
 		int frameCount;
+		int frameSync;
 		std::chrono::time_point<std::chrono::steady_clock> lastFrameTime;
 		float frameDuration;
 		std::vector< WorldObject*> worldObjects;
