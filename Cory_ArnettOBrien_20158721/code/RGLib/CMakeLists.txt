@@ -44,6 +44,8 @@ WaterRenderer.hpp
 WaterRenderer.cpp
 InstanceRenderer.cpp
 InstanceRenderer.hpp
+Physics.hpp
+Physics.cpp
 )
 
 target_compile_features(RGLib PRIVATE cxx_std_20)
