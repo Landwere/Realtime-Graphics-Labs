@@ -60,11 +60,12 @@ void main() {
         sPos[gl_GlobalInvocationID.x].xyz =  pos[gl_GlobalInvocationID.x].xyz;
         //currently no depth testing so all splash should be at Y 0
          sPos[gl_GlobalInvocationID.x].y = 0;
-         sPos[gl_GlobalInvocationID.x].w = 2;
+         sPos[gl_GlobalInvocationID.x].w = 1.5f;
         pos[gl_GlobalInvocationID.x].y = 30;
         velocity = vec3(0,0,0);
         vel[gl_GlobalInvocationID.x].xyz = velocity;
     }
+    
     //time out splashes
     if(sPos[gl_GlobalInvocationID.x].w > 0)
     {

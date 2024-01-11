@@ -10,7 +10,11 @@
 
 namespace RGLib
 {
-	//source Cory Arnett-O'Brien (Game Engine Architecture)
+	/*! \brief Old model class from Game Engine Architecture repurposed to be a model loader for glhelper::Mesh
+	* 
+	* source Cory Arnett-O'Brien (Game Engine Architecture)
+	*/
+	
 	class Model
 	{
 	public:
@@ -60,7 +64,10 @@ namespace RGLib
 		GLuint indexCount;
 		int numVertices;
 	};
-
+/*! \brief Old model renderer from Game Engine Architecture depreciated in favour of glhelper::Mesh
+*
+*	Sourced from Cory Arnett-O'Brien (Game Engine Architecture) with minimal modifications
+*/
 class ModelRenderer
 {
 public:
@@ -188,7 +195,7 @@ private:
 	GLuint fogRangeId;
 
 };
-
+/*! \brief Struct to hold vertex data for RGLib::Model class*/
 struct Vertex
 {
 	//location

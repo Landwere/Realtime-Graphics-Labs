@@ -5,13 +5,16 @@
 
 namespace RGLib
 {
-	//Source Cory Arnett-O'Brien (Game Engine Architecture)
+	/*! \brief Unused in favour of glhelper::FlyViewer 
+	*
+	* Source Cory Arnett-O'Brien (Game Engine Architecture)
+	*/
 	class Camera
 	{
 	public:
 		Camera(glm::vec3 cam_pos, glm::vec3 cam_target, glm::vec3 cam_upDir, float fov, float ar, float near, float far)
 		{
-			//initilise the camera variables to the values passed on the parameters
+			//initialise the camera variables to the values passed on the parameters
 			pos = cam_pos;
 			target = cam_target;
 			up = cam_upDir;

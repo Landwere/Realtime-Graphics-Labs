@@ -2,6 +2,7 @@
 #include <Eigen/Dense>
 namespace RGLib
 {
+	/*! \brief The light class stored the position and intensity of light sources*/
 	class Light
 	{
 	public:

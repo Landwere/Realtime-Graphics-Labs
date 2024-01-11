@@ -16,8 +16,8 @@ void main()
 	// Use the standard shader output value gl_FragDepth.
 	// You'll probably want to scale your depths to be in the [0,1] range
 	// based on the current nearPlane & farPlane values.
-	float lightLength = distance(fragPosWorld, camPosWorld);
-	if(lightLength > 15f || lightLength < 0f)
+	float fragDist = distance(fragPosWorld, camPosWorld);
+	if(fragDist > 15f || fragDist < 0f)
 	{
 		gl_FragDepth = 1;}
 	else{

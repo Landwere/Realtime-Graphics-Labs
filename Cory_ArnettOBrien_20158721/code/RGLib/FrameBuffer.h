@@ -3,6 +3,10 @@
 #include <GL/glew.h>
 
 namespace RGLib {
+	/*! \brief Previously used for FrameBuffer reflections, now unused
+	* 
+	* Based on code from Game Engine Architecture
+	*/
 	class FrameBuffer {
 	public:
 		FrameBuffer(int _width, int _height) : width(_width), height(_height) {}

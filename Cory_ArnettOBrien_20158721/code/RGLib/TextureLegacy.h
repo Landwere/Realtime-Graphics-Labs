@@ -7,6 +7,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 namespace RGLib {
+	/*! \brief Unused class in favour of glhelper::Texture*/
 	//source Cory Arnett-O'Brien (Game engine architecture)
 	class Texture
 	{

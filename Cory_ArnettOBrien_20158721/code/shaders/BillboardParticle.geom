@@ -20,7 +20,7 @@ layout(std140) uniform cameraBlock
 uniform float particleSize;
 
 out vec2 texCoords;
-
+out vec3 pointPos;
 void main()
 {
 	vec3 pointPos = gl_in[0].gl_Position.xyz;

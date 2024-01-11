@@ -23,7 +23,7 @@ vec4 blurPixel(vec2 texCoord, vec3 colour)
 	if (depth < 0.1)
 	{
 		return blurColour;
-		}
+	}
 	float x = 0.4;
 
 	x *= 2.0; // from 0 to 1

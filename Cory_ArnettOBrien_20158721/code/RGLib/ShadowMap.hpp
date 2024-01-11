@@ -11,6 +11,9 @@
 
 namespace RGLib
 {
+	/*! \brief Incomplete attempt to separate shadow map from main function
+	*
+	*/
 	class ShadowMap
 	{
 	public:

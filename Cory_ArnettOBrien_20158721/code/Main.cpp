@@ -7,7 +7,6 @@
 #include <iostream>
 #include "RGLib/modelLoader.hpp"
 #include "RGLib/ShaderProgram.hpp"
-//#include "RGLib/ShaderUtils.h"
 #include <glm/glm.hpp>
 #include "RGLib/Camera.h"
 #include "RGLib/Texture.hpp"
@@ -83,7 +82,7 @@ float gridWidth = 6;
 float particleInitialVelocity = 0.0f;
 float particleMass = 1.f;
 float gravitationalConstant = -1.f;
-float rainParticleSize = 0.03f;
+float rainParticleSize = 0.05f;
 
 void Clean();
 
@@ -272,7 +271,6 @@ GLuint createTexture(cv::String filename)
 int main()
 {
 	RGLib::Light* lampLight = new RGLib::Light(100, Eigen::Vector3f(-0.1f, 7.f, 0.f)); /*Light from lighthouse lamp*/
-
 	//lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
 	//lightPos = Eigen::Vector3f(0, 6, -5);
 	worldLightDir.normalize();
@@ -311,11 +309,11 @@ int main()
 	SDL_GL_SetSwapInterval(1);
 
 
-	RGLib::Camera* cam = new RGLib::Camera(
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),//look at
-		glm::vec3(0.0f, 1.0f, 0.0f),//up direction
-		90.0f, windowWidth / windowHeight, 0.4f, 900.0f); // fov, aspect ratio based on window dimensions
+	//RGLib::Camera* cam = new RGLib::Camera(
+	//	glm::vec3(0.0f, 0.0f, 0.0f),
+	//	glm::vec3(0.0f, 0.0f, 0.0f),//look at
+	//	glm::vec3(0.0f, 1.0f, 0.0f),//up direction
+	//	90.0f, windowWidth / windowHeight, 0.4f, 900.0f); // fov, aspect ratio based on window dimensions
 
 	glhelper::FlyViewer viewer(windowWidth, windowHeight);
 
@@ -549,13 +547,13 @@ int main()
 		pinecone.loadTexture("../models/pinecone/pinecone_1001_BaseColor.jpg");
 		pinecone.shaderProgram(&blinnPhongShader);
 		Eigen::Matrix4f pineconeMTW = Eigen::Matrix4f::Identity();
-		pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4.2f, 0, 4.2f)) * makeScaleMatrix(30.f) * pineconeMTW);
+		pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4.2f, 0, 4.2f)) * makeScaleMatrix(1.f) * pineconeMTW);
 
 #pragma endregion
 
 		//BULLET physics
 		
-			// This sets up the physics world for your simulation.
+			// This sets up the physics world for the simulation.
 			// I used unique_ptr here for convenience but it would probably be neater
 			// to wrap up the creation and destruction of the physics world into a class.
 			std::unique_ptr<btDefaultCollisionConfiguration> collisionConfig =
@@ -580,11 +578,11 @@ int main()
 				// Make a box collision shape, set its transform, mass, inertia and restitution
 				// then make the rigidbody with these properties and add it to the world.
 				btBoxShape* box;
-				box = new btBoxShape(btVector3(20, 0.1f, 20));
+				box = new btBoxShape(btVector3(20, 0.01f, 20));
 				btRigidBody* floor;
 				btRigidBody::btRigidBodyConstructionInfo floorInfo{ 0, 0, box };
 				floor = new btRigidBody(floorInfo);
-				floor->setRestitution(1.0f);
+				floor->setRestitution(0.4f);
 				floor->setCollisionShape(box);
 				floor->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(0.0f, 0.f, 0.0f)));
 				world->addCollisionObject(floor);
@@ -600,19 +598,18 @@ int main()
 				// body->activate(); again for impulses and forces to have any effect.
 				// This is more efficient, but annoying for debugging!
 				btSphereShape* sphere;
-				sphere = new btSphereShape(btScalar(1));
+				sphere = new btSphereShape(btScalar(0.09f));
 				btTransform ballTr;
 				ballTr.setOrigin(btVector3(0.0f, 5.f, 0));
 				//sphere->calculateLocalInertia(1, btVector3(0, 0, 0));
 				btDefaultMotionState* ballMS = new btDefaultMotionState(ballTr);
 
-				btRigidBody::btRigidBodyConstructionInfo ballInfo{ 1, ballMS, sphere };
+				btRigidBody::btRigidBodyConstructionInfo ballInfo{ 0, ballMS, sphere };
 				ball = new btRigidBody(ballInfo);
-				ball->setRestitution(1.f);
+				ball->setRestitution(0.6f);
 				ball->setCollisionShape(sphere);
-				ball->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(4.1f, 5.0f, 4.0f)));
+				ball->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(4.5f, 2.6f, 4.0f)));
 				ball->setActivationState(DISABLE_DEACTIVATION);
-				world->addRigidBody(ball);
 			}
 
 		
@@ -730,7 +727,7 @@ int main()
 		//Worldscene->AddToWorld(Tree1);
 		//Worldscene->AddToWorld(pinecone);
 		Worldscene->AddWorldObject(Tree1);
-		Worldscene->AddWorldObject(pinecone);
+		Worldscene->AddWorldObject(pinecone, false);
 		Worldscene->ground = &groundPlane;
 		Worldscene->AddWorldObject(testMesh, spotNormalMap);
 		Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
@@ -791,7 +788,9 @@ int main()
 		Eigen::AngleAxisf rotation;
 		Eigen::Vector3f rotDir;
 		bool hdrEnable = false;
-	
+		
+
+		bool pineconeActive = false; /* < stops pinecone from being activated multiple times causing crash*/
 		while (running)
 		{
 			Uint64 frameStartTime = SDL_GetTicks64();
@@ -878,6 +877,19 @@ int main()
 
 						std::cout << "HDR ENABLED = " << hdrEnable << std::endl;
 					}
+
+					if (event.key.keysym.sym == SDLK_SPACE)
+					{
+						if (!pineconeActive)
+						{
+							ball->activate();
+							ball->setMassProps(1, btVector3(0.0f, 1.f, 0));
+							world->addRigidBody(ball);
+							pineconeActive = true;
+						}
+	
+
+					}
 					
 				}
 #pragma endregion
@@ -921,14 +933,14 @@ int main()
 			glProgramUniform3f(waterShader.get(), waterShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
 			//Render reflections
-			reflectionBuffer->bind();
-			glClearColor(skyColour[0], skyColour[1], skyColour[2], skyColour[3]);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glEnable(GL_DEPTH_TEST);
-			glEnable(GL_CLIP_DISTANCE0);
-			Worldscene->RenderWorldObjects();
-			glDisable(GL_CLIP_DISTANCE0);
-			reflectionBuffer->unbind();
+			//reflectionBuffer->bind();
+			//glClearColor(skyColour[0], skyColour[1], skyColour[2], skyColour[3]);
+			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			//glEnable(GL_DEPTH_TEST);
+			//glEnable(GL_CLIP_DISTANCE0);
+			//Worldscene->RenderWorldObjects();
+			//glDisable(GL_CLIP_DISTANCE0);
+			//reflectionBuffer->unbind();
 			//Clear buffers before rendering shadows
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 
@@ -1020,36 +1032,37 @@ int main()
 
 			glActiveTexture(GL_TEXTURE0 + 0);
 
-			btTransform ballTran;
-			ball->getMotionState()->getWorldTransform(ballTran);
-			btVector3 ballPos = ballTran.getOrigin();
-			//std::cout << "ball pos: " << ballPos.y() << std::endl;
-			pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(ballPos.x(), ballPos.y(), ballPos.z()) ) * makeScaleMatrix(0.2f));
+			btTransform pineTran;
+			ball->applyCentralForce(btVector3(0.5f / 8.f, 0.0f, 0.0f)); /*push pinecone to the side*/
+
+			ball->getMotionState()->getWorldTransform(pineTran);
+
+			btVector3 pinePos = pineTran.getOrigin();
+			//std::cout << "ball pos: " << pinePos.y() << std::endl;
+			pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(pinePos.x(), pinePos.y(), pinePos.z())) * makeScaleMatrix(0.3f));
 
 			Worldscene->RenderWorldObjects();
 
 			//render Rain particles from research paper (Work in progress)
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBuffer.get());
-
-			//glhelper::BufferObject velocityBuffer(nParticles, GL_SHADER_STORAGE_BUFFER);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, velocityBuffer.get());
-
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, splashBuffer.get());
 
 			glUseProgram(RainPhysicsShader.get());
-			//Begin query for rain particles (included compute)
-			glBeginQuery(GL_TIME_ELAPSED_EXT, Worldscene->GetQueries()["Rain Particles"]);
-
+			glBeginQuery(GL_TIME_ELAPSED_EXT, Worldscene->GetQueries()["Rain Compute"]);/*! < Begin query for rain particles compute*/
 			glDispatchCompute(nRParticles, 1, 1);
+			glEndQuery(GL_TIME_ELAPSED_EXT);
 
 			glEnable(GL_BLEND);
 			glDepthMask(GL_FALSE);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+			glBeginQuery(GL_TIME_ELAPSED_EXT, Worldscene->GetQueries()["Rain Particles"]);/*! < Begin query for rain particles billboards*/
 			glBindVertexArray(rainVao);
 			billboardParticleShader.use();
-			glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), rainParticleSize);
+			glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("depthPass"), 0);
+			glProgramUniform1f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleSize"), rainParticleSize );
 			glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("particleColor"), 0.4f, 0.48f, 0.59f);
 			glDrawArrays(GL_POINTS, 0, nRParticles);
 			glBindVertexArray(splashVao);
@@ -1060,11 +1073,15 @@ int main()
 			billboardParticleShader.unuse();
 			glDepthMask(GL_TRUE);
 
+
+
 			//std::cout << "camPOs " << viewer.position().x() << viewer.position().y() << viewer.position().z() << std::endl;
 			glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), viewer.position().x(), viewer.position().y(), viewer.position().z());
+			glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("camPosWorld"), viewer.position().x(), viewer.position().y(), viewer.position().z());
+
 			//glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
 			Eigen::Matrix4f clipMatrix;
-			clipMatrix = flipMatrix * cubemapPerspective *  makeTranslationMatrix(-Eigen::Vector3f(cam->getPosX(), cam->getPosY(), cam->getPosZ()));
+			clipMatrix = flipMatrix * cubemapPerspective *  makeTranslationMatrix(-Eigen::Vector3f(viewer.position().x(), viewer.position().y(), viewer.position().z()));
 
 
 			glProgramUniformMatrix4fv(DOFShader.get(), DOFShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());

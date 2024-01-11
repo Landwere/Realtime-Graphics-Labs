@@ -4,15 +4,17 @@
 #include "Camera.h"
 #include "Mesh.hpp"
 
-//Based on code from game engine architecture 
-
 namespace RGLib {
+	/*! \brief helper class for InstanceRenderer */
 	struct InstancePosRotScale {
 		float posX, posY, posZ;
 		float rotX, rotY, rotZ;
 		float scaleX, scaleY, scaleZ;
 	};
-
+/*! \brief unused and incomplete class for instance rendering
+*
+* Based on code from game engine architecture
+*/
 	class InstanceRenderer
 	{
 	public:

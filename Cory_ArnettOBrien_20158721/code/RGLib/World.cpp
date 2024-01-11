@@ -1,6 +1,4 @@
 #include "World.hpp"
-#include "World.hpp"
-#include "World.hpp"
 #include "Constants.hpp"
 #include <glm/ext/matrix_transform.hpp>
 
@@ -11,8 +9,10 @@
 RGLib::World::World()
 {
 	gltInit();
+	/*! opens data file renderData.csv */
+	dataFile.open("renderData.csv");
 
-	dataFile.open("renderData.csv", std::ios_base::app);
+	/*! initialise GL text */
 	fpsText = gltCreateText();
 	frameCountText = gltCreateText();
 	frameCount = 0;
@@ -24,22 +24,22 @@ RGLib::World::World()
 		0, 0, 0, 1;
 
 
-	//Create cubemap for shadows
-	glGenTextures(1, &cubeMapTexture);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-	for (int i = 0; i < 6; ++i)
-	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	}
-	glTextureParameteri(cubeMapTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	/*! Create cubemap for shadows, Part of unfinished shadow map conversion*/
+	//glGenTextures(1, &cubeMapTexture);
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+	//for (int i = 0; i < 6; ++i)
+	//{
+	//	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	//}
+	//glTextureParameteri(cubeMapTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	cubemapPerspective = perspective(M_PI_2, 1, shadowMapNear, shadowMapFar);
+	//cubemapPerspective = perspective(M_PI_2, 1, shadowMapNear, shadowMapFar);
 
-	glGenFramebuffers(1, &frameBuffer);
+	//glGenFramebuffers(1, &frameBuffer);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+	//glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Here are the rotations for each face of the cubemap (please do use them!)
 
@@ -168,6 +168,7 @@ void RGLib::World::RenderWorldObjects(glhelper::ShaderProgram& shader)
 {
 	for (WorldObject* object : worldObjects)
 	{
+
 		//check mesh has texture and bind it
 		glActiveTexture(GL_TEXTURE0 + 0);
 		if (object->getMesh()->meshTex != nullptr)
@@ -226,7 +227,9 @@ void RGLib::World::RenderReflectedObjects()
 	glBeginQuery(GL_TIME_ELAPSED_EXT, queries["Reflections"]);
 	for (WorldObject* object : worldObjects)
 	{
-		
+		if (!object->IsInReflection())
+			continue;
+
 		Eigen::Matrix4f mtwCache = object->getMesh()->modelToWorld();
 		Eigen::Matrix4f pineconeMTW = Eigen::Matrix4f::Identity();
 		test = glm::scale(glm::translate(E2GLM(object->getMesh()->modelToWorld())
@@ -339,15 +342,17 @@ void RGLib::World::AddToWorld(glhelper::Mesh &mesh)
 
 }
 
-void RGLib::World::AddWorldObject(glhelper::Mesh& mesh)
+void RGLib::World::AddWorldObject(glhelper::Mesh& mesh, bool reflect)
 {
 	WorldObject* wO = new WorldObject(mesh);
+	wO->SetInReflection(reflect);
 	worldObjects.push_back(wO);
 }
 
-void RGLib::World::AddWorldObject(glhelper::Mesh& mesh, GLuint normalMap)
+void RGLib::World::AddWorldObject(glhelper::Mesh& mesh, GLuint normalMap, bool reflect)
 {
 	WorldObject* wO = new WorldObject(mesh);
+	wO->SetInReflection(reflect);
 	wO->SetNormal(normalMap);
 	worldObjects.push_back(wO);
 }
@@ -370,8 +375,8 @@ void RGLib::World::CreateQueries()
 	}
 	dataFile.clear();
 
-	shadowMap = new RGLib::ShadowMap(512, worldLights[0]);
-	shadowRec.push_back(ground);
+	//shadowMap = new RGLib::ShadowMap(512, worldLights[0]);
+	//shadowRec.push_back(ground);
 
 	for (WorldObject* object : worldObjects)
 	{
@@ -381,6 +386,8 @@ void RGLib::World::CreateQueries()
 	queries["Reflections"] = NULL;
 	queries["DepthofField"] = NULL;
 	queries["Rain Particles"] = NULL;
+	queries["Rain Compute"] = NULL;
+	queries["Rain Total"] = NULL;
 	queries["Shadows"] = NULL;
 	std::map <std::string, GLuint> ::iterator iter;
 	for (iter = queries.begin(); iter != queries.end(); iter++)
@@ -421,6 +428,10 @@ void RGLib::World::RecordQueries()
 			dataFile << timeElapsed << ", ";
 			object->SetQueryQueued(false);
 		}
+		GLuint64 rainPTime, rainCTime;
+		glGetQueryObjectui64v(queries["Rain Particles"], GL_QUERY_RESULT, &rainPTime);
+		glGetQueryObjectui64v(queries["Rain Compute"], GL_QUERY_RESULT, &rainCTime);
+		queries["Rain Total"] =  rainPTime + rainCTime;
 		for (std::pair pair : queries)
 		{
 			GLuint64 timeElapsed;
