@@ -683,6 +683,10 @@ int main()
 		//TODO remove scene and replace with World class, currently only used for shadows
 		std::vector<glhelper::Renderable*> scene{ &testMesh,/* &lightHouse,*/ &rock, &rock2, &groundPlane, &Tree1};
 
+		//old reflection buffer
+		RGLib::FrameBuffer* reflectionBuffer = new RGLib::FrameBuffer(1280, 720);
+		reflectionBuffer->init();
+
 		//set up world scene
 		Worldscene = new RGLib::World;
 		Worldscene->SetShadowMapShaders(shadowMappedShader, shadowCubeMapShader);
@@ -729,7 +733,7 @@ int main()
 		glCullFace(GL_BACK);
 
 		//functions adjustable by key input for debugging
-		bool running = true;
+		bool fbReflection = false;
 		float lightDir = 0;
 		float lightDir2 = 0;
 		bool hdrEnable = false;
@@ -754,7 +758,7 @@ int main()
 
 
 
-
+		bool running = true;
 		while (running)
 		{
 			Uint64 frameStartTime = SDL_GetTicks64(); /*! < frame start time used for FPS calculations*/
@@ -857,7 +861,13 @@ int main()
 	
 
 					}
-					
+					if (event.key.keysym.sym == SDLK_r)
+					{
+						if (fbReflection == false)
+							fbReflection = true;
+						else
+							fbReflection = false;
+					}
 				}
 #pragma endregion
 			}
@@ -887,14 +897,18 @@ int main()
 			glProgramUniform3f(waterShader.get(), waterShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
 			//Old framebuffer reflections
-			//reflectionBuffer->bind();
-			//glClearColor(skyColour[0], skyColour[1], skyColour[2], skyColour[3]);
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			//glEnable(GL_DEPTH_TEST);
-			//glEnable(GL_CLIP_DISTANCE0);
-			//Worldscene->RenderWorldObjects();
-			//glDisable(GL_CLIP_DISTANCE0);
-			//reflectionBuffer->unbind();
+			if (fbReflection)
+			{
+				reflectionBuffer->bind();
+				glClearColor(skyColour[0], skyColour[1], skyColour[2], skyColour[3]);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				glEnable(GL_DEPTH_TEST);
+				glEnable(GL_CLIP_DISTANCE0);
+				Worldscene->RenderWorldObjects();
+				glDisable(GL_CLIP_DISTANCE0);
+				reflectionBuffer->unbind();
+			}
+
 			
 			//Clear buffers before rendering shadows
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
@@ -951,23 +965,33 @@ int main()
 			glEnable(GL_DEPTH_TEST);
 			glClearDepth(1.0);
 			//Reflection rendering using stencils
-			glEnable(GL_STENCIL_TEST);
-			glActiveTexture(GL_TEXTURE0 + 0);
-			//Stencil functions from https://open.gl/depthstencils
-			glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
-			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-			glStencilMask(0xFF); // Write to stencil buffer
-			glDepthMask(GL_FALSE);
-			glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
-			waterPlane.render();
-			glStencilFunc(GL_EQUAL, 1, 0xFF); // Pass test if stencil value is 1
-			glStencilMask(0x00); // Don't write anything to stencil buffer
-			glDepthMask(GL_TRUE);
-			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.3f, 0.3f, 0.6f);
-			Worldscene->RenderReflectedObjects(); /*! < render all objects with reflections into the stencil buffer with a colour override*/
-			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.0f, 0.0f, 0.0f);
-			glDisable(GL_STENCIL_TEST);
-			//end source
+			if (!fbReflection)
+			{
+				glEnable(GL_STENCIL_TEST);
+				glActiveTexture(GL_TEXTURE0 + 0);
+				//Stencil functions from https://open.gl/depthstencils
+				glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
+				glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+				glStencilMask(0xFF); // Write to stencil buffer
+				glDepthMask(GL_FALSE);
+				glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
+				waterPlane.render();
+				glStencilFunc(GL_EQUAL, 1, 0xFF); // Pass test if stencil value is 1
+				glStencilMask(0x00); // Don't write anything to stencil buffer
+				glDepthMask(GL_TRUE);
+				glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.3f, 0.3f, 0.6f);
+				Worldscene->RenderReflectedObjects(); /*! < render all objects with reflections into the stencil buffer with a colour override*/
+				glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.0f, 0.0f, 0.0f);
+				glDisable(GL_STENCIL_TEST);
+				//end source
+			}
+			else
+			{
+				glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
+				waterPlane.render();
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			
 
 			//Render ground plane with shadow map applied
 			glActiveTexture(GL_TEXTURE0 + 1);
