@@ -61,7 +61,7 @@ void main() {
         //currently no depth testing so all splash should be at Y 0
          sPos[gl_GlobalInvocationID.x].y = 0;
          sPos[gl_GlobalInvocationID.x].w = 1.5f;
-        pos[gl_GlobalInvocationID.x].y = 30;
+        pos[gl_GlobalInvocationID.x].y = 45;
         velocity = vec3(0,0,0);
         vel[gl_GlobalInvocationID.x].xyz = velocity;
     }

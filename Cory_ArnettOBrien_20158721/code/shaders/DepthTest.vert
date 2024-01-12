@@ -9,7 +9,6 @@ layout(std140) uniform cameraBlock
 	vec4 cameraPos;
 	vec4 cameraDir;
 };
-uniform mat4 shadowWorldToClip;
 uniform mat4 modelToWorld;
 
 out vec3 fragPosWorld;

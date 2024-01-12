@@ -190,7 +190,7 @@ Mesh& Mesh::drawMode(GLenum mode)
 
 void Mesh::loadTexture(cv::String filename)
 {
-	cv::Mat textureImage = cv::imread(filename);
+	cv::Mat textureImage = cv::imread(filename, cv::IMREAD_UNCHANGED);
 	cv::cvtColor(textureImage, textureImage, cv::COLOR_BGRA2RGBA);
 
 	//TODO Change to accept RGBA for transparency

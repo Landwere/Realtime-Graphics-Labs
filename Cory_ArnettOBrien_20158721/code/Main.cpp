@@ -43,41 +43,38 @@ namespace fs = std::filesystem;
 int windowWidth = 1280;
 int windowHeight = 720;
 
-//frametime to lock application to in milliseconds
+//frametime for use in physics simulation
 const Uint64 desiredFrametime = 16.6;
-
-//Models
-Model* model;
 
 
 SDL_Event event;
-float theta = 0.0f;
-Eigen::Vector4f albedo(0.1f, 0.6f, 0.6f, 1.f);
-float specularExponent = 60.f, specularIntensity = 0.05f;
-//float lightIntensity =  30.f;
-float fallOffExponent = 2.0f;
-Eigen::Vector3f worldLightDir(40,90, 0);
-float worldLightIntensity = 0.5f;
-float lightWidth = 0.01f;
-int sampleRadius = 1;
+float theta = 9.f;
+//Lighting variables
+float specularExponent = 60.f, specularIntensity = 0.5f; /*! < specular values used in shader programs*/
+float fallOffExponent = 2.0f; /*! < light falloff used for debugging*/
+Eigen::Vector3f worldLightDir(40,90, 0); /*! < Direction of world light, directional light source, normalised in main function*/
+float worldLightIntensity = 0.5f; /*! < Intensity of world light, directional light source*/
+float lightWidth = 0.01f; /*! < width of light used for shadowmaps*/
+int sampleRadius = 1; /*! < sample radius used for shadowmaps*/
 
-Eigen::Vector4f skyColour(0.01f, 0.01f, 0.01f, 1.0f);
+Eigen::Vector4f skyColour(0.01f, 0.01f, 0.01f, 1.0f); /*! < background sky colour, used for openGL clear colour*/
 
-//shadow
-const float shadowMapNear = 1.f, shadowMapFar = 1000.f;
-float shadowMapBias = 1.0f; /*! shadow map depth distance bias to prevent artefacts*/
-const int shadowMapSize = 1024; /*!<Shadow map resolution*/
+//shadow map values
+const float shadowMapNear = 1.f, shadowMapFar = 1000.f;/*! < shadow map cutoffs for near and far objects*/
+float shadowMapBias = 1.0f; /*! < shadow map depth distance bias to prevent artefacts*/
+const int shadowMapSize = 1024; /*! < Shadow map resolution*/
 
+//JSON variables for unused model loading system
 nlohmann::json models;
 std::map<std::string, glhelper::Mesh> meshes;
 std::map<std::string, glhelper::ShaderProgram> shaders;
 std::map<std::string, glhelper::Texture> textures;
 
-RGLib::World* Worldscene;
+RGLib::World* Worldscene; /*! < Reference to world scene used to store RGLib::World class*/
 
-const int nRParticles = 20000;
-float ringMinRadius = 5.f;
-float ringMaxRadius = 100.f;
+//Particle variables
+const int nRParticles = 5000;
+float rainMaxRadius = 70.f;
 float gridWidth = 6;
 float particleInitialVelocity = 0.0f;
 float particleMass = 1.f;
@@ -116,6 +113,7 @@ void renderQuad()
 	glBindVertexArray(0);
 }
 //end source
+
 //TODO Remove loadSpotMeshFunction ONLY USED FOR TESTING source Moodle
 void loadSpotMesh(glhelper::Mesh* mesh)
 {
@@ -162,6 +160,7 @@ void loadSpotMesh(glhelper::Mesh* mesh)
 	mesh->tex(uvs);
 }
 //end source
+//Reload config only can be used for untextured models, not used for anything within final game scene
 void ReloadConfig()
 {
 	Model* modelLoader = new Model();
@@ -245,7 +244,7 @@ GLuint createTexture(const cv::Mat& image)
 
 	return texture;
 }
-//create texture function from Texture lab by David Walton adjusted to take filename input
+//create texture function from Texture lab by David Walton adjusted to take filename input (Used for loading normals)
 GLuint createTexture(cv::String filename)
 {
 	cv::Mat image = cv::imread(filename);
@@ -270,9 +269,9 @@ GLuint createTexture(cv::String filename)
 //end source
 int main()
 {
-	RGLib::Light* lampLight = new RGLib::Light(100, Eigen::Vector3f(-0.1f, 7.f, 0.f)); /*Light from lighthouse lamp*/
-	//lightPos = Eigen::Vector3f(-0.1f, 7.f, 0.f);
-	//lightPos = Eigen::Vector3f(0, 6, -5);
+
+	RGLib::Light* lampLight = new RGLib::Light(100, Eigen::Vector3f(-0.1f, 7.f, 0.f)); /*! < Light from lighthouse lamp*/
+
 	worldLightDir.normalize();
 
 
@@ -305,15 +304,9 @@ int main()
 	{
 		std::cerr << "Problem starting glew " << glewGetErrorString(gStatus) << std::endl;
 	}
+
 	//Enable Vsync
 	SDL_GL_SetSwapInterval(1);
-
-
-	//RGLib::Camera* cam = new RGLib::Camera(
-	//	glm::vec3(0.0f, 0.0f, 0.0f),
-	//	glm::vec3(0.0f, 0.0f, 0.0f),//look at
-	//	glm::vec3(0.0f, 1.0f, 0.0f),//up direction
-	//	90.0f, windowWidth / windowHeight, 0.4f, 900.0f); // fov, aspect ratio based on window dimensions
 
 	glhelper::FlyViewer viewer(windowWidth, windowHeight);
 
@@ -347,14 +340,11 @@ int main()
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("worldLightInt"), worldLightIntensity);
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
 	glProgramUniform1f(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
-
-	//glProgramUniform4f(lambertShader.get(), lambertShader.uniformLoc("color"), 1.f, 1.f, 1.f, 1.f);
 	
-	//set up Shadow map shader uniforms
+	//set up Shadow map & mapped shader uniforms
 	glProgramUniform1f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("nearPlane"), shadowMapNear);
 	glProgramUniform1f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("farPlane"), shadowMapFar);
 	glProgramUniform3f(shadowCubeMapShader.get(), shadowCubeMapShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
-
 	glProgramUniform4f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("color"), 0.27f, 0.33f, 0.34f, 1.f);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("nearPlane"), shadowMapNear);
 	glProgramUniform1f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("farPlane"), shadowMapFar);
@@ -386,20 +376,18 @@ int main()
 	glhelper::ShaderStorageBuffer particleBuffer(nRParticles * 4 * sizeof(float)),
 		velocityBuffer(nRParticles * 4 * sizeof(float)), splashBuffer(nRParticles * 4 * sizeof(float));
 
-	// Initialise ring particle positions and velocities		
+	// Initialise rain particle positions and velocities		
 	{
 		std::vector<Eigen::Vector4f> particlePositions(nRParticles), particleVelocities(nRParticles);
 		std::default_random_engine eng;
-		std::uniform_real_distribution<> radDist(ringMinRadius, ringMaxRadius);
+		std::uniform_real_distribution<> radDist(0, rainMaxRadius);
 
 		for (size_t i = 0; i < nRParticles; ++i) {
-			//float angle = angleDist(eng);
 			float radius = radDist(eng);
 
-			//particlePositions[i] = radius * Eigen::Vector4f(sinf(angle), 1.f, cosf(angle), 1.0f);
-			particlePositions[i].x() = radDist(eng) - 50;
+			particlePositions[i].x() = radDist(eng) - 35;
 			particlePositions[i].y() = radDist(eng);
-			particlePositions[i].z() = radDist(eng) - 50;
+			particlePositions[i].z() = radDist(eng) - 35;
 
 			particleVelocities[i] = particleInitialVelocity * Eigen::Vector4f(0.f, 0.f, 0.f, 0.f);
 			Eigen::Vector3f vel = -particlePositions[i].block<3, 1>(0, 0).normalized().cross(Eigen::Vector3f(0.f, 0.f, 0.f)) * particleInitialVelocity;
@@ -410,7 +398,7 @@ int main()
 		velocityBuffer.update(particleVelocities);
 	}
 
-
+	//set up rain particle arrays
 	glBindVertexArray(rainVao);
 	glBindBuffer(GL_ARRAY_BUFFER, particleBuffer.get());
 	glEnableVertexAttribArray(0);
@@ -504,6 +492,16 @@ int main()
 		rock2.shaderProgram(&blinnPhongShader);
 		rock2.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(9, 0.f, -4.1)) * makeRotationMatrix(0,-180,0) * makeScaleMatrix(1) * rock2ModelToWorld);
 
+		//Ceramic frog mesh
+		glhelper::Mesh frog;
+		frog.meshName = "Frog";
+		Eigen::Matrix4f frogModelToWorld = makeIdentityMatrix(1);
+		modelLoader->loadFromFile("../models/Ceramic-frog/Ceramic-frog_low-poly.obj", &frog);
+		frog.loadTexture("../models/Ceramic-frog/albedo_Ceramic-frog_low-poly.png");
+		GLuint frogNormal = createTexture("../models/Ceramic-frog/normal_Ceramic-frog_low-poly.png");
+		frog.shaderProgram(&blinnPhongShader);
+		frog.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(0.2f,0,-2)) *  makeScaleMatrix(1) * frogModelToWorld);
+
 		//River Rock Mesh
 		glhelper::Mesh riverRock;
 		riverRock.meshName = "river rock";
@@ -516,6 +514,7 @@ int main()
 		riverRock.shaderProgram(&lambertShader);
 		riverRock.modelToWorld(riverRockModelToWorld);
 
+		//ground plane mesh, used to display shadows from objects
 		glhelper::Mesh groundPlane;
 		groundPlane.meshName = "Ground";
 		Eigen::Matrix4f groundModelToWorld = Eigen::Matrix4f::Identity();
@@ -525,6 +524,7 @@ int main()
 		groundPlane.shaderProgram(&shadowMappedShader);
 		groundPlane.modelToWorld(makeScaleMatrix(2) * groundModelToWorld);
 
+		//water plane mesh, used for reflections
 		glhelper::Mesh waterPlane;
 		waterPlane.meshName = "Water";
 		modelLoader->loadFromFile("../models/groundPlane.obj", &waterPlane);
@@ -532,15 +532,16 @@ int main()
 		Eigen::Matrix4f waterModelToWorld = Eigen::Matrix4f::Identity();
 		waterPlane.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(0, 0.1f, 20.f)) * waterModelToWorld);
 		
-
+		//tree mesh, uses transparency
 		glhelper::Mesh Tree1;
 		Tree1.meshName = "tree1";
 		modelLoader->loadFromFile("../models/tree/Tree-scaled.obj", &Tree1);
 		Tree1.loadTexture("../models/tree/textures/Ivy_branch_Variation_1_Diffuse-Ivy_branch_Variation_1_Opacit.png");
 		Tree1.shaderProgram(&blinnPhongShader);
 		Eigen::Matrix4f treeModelToWorld = Eigen::Matrix4f::Identity();
-		Tree1.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4, 0, 4.f)) * makeScaleMatrix(1) * treeModelToWorld);
+		Tree1.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(4, 0, 4.f)) * makeScaleMatrix(1.5f) * treeModelToWorld);
 
+		//pinecone mesh, used for physics example
 		glhelper::Mesh pinecone;
 		pinecone.meshName = "Pinecone";
 		modelLoader->loadFromFile("../models/pinecone/pinecone.fbx", & pinecone);
@@ -554,8 +555,9 @@ int main()
 		//BULLET physics
 		
 			// This sets up the physics world for the simulation.
-			// I used unique_ptr here for convenience but it would probably be neater
-			// to wrap up the creation and destruction of the physics world into a class.
+			// set as unique_ptr, partially converted into the Physics class
+			//however the class is incomplete so these values are still used
+			//Source David Walton (moodle.bcu.ac.uk)
 			std::unique_ptr<btDefaultCollisionConfiguration> collisionConfig =
 				std::make_unique<btDefaultCollisionConfiguration>();
 			std::unique_ptr<btCollisionDispatcher> dispatcher =
@@ -567,16 +569,14 @@ int main()
 			std::unique_ptr<btDiscreteDynamicsWorld> world =
 				std::make_unique<btDiscreteDynamicsWorld>(
 					dispatcher.get(), overlappingPairCache.get(), solver.get(), collisionConfig.get());
-
-			// You may want to set appropriate gravity here.
+			//End source
+			//set appropriate gravity
 			world->setGravity(btVector3(0, -1, 0));
-			// When you create your shapes (box and sphere) add them to this array. 
-			// You should then delete them at the end of the program.
+			// Collision shapes array used to delete shapes at the end of 
+			//the program
 			btAlignedObjectArray<btCollisionShape*> collisionShapes;
 			{
-				// Make a rigidbody for the floor
-				// Make a box collision shape, set its transform, mass, inertia and restitution
-				// then make the rigidbody with these properties and add it to the world.
+				// floor ridigbody
 				btBoxShape* box;
 				box = new btBoxShape(btVector3(20, 0.01f, 20));
 				btRigidBody* floor;
@@ -586,35 +586,29 @@ int main()
 				floor->setCollisionShape(box);
 				floor->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(0.0f, 0.f, 0.0f)));
 				world->addCollisionObject(floor);
+				collisionShapes.push_back(box);
 			}
+			//Ball ridgidbody used in pinecone physics 
 			btRigidBody* ball;
 
 			{
-				// Make a rigidbody for the ball
-				// Make a sphere collision shape, set its transform, mass, inertia and restitution
-				// then make the rigidbody with these properties and add it to the world.
-				// I recommend setting body->setActivationState(DISABLE_DEACTIVATION)
-				// By default, the sphere will be dectivated if it stops moving and you'll need to call
-				// body->activate(); again for impulses and forces to have any effect.
-				// This is more efficient, but annoying for debugging!
+
 				btSphereShape* sphere;
 				sphere = new btSphereShape(btScalar(0.09f));
 				btTransform ballTr;
 				ballTr.setOrigin(btVector3(0.0f, 5.f, 0));
-				//sphere->calculateLocalInertia(1, btVector3(0, 0, 0));
 				btDefaultMotionState* ballMS = new btDefaultMotionState(ballTr);
-
+				//set to static as it is enabled using key input
 				btRigidBody::btRigidBodyConstructionInfo ballInfo{ 0, ballMS, sphere };
 				ball = new btRigidBody(ballInfo);
 				ball->setRestitution(0.6f);
 				ball->setCollisionShape(sphere);
-				ball->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(4.5f, 2.6f, 4.0f)));
-				ball->setActivationState(DISABLE_DEACTIVATION);
+				ball->setWorldTransform(btTransform(btQuaternion(0, 0, 0), btVector3(4.5f, 3.f, 4.0f)));
+				collisionShapes.push_back(sphere);
 			}
 
 		
-		//Colour buffer
-
+		//HDR frame buffer used for both reinhard tone mapping and applying depth of field effects
 		GLuint HDRFrameBuffer;
 		glGenFramebuffers(1, &HDRFrameBuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
@@ -628,26 +622,8 @@ int main()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		
-
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourBuffer, 0);
-		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
 
-		//second colour buffer for use in depth of field 
-		//GLuint colourBuffer2;
-		//glGenTextures(1, &colourBuffer2);
-		//glBindTexture(GL_TEXTURE_2D, colourBuffer2);
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		//glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colourBuffer, 0);
-		
-		
-		//glStencilFunc(GL_ALWAYS, 1, depthTexture);
-		
 		//attach depth buffer
 		GLuint renderBuffer;
 		glGenRenderbuffers(1, &renderBuffer);
@@ -678,16 +654,13 @@ int main()
 		glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
+		//Create cubemap for shadow mapping
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-		//Create cubemap for shadows
 		GLuint cubeMapTexture;
 		glGenTextures(1, &cubeMapTexture);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
@@ -700,7 +673,7 @@ int main()
 
 		cubemapPerspective = perspective(M_PI_2, 1, shadowMapNear, shadowMapFar);
 
-		// Here are the rotations for each face of the cubemap (please do use them!)
+		// Here are the rotations for each face of the cubemap source David Walton (moodle.bcu.ac.uk)
 		 std::array<Eigen::Matrix4f, 6> cubemapRotations{
 			angleAxisMat4(float(M_PI_2), Eigen::Vector3f(0,1,0)),//POSITIVE_X - rotate right 90 degrees
 			angleAxisMat4(float(-M_PI_2), Eigen::Vector3f(0,1,0)),//NEGATIVE_X - rotate left 90 degrees
@@ -709,23 +682,16 @@ int main()
 			angleAxisMat4(float(M_PI), Eigen::Vector3f(0,1,0)),     //POSITIVE_Z - rotate right 180 degrees
 			Eigen::Matrix4f::Identity()                           //NEGATIVE_Z
 		};
-
+		 //end source
 
 		//TODO remove scene and replace with World class, currently only used for shadows
-		std::vector<glhelper::Renderable*> scene{ /*&testMesh,*//* &lightHouse,*/ &rock, &rock2, &groundPlane};
+		std::vector<glhelper::Renderable*> scene{ &testMesh,/* &lightHouse,*/ &rock, &rock2, &groundPlane, &Tree1};
 
 		//set up world scene
 		Worldscene = new RGLib::World;
-		//Worldscene->AddToWorld(testMesh);
 		Worldscene->SetShadowMapShaders(shadowMappedShader, shadowCubeMapShader);
-
 		Worldscene->AddWorldLight(*lampLight);
-		//Worldscene->AddToWorld(groundPlane);
-		//Worldscene->AddToWorld(sphereMesh);
-		Worldscene->AddToWorld(lightHouse);
-		//Worldscene->AddToWorld(rock);
-		//Worldscene->AddToWorld(Tree1);
-		//Worldscene->AddToWorld(pinecone);
+
 		Worldscene->AddWorldObject(Tree1);
 		Worldscene->AddWorldObject(pinecone, false);
 		Worldscene->ground = &groundPlane;
@@ -733,8 +699,9 @@ int main()
 		Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
 		Worldscene->AddWorldObject(rock, rockNormal);
 		Worldscene->AddWorldObject(rock2, rockNormal);
-		//RGLib::WorldObject* lightHouse = new RGLib::WorldObject(lightHouse, Worldscene);
+		Worldscene->AddWorldObject(frog, frogNormal);
 
+		//incomplete JSON model loader based on source David Walton (MS Teams)
 		for (auto& model : models) {
 			glhelper::Mesh& mesh = meshes.at(model["mesh"]);
 			glhelper::ShaderProgram& shader = shaders.at(model["shader"]);
@@ -754,46 +721,47 @@ int main()
 		Worldscene->models = &models;
 		//Worldscene->meshes = &meshes;
 		//Worldscene->shaders = &shaders;
+		//End source
 
 		Worldscene->CreateQueries();
 
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
-		bool lightRotating = false;
+		//functions adjustable by key input for debugging
 		bool running = true;
 		float lightDir = 0;
 		float lightDir2 = 0;
+		bool hdrEnable = false;
+		bool pineconeActive = false; /* < stops pinecone from being activated multiple times causing crash*/
+
+		//helper variables for the lighthouse light rotation
 		Eigen::Matrix4f lightMat = Eigen::Matrix4f::Identity();
 		lightMat = makeRotationMatrix(0, 0, 0);
 		glm::vec3 glmLight;
 		glmLight = glm::vec3(90, 0, 0);
+		Eigen::Vector3f spotLightDir(-1.0f, 0.f, 0.f);
+		Eigen::AngleAxisf rotation;
+		Eigen::Vector3f rotDir;
 
+		//create framebuffer for shadow map
 		GLuint frameBuffer;
 		glGenFramebuffers(1, &frameBuffer);
-
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapTexture, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		RGLib::FrameBuffer* reflectionBuffer = new RGLib::FrameBuffer(1280, 720);
-		reflectionBuffer->init();
-		//unsigned int textureframe = frameBuffer2->getTextureLocation();
 
-		Eigen::Vector3f spotLightDir(-1.0f, 0.f, 0.f);
-		Eigen::AngleAxisf rotation;
-		Eigen::Vector3f rotDir;
-		bool hdrEnable = false;
-		
 
-		bool pineconeActive = false; /* < stops pinecone from being activated multiple times causing crash*/
+
+
 		while (running)
 		{
-			Uint64 frameStartTime = SDL_GetTicks64();
+			Uint64 frameStartTime = SDL_GetTicks64(); /*! < frame start time used for FPS calculations*/
 
 			world->stepSimulation((desiredFrametime / 1000.0f), 10);
 
@@ -813,6 +781,7 @@ int main()
 					viewer.update();
 				}
 #pragma region KeyInput
+				//key inputs for debugging and physics interaction
 				if (event.type == SDL_KEYDOWN)
 				{
 					if (event.key.keysym.sym == SDLK_DOWN) {
@@ -885,7 +854,9 @@ int main()
 							ball->activate();
 							ball->setMassProps(1, btVector3(0.0f, 1.f, 0));
 							world->addRigidBody(ball);
+							ball->applyCentralForce(btVector3(20, 0.0f, 0.0f)); /*push pinecone to the side*/
 							pineconeActive = true;
+
 						}
 	
 
@@ -894,29 +865,17 @@ int main()
 				}
 #pragma endregion
 			}
-
-			if (lightRotating) {
-				theta += 0.01f;
-				if (theta > 2 * 3.14159f) theta = 0.f;
-				lampLight->GetPos() << 5.f * sinf(theta), 5.f, 5.f * cosf(theta);
-				sphereMesh.modelToWorld(makeTranslationMatrix(lampLight->GetPos()));
-				glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
-				glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
-				glProgramUniform3f(waterShader.get(), waterShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
-
-			}
-
-			//Rotate light code (does not work properly with the shader)
-	/*		if (lightDir < 2 * M_PI)
-			{
-				lightDir += 0.1f;
-				lightDir2 -= 0.1f;
-			}
-			else
-			{
-				lightDir = -6.f;
-				lightDir2 = -6.f;
-			}*/
+			//if (lightRotating) {
+			//	theta += 0.01f;
+			//	if (theta > 2 * 3.14159f) theta = 0.f;
+			//	lampLight->GetPos() << 5.f * sinf(theta), 5.f, 5.f * cosf(theta);
+			//	sphereMesh.modelToWorld(makeTranslationMatrix(lampLight->GetPos()));
+			//	glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+			//	glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+			//	glProgramUniform3f(waterShader.get(), waterShader.uniformLoc("lightPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
+			//}
+			
+			//rotate spotlight direction
 			lightDir += 0.01f;
 			if (lightDir > 2.0f * M_PI)
 			{
@@ -926,13 +885,12 @@ int main()
 			rotation = Eigen::AngleAxisf(-lightDir, Eigen::Vector3f::UnitY());
 			rotDir = rotation * spotLightDir;
 
-			lightMat = makeRotationMatrix(90, 0, 0);
 			glProgramUniform3f(blinnPhongShader.get(), blinnPhongShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 			glProgramUniform3f(shadowMappedShader.get(), shadowMappedShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 			glProgramUniform3f(waterShader.get(), waterShader.uniformLoc("spotLightDir"), rotDir.x(), rotDir.y(), rotDir.z());
 
-			//Render reflections
+			//Old framebuffer reflections
 			//reflectionBuffer->bind();
 			//glClearColor(skyColour[0], skyColour[1], skyColour[2], skyColour[3]);
 			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -941,6 +899,7 @@ int main()
 			//Worldscene->RenderWorldObjects();
 			//glDisable(GL_CLIP_DISTANCE0);
 			//reflectionBuffer->unbind();
+			
 			//Clear buffers before rendering shadows
 			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
 
@@ -989,23 +948,16 @@ int main()
 			
 			glViewport(0, 0, windowWidth, windowHeight);
 
-		/*	for (glhelper::Renderable* mesh : scene) {
-
-				mesh->render();
-
-			}*/
-			//glDisable(GL_CULL_FACE);
 			//Worldscene->RenderShadowMaps();
 
 
-			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, HDRFrameBuffer); /*! < Render scene to HDR framebuffer then apply post process and render to quad*/
 			glEnable(GL_DEPTH_TEST);
 			glClearDepth(1.0);
+			//Reflection rendering using stencils
 			glEnable(GL_STENCIL_TEST);
-			//Render scene
 			glActiveTexture(GL_TEXTURE0 + 0);
 			//Stencil functions from https://open.gl/depthstencils
-			//glBindTexture(GL_TEXTURE_2D, reflectionBuffer->getTextureLocation());
 			glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
 			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 			glStencilMask(0xFF); // Write to stencil buffer
@@ -1016,31 +968,26 @@ int main()
 			glStencilMask(0x00); // Don't write anything to stencil buffer
 			glDepthMask(GL_TRUE);
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.3f, 0.3f, 0.6f);
-			Worldscene->RenderReflectedObjects();
+			Worldscene->RenderReflectedObjects(); /*! < render all objects with reflections into the stencil buffer with a colour override*/
 			glProgramUniform3f(NormalShader.get(), NormalShader.uniformLoc("colourOverride"), 0.0f, 0.0f, 0.0f);
-
 			glDisable(GL_STENCIL_TEST);
 			//end source
-			//glBindTexture(GL_TEXTURE_2D, 0);
 
+			//Render ground plane with shadow map applied
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
 			glActiveTexture(GL_TEXTURE0 + 0);
 			groundPlane.meshTex->bindToImageUnit(0);
 			groundPlane.render();
-			//Worldscene->RenderShadowMaps();
-
 			glActiveTexture(GL_TEXTURE0 + 0);
 
+			//physics calculations
 			btTransform pineTran;
-			ball->applyCentralForce(btVector3(0.5f / 8.f, 0.0f, 0.0f)); /*push pinecone to the side*/
-
 			ball->getMotionState()->getWorldTransform(pineTran);
-
 			btVector3 pinePos = pineTran.getOrigin();
-			//std::cout << "ball pos: " << pinePos.y() << std::endl;
 			pinecone.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(pinePos.x(), pinePos.y(), pinePos.z())) * makeScaleMatrix(0.3f));
 
+			//Render actual game scene
 			Worldscene->RenderWorldObjects();
 
 			//render Rain particles from research paper (Work in progress)
@@ -1074,17 +1021,10 @@ int main()
 			glDepthMask(GL_TRUE);
 
 
-
-			//std::cout << "camPOs " << viewer.position().x() << viewer.position().y() << viewer.position().z() << std::endl;
+			//set up for depth of field calculations, similar to rendering a shadow map from the viewers position
 			glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), viewer.position().x(), viewer.position().y(), viewer.position().z());
 			glProgramUniform3f(billboardParticleShader.get(), billboardParticleShader.uniformLoc("camPosWorld"), viewer.position().x(), viewer.position().y(), viewer.position().z());
 
-			//glProgramUniform3f(DOFShader.get(), DOFShader.uniformLoc("camPosWorld"), lampLight->getX(), lampLight->getY(), lampLight->getZ());
-			Eigen::Matrix4f clipMatrix;
-			clipMatrix = flipMatrix * cubemapPerspective *  makeTranslationMatrix(-Eigen::Vector3f(viewer.position().x(), viewer.position().y(), viewer.position().z()));
-
-
-			glProgramUniformMatrix4fv(DOFShader.get(), DOFShader.uniformLoc("shadowWorldToClip"), 1, false, clipMatrix.data());
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glBindFramebuffer(GL_FRAMEBUFFER, dframeBuffer);
 			glDrawBuffer(GL_NONE);
@@ -1092,13 +1032,12 @@ int main()
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
 			glBeginQuery(GL_TIME_ELAPSED_EXT, Worldscene->GetQueries()["DepthofField"]);
-			Worldscene->RenderWorldObjects(DOFShader);
+			Worldscene->RenderWorldObjects(DOFShader); /*! < render all scene objects using the DOF shader to apply their depth to a texture*/
 			glEndQuery(GL_TIME_ELAPSED_EXT);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glDrawBuffer(GL_BACK);
 
-			//glCopyImageSubData(colourBuffer, GL_TEXTURE_2D, 0, 0, 0, 0, colourBuffer2, GL_TEXTURE_2D, 0, 0, 0, 0, windowWidth, windowHeight, 1);
 			////RENDER QUAD TO SCREEN
 			HDRShader.use();
 			glDisable(GL_DEPTH_TEST);
@@ -1109,13 +1048,6 @@ int main()
 			renderQuad();
 
 			Worldscene->RenderGUI();
-			////glhelper::Mesh* tM = &testMesh;
-
-			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("albedoTex"), 0);
-			//glProgramUniform1i(NormalShader.get(), NormalShader.uniformLoc("normalTex"), 2);
-
-
-
 
 			Worldscene->RecordQueries();
 
@@ -1134,8 +1066,14 @@ int main()
 		glDeleteBuffers(1, &HDRFrameBuffer);
 		glDeleteBuffers(1, &dframeBuffer);
 		glDeleteBuffers(1, &colourBuffer);
-		delete(reflectionBuffer);
+		//delete(reflectionBuffer);
 		Worldscene->Clean();
+
+		for (int i; i < collisionShapes.size(); ++i)
+		{
+			delete(collisionShapes[i]);
+		}
+		
 
 		SDL_GL_DeleteContext(context);
 		SDL_DestroyWindow(window);

@@ -64,7 +64,7 @@ void main()
 //		add = 0;
 	
 	//transparency
-	if(albedo.a < 1.0f)
+	if(albedo.a < 0.1f)
 	{
 		discard;
 	}
