@@ -1,10 +1,14 @@
 #define SDL_MAIN_HANDLED
 #include <GL/glew.h>
-
 #include <SDL.h>
 #include <string>
+#include <random>
 #include <filesystem>
 #include <iostream>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <bullet/btBulletDynamicsCommon.h>
 #include "RGLib/modelLoader.hpp"
 #include "RGLib/ShaderProgram.hpp"
 #include <glm/glm.hpp>
@@ -22,21 +26,13 @@
 #include "RGLib/FlyViewer.hpp"
 #include "RGLib/json.hpp"
 #include <RGLib/FrameBuffer.h>
-#include <random>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <bullet/btBulletDynamicsCommon.h>
+
+/*! \file */
 
 /*! \mainpage Cory Arnett-O'Brien, Realtime computer graphics
 	This is the Doxygen documentation for the realtime computer graphics program created by Cory Arnett-O'Brien for the CMP7172 assignment
-
 */
 
-
-///! <summary>
-/// Summary test
-/// </summary>
 
 namespace fs = std::filesystem;
 
@@ -695,7 +691,7 @@ int main()
 		Worldscene->AddWorldObject(Tree1);
 		Worldscene->AddWorldObject(pinecone, false);
 		Worldscene->ground = &groundPlane;
-		Worldscene->AddWorldObject(testMesh, spotNormalMap);
+		//Worldscene->AddWorldObject(testMesh, spotNormalMap);
 		Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
 		Worldscene->AddWorldObject(rock, rockNormal);
 		Worldscene->AddWorldObject(rock2, rockNormal);
