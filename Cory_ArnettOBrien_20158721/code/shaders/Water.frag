@@ -9,6 +9,8 @@ out vec4 colorOut;
 uniform vec3 spotLightDir;
 uniform vec3 lightPosWorld;
 
+//Attempt at reflection shader based on framebuffer 
+//does not properly map reflections into the correct positions
 void main()
 {
 

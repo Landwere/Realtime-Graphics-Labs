@@ -11,17 +11,18 @@ out vec4 colourOut;
 
 void main()
 {
-	// Your code here
-	// Save some depth values here so you can use them later for shadow mapping
-	// Use the standard shader output value gl_FragDepth.
-	// You'll probably want to scale your depths to be in the [0,1] range
-	// based on the current nearPlane & farPlane values.
+	//get distance and apply to depth texture 
 	float fragDist = distance(fragPosWorld, camPosWorld);
 	if(fragDist > 15f || fragDist < 0f)
 	{
 		gl_FragDepth = 1;}
-	else{
+	else
+	{
 		gl_FragDepth = 0;}
+		
+	//to make depth test work with transparency, depth buffer would need alpha colour data
+	//could be received from HDR framebuffer
+
 	//gl_FragDepth = 0;
 	//colourOut = vec4(0.0,0.0,0.0,0.0);
 	//gl_FragDepth = clamp( (lightLength - nearPlane) / (farPlane - nearPlane) ,0, 1);

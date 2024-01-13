@@ -12,6 +12,7 @@ layout(std140) uniform cameraBlock
 uniform mat4 modelToWorld;
 
 out vec3 fragPosWorld;
+out vec2 texCoord;
 
 void main()
 {

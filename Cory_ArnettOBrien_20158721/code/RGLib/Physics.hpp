@@ -7,7 +7,11 @@
 
 namespace RGLib 
 {
-
+	/*! \brief attempt at decoupling physics code from main loop
+	*
+	* Incomplete class that does not currently work due to errors in 
+	* world step simulation
+	*/
 	class Physics
 	{
 	public:

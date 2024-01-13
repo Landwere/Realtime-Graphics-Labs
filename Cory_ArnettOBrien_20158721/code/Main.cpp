@@ -426,25 +426,29 @@ int main()
 
 
 #pragma region Meshes
-	//Test Mesh (spot the cow)
-		glhelper::Mesh testMesh;
+	//Test Meshes (spot the cow)
+		glhelper::Mesh testMesh, testMesh2;
 		testMesh.meshName = "TestMesh";
-
-		Eigen::Matrix4f bunnyModelToWorld = Eigen::Matrix4f::Identity();
-		bunnyModelToWorld(0, 0) = 0.3f;
-		bunnyModelToWorld(1, 1) = 0.3f;
-		bunnyModelToWorld(2, 2) = 0.3f;
-		bunnyModelToWorld = makeTranslationMatrix(Eigen::Vector3f(6.f, 0.5f, 0)) * makeRotationMatrix(0, 0, 0) * bunnyModelToWorld;
-		loadSpotMesh(&testMesh);
-		//modelLoader->loadFromFile(/*"../models/stanford_bunny/scene.gltf"*/"../models/spot/spot_triangulated.obj", &testMesh);
+		testMesh2.meshName = "TestMesh 2";
+		Eigen::Matrix4f testModelToWorld = Eigen::Matrix4f::Identity();
+		testModelToWorld(0, 0) = 0.3f;
+		testModelToWorld(1, 1) = 0.3f;
+		testModelToWorld(2, 2) = 0.3f;
+		testModelToWorld = makeTranslationMatrix(Eigen::Vector3f(6.f, 0.5f, 0)) * makeRotationMatrix(0, 0, 0) * testModelToWorld;
+		Eigen::Matrix4f test2ModelToWorld = makeTranslationMatrix(Eigen::Vector3f(1.f, 0, 0)) * makeRotationMatrix(0, 0, 0) * testModelToWorld;
+		//loadSpotMesh(&testMesh);
+		modelLoader->loadFromFile(/*"../models/stanford_bunny/scene.gltf"*/"../models/spot/spot_triangulated.obj", &testMesh);
+		modelLoader->loadFromFile(/*"../models/stanford_bunny/scene.gltf"*/"../models/spot/spot_triangulated.obj", &testMesh2);
 		testMesh.loadTexture(/*"../models/stanford_bunny/textures/Bunny_baseColor.png"*/"../models/spot/spot_texture.png");
+		testMesh2.loadTexture(/*"../models/stanford_bunny/textures/Bunny_baseColor.png"*/"../models/spot/spot_texture.png");
 
-		testMesh.modelToWorld(bunnyModelToWorld);
+		testMesh.modelToWorld(testModelToWorld);
 		testMesh.shaderProgram(&NormalShader);
+		testMesh2.modelToWorld(test2ModelToWorld);
+		testMesh2.shaderProgram(&blinnPhongShader);
 
 		GLuint spotNormalMap = createTexture("../models/spot/normalmap.png");
-
-		GLuint spotTexture = createTexture("../models/spot/spot_texture.png");
+		//GLuint spotTexture = createTexture("../models/spot/spot_texture.png");
 
 
 		//Sphere mesh used to show light position for debugging 
@@ -681,7 +685,7 @@ int main()
 		 //end source
 
 		//TODO remove scene and replace with World class, currently only used for shadows
-		std::vector<glhelper::Renderable*> scene{ &testMesh,/* &lightHouse,*/ &rock, &rock2, &groundPlane, &Tree1};
+		std::vector<glhelper::Renderable*> scene{ &frog,/* &lightHouse,*/ &rock, &rock2, &groundPlane, &Tree1};
 
 		//old reflection buffer
 		RGLib::FrameBuffer* reflectionBuffer = new RGLib::FrameBuffer(1280, 720);
@@ -696,6 +700,7 @@ int main()
 		Worldscene->AddWorldObject(pinecone, false);
 		Worldscene->ground = &groundPlane;
 		//Worldscene->AddWorldObject(testMesh, spotNormalMap);
+		//Worldscene->AddWorldObject(testMesh2);
 		Worldscene->AddWorldObject(lightHouse, lightHouseNormal);
 		Worldscene->AddWorldObject(rock, rockNormal);
 		Worldscene->AddWorldObject(rock2, rockNormal);

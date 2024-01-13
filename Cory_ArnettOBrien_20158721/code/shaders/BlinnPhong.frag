@@ -54,6 +54,7 @@ void main()
 	float falloff = pow(lightDistance, 2);
 
 //	//dot product betwwen lighthouse light direction and object light direction
+//	Depreciated math
 //	float shape = dot(spotLightDir ,lightDir);
 //	float add;
 //	add = 0;
@@ -69,12 +70,12 @@ void main()
 		discard;
 	}
 
-
+	//spot controls spotlight from lighthouse
 	float spot = pow(max(dot(-lightDir, spotLightDir), 0.0f), 1);
 
 	colorOut.rgb = vec3(0);
 	colorOut.a = 1;
-	//Point  
+	//spot light from lighthouse
 	colorOut.rgb += (lightModel(lightIntensity, lightDir, viewDir, albedo.xyz) * spot  )  / falloff;
 	//global light
 	colorOut.rgb += lightModel(worldLightInt, worldLightDir, viewDir, albedo.xyz);
