@@ -79,12 +79,12 @@ void main()
 	colorOut.rgb = vec3(0);
 
 	//apply lighting based on normal map and lighthouse spotlight (half lightIntensity because normal mapping seems to add more light)
-	colorOut += clamp((lightModel(lightIntensity / 2, lightDir, viewDir, albedo, mapNormal) * spot) / falloff, 0.f,1.f);
+	colorOut += clamp((lightModel(lightIntensity / 2, lightDir, viewDir, albedo, mapNormal) * spot) / falloff, 0.f, 1.f);
 
 
 
 //	//apply global light (half lightIntensity because normal mapping seems to add more light)
-	colorOut += clamp(lightModel(worldLightInt / 2, worldLightDir, viewDir, albedo, mapNormal),0.f,1.f);
+	colorOut += clamp(lightModel(worldLightInt / 2, worldLightDir, viewDir, albedo, mapNormal),0.f, 1.f);
 	if(colourOverride != vec3(0,0,0))
 		colorOut.rgb *= colourOverride;
 }

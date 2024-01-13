@@ -13,7 +13,7 @@ void main()
 {
 	//get distance and apply to depth texture 
 	float fragDist = distance(fragPosWorld, camPosWorld);
-	if(fragDist > 15f || fragDist < 0f)
+	if(fragDist > 15.f || fragDist < 0.f)
 	{
 		gl_FragDepth = 1;}
 	else
