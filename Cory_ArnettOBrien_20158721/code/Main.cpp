@@ -530,7 +530,7 @@ int main()
 		modelLoader->loadFromFile("../models/groundPlane.obj", &waterPlane);
 		waterPlane.shaderProgram(&waterShader);
 		Eigen::Matrix4f waterModelToWorld = Eigen::Matrix4f::Identity();
-		waterPlane.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(0, 0.1f, 20.f)) * waterModelToWorld);
+		waterPlane.modelToWorld(makeTranslationMatrix(Eigen::Vector3f(0, 0.1f, 22.f)) * waterModelToWorld);
 		
 		//tree mesh, uses transparency
 		glhelper::Mesh Tree1;
