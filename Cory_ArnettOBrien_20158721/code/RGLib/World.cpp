@@ -47,11 +47,10 @@ RGLib::World::World()
 
 void RGLib::World::RenderWorldObjects()
 {
-	//int i is used to link world objects to their queries
-	//TODO make world objects into their own mini class with queries attached or attach queries to meshes
-	
+
 	//shadowMap->RenderShadowMap(worldMeshes, shadowRec, worldLights[0]);
 
+	//render meshes using the legacy world mesh system
 	int i = 0;
 	for (glhelper::Mesh* mesh : worldMeshes)
 	{
@@ -70,40 +69,46 @@ void RGLib::World::RenderWorldObjects()
 		glEndQuery(GL_TIME_ELAPSED_EXT);
 	}
 
-	for (WorldObject* object : worldObjects)
-	{
-		//check mesh has texture and bind it
-		glActiveTexture(GL_TEXTURE0 + 0);
-		if (object->getMesh()->meshTex != nullptr)
-			object->getMesh()->meshTex->bindToImageUnit(0);
-		//TODO else bind empty tex
-
-		//bind normal map
-		if (object->GetNormal() != NULL)
+		//render world objects each with their own query
+		for (WorldObject* object : worldObjects)
 		{
-			glDisable(GL_BLEND);
-			glActiveTexture(GL_TEXTURE0 + 1);
-			glBindTexture(GL_TEXTURE_2D, object->GetNormal());
-		}
+			//check mesh has texture and bind it
+			glActiveTexture(GL_TEXTURE0 + 0);
+			if (object->getMesh()->meshTex != nullptr)
+				object->getMesh()->meshTex->bindToImageUnit(0);
+			//TODO else bind empty tex
+
+			//bind normal map
+			if (object->GetNormal() != NULL)
+			{
+				glDisable(GL_BLEND);
+				glActiveTexture(GL_TEXTURE0 + 1);
+				glBindTexture(GL_TEXTURE_2D, object->GetNormal());
+			}
 
 
-		//store query data for each mesh rendered 
-		if (!object->IsQueryQueued())
-		{
-			glBeginQuery(GL_TIME_ELAPSED_EXT, object->GetQuery());
-			object->getMesh()->render();
-			glEndQuery(GL_TIME_ELAPSED_EXT);
-			object->SetQueryQueued(true);
-		}
-		else
-		{
-			object->getMesh()->render();
-		}
-		//Unbind textures
-		glActiveTexture(GL_TEXTURE0 + 0);
-		glBindTexture(GL_TEXTURE_2D, NULL);
+			//store query data for each mesh rendered
+			//check if previous query has been used before starting new one
+			if (!object->IsQueryQueued() && queriesAvailible)
+			{
+				object->SetQueryQueued(true);
+				glBeginQuery(GL_TIME_ELAPSED_EXT, object->GetQuery());
+				object->getMesh()->render();
+				glEndQuery(GL_TIME_ELAPSED_EXT);
+			}
+			else
+			{
+				object->getMesh()->render();
+			}
+			//Unbind textures
+			glActiveTexture(GL_TEXTURE0 + 0);
+			glBindTexture(GL_TEXTURE_2D, NULL);
 
-	}
+		}
+	
+		queriesAvailible = false;
+	
+	
 
 	//for (auto& model : *models) {
 	//	glhelper::Mesh& mesh = meshes.at(model["mesh"]);
@@ -387,7 +392,7 @@ void RGLib::World::CreateQueries()
 	queries["DepthofField"] = NULL;
 	queries["Rain Particles"] = NULL;
 	queries["Rain Compute"] = NULL;
-	queries["Rain Total"] = NULL;
+	//queries["Rain Total"] = NULL;
 	queries["Shadows"] = NULL;
 	std::map <std::string, GLuint> ::iterator iter;
 	for (iter = queries.begin(); iter != queries.end(); iter++)
@@ -397,24 +402,34 @@ void RGLib::World::CreateQueries()
 		(*iter).second = query;
 		dataFile << (*iter).first << ", ";
 	}
+	dataFile << "FPS:" << ", ";
 }
 void RGLib::World::RecordQueries()
 {
 	bool allAvailible = true;
 
-
+	//make sure queries are available 
 	for (WorldObject* object : worldObjects)
 	{
 		GLint availible = 0;
 
 		glGetQueryObjectiv(object->GetQuery(), GL_QUERY_RESULT_AVAILABLE, &availible);
-
+		GLuint64 timeElapsed;
 		if (!availible)
 			allAvailible = false;
 	}
+	//for (std::pair pair : queries)
+	//{
+	//	GLint availible = 0;
+
+	//	glGetQueryObjectiv(pair.second, GL_QUERY_RESULT_AVAILABLE, &availible);
+	//	if (!availible)
+	//		allAvailible = false;
+	//}
 
 	if (allAvailible)
 	{
+		queriesAvailible = true;
 		dataFile << "\n";
 
 		for (WorldObject* object : worldObjects)
@@ -428,16 +443,17 @@ void RGLib::World::RecordQueries()
 			dataFile << timeElapsed << ", ";
 			object->SetQueryQueued(false);
 		}
-		GLuint64 rainPTime, rainCTime;
-		glGetQueryObjectui64v(queries["Rain Particles"], GL_QUERY_RESULT, &rainPTime);
-		glGetQueryObjectui64v(queries["Rain Compute"], GL_QUERY_RESULT, &rainCTime);
-		queries["Rain Total"] =  rainPTime + rainCTime;
+		//GLuint64 rainPTime, rainCTime;
+		//glGetQueryObjectui64v(queries["Rain Particles"], GL_QUERY_RESULT, &rainPTime);
+		//glGetQueryObjectui64v(queries["Rain Compute"], GL_QUERY_RESULT, &rainCTime);
+		//queries["Rain Total"] =  rainPTime + rainCTime;
 		for (std::pair pair : queries)
 		{
 			GLuint64 timeElapsed;
 			glGetQueryObjectui64v(pair.second, GL_QUERY_RESULT, &timeElapsed);
 			dataFile << timeElapsed << ", ";
 		}
+		dataFile << std::to_string(1 / frameDuration) << ", ";
 		frameSync++;
 	}
 	

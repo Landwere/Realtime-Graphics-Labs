@@ -152,6 +152,7 @@ namespace RGLib
 		float frameDuration;
 		std::vector< WorldObject*> worldObjects;
 
+		bool queriesAvailible = true;
 
 		Eigen::Matrix4f flipMatrix;
 
