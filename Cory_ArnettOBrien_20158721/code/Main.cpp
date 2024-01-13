@@ -696,7 +696,7 @@ int main()
 		Worldscene->SetShadowMapShaders(shadowMappedShader, shadowCubeMapShader);
 		Worldscene->AddWorldLight(*lampLight);
 
-		//Worldscene->AddWorldObject(Tree1);
+		Worldscene->AddWorldObject(Tree1);
 		Worldscene->AddWorldObject(pinecone, false);
 		Worldscene->ground = &groundPlane;
 		//Worldscene->AddWorldObject(testMesh, spotNormalMap);
