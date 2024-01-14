@@ -15,3 +15,6 @@ river-rock: GetDeadEntertainment (Sketchfab: https://sketchfab.com/3d-models/riv
 obj-nat-rock: Sascha Henrichs (Sketchfab: https://sketchfab.com/3d-models/obj-nat-rock-01-62d63fd7d1dd416aac1496eb19c43cc0)
 Stanford bunny: Stanford univeristy (Model downloaded from moodle: https://moodle.bcu.ac.uk)
 Ceramic Frog: GheoCom (Turbosquid: https://www.turbosquid.com/3d-models/3d-ceramic-frog-toad-lowpoly-3d-model-1798441)
+
+##Research Paper sources
+Real-Time Rain Simulation (Zhong-Xin Feng et al, 2005) https://link.springer.com/chapter/10.1007/11686699_63
