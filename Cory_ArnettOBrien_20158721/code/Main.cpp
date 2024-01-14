@@ -302,7 +302,7 @@ int main()
 	}
 
 	//Enable Vsync
-	SDL_GL_SetSwapInterval(0);
+	SDL_GL_SetSwapInterval(1);
 
 	glhelper::FlyViewer viewer(windowWidth, windowHeight);
 
