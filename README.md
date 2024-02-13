@@ -1,5 +1,6 @@
 # Repository for Real-Time Graphics Programming Assignment Project
-previously used for graphics labs 
+Previously used for graphics labs.   
+Week 1 Labs can be found in Week1 folder. **Main scene** is found within the Cory_ArnettOBrien_20158721/Code folder, the scene is build using Cmake and has the nessessary files to support it within the code folder.
 
 
 ### scene mockup made in blender
